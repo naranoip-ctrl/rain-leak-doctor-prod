@@ -2,15 +2,13 @@
  * app/result/[id]/page.tsx
  * 診断結果表示ページ
  * 
- * クライアントコンポーネント → ブラウザ用の supabase を使用
- * DB の secret_code カラムを使って合言葉を表示
+ * サーバーサイドAPIルート経由でデータを取得（RLS問題を回避）
  */
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getSupabase } from '@/lib/supabase/client';
 
 interface DiagnosisSession {
   id: string;
@@ -45,25 +43,17 @@ export default function ResultPage() {
       }
 
       try {
-        const supabase = getSupabase();
-        const { data, error } = await supabase
-          .from('diagnosis_sessions')
-          .select('*')
-          .eq('id', id)
-          .single();
+        // サーバーサイドAPIルート経由でデータを取得（RLS問題を回避）
+        const response = await fetch(`/api/result/${id}`);
+        const json = await response.json();
 
-        if (error) {
-          console.error('Supabase Error:', error);
-          setErrorMsg('データの取得に失敗しました。');
+        if (!response.ok) {
+          console.error('API Error:', json.error);
+          setErrorMsg(json.error || 'データの取得に失敗しました。');
           return;
         }
 
-        if (!data) {
-          setErrorMsg('診断データが見つかりませんでした。');
-          return;
-        }
-
-        setSession(data as DiagnosisSession);
+        setSession(json.data as DiagnosisSession);
       } catch (err) {
         console.error('Unexpected Error:', err);
         setErrorMsg('予期せぬエラーが発生しました。');
