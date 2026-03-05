@@ -13,6 +13,13 @@ export interface DiagnosisResult {
   firstAidCost: number;
   insuranceLikelihood: 'high' | 'medium' | 'low' | 'none';
   recommendedPlan: string;
+  // PDF専用の詳細分析フィールド
+  detailedAnalysis: string;
+  estimatedCause: string;
+  repairComparison: string;
+  neglectRisk: string;
+  insuranceTips: string;
+  imageFindings: string;
 }
 
 /**
@@ -37,6 +44,14 @@ export async function performAIDiagnosis(
 7. insuranceLikelihood: 火災保険適用の可能性（"high", "medium", "low", "none"のいずれか）。該当なしの場合は"none"
 8. recommendedPlan: 推奨プラン（例：「現地調査」「応急処置」「本格修繕」「該当なし」）
 
+**PDF詳細レポート専用の追加項目（各項目200〜400文字程度で詳しく記述）：**
+9. detailedAnalysis: 建物全体の状態評価。築年数の推定、全体的な劣化度、メンテナンス推奨事項を含む専門的な分析。該当なしの場合は「該当なし」
+10. estimatedCause: 推定原因の分析。経年劣化・風災・施工不良・結露など、考えられる原因を根拠とともに詳しく説明。該当なしの場合は「該当なし」
+11. repairComparison: 修繕工法の比較。応急処置と本復旧それぞれの工法名、費用目安、耐久年数、メリット・デメリットを詳しく説明。該当なしの場合は「該当なし」
+12. neglectRisk: 放置リスクの解説。1ヶ月後・半年後・1年後の被害拡大予測と費用増加リスクを具体的に説明。該当なしの場合は「該当なし」
+13. insuranceTips: 火災保険申請のポイント。必要書類・手順・コツ・申請期限のアドバイスを具体的に説明。該当なしの場合は「該当なし」
+14. imageFindings: 写真別の詳細所見。各画像（写真1、写真2、写真3）ごとに損傷の種類・位置・重症度を個別に分析。該当なしの場合は「該当なし」
+
 **JSON形式の例：**
 {
   "damageLocations": "天井、外壁",
@@ -46,7 +61,13 @@ export async function performAIDiagnosis(
   "estimatedCostMax": 300000,
   "firstAidCost": 50000,
   "insuranceLikelihood": "high",
-  "recommendedPlan": "現地調査"
+  "recommendedPlan": "現地調査",
+  "detailedAnalysis": "築15〜20年程度と推定される木造住宅です。外壁のクラックや天井のシミから...",
+  "estimatedCause": "主な原因として経年劣化による防水層の劣化が考えられます。特に...",
+  "repairComparison": "【応急処置】コーキング補修：費用3〜5万円、耐久2〜3年...【本復旧】屋根葺き替え：費用15〜30万円、耐久15〜20年...",
+  "neglectRisk": "1ヶ月後：カビの発生リスクが高まり...半年後：構造材への浸水が進行し...1年後：大規模な修繕が必要になり費用が2〜3倍に...",
+  "insuranceTips": "風災や雪災が原因の場合、火災保険の申請が可能です。必要書類：1.保険証券 2.被害状況の写真...",
+  "imageFindings": "【写真1】天井部分に直径約30cmの水染みが確認。色の濃さから...【写真2】外壁に幅0.3mm程度のクラックが...【写真3】..."
 }
 
 写真を分析して、上記の形式でJSONを返してください。`;
@@ -57,7 +78,7 @@ export async function performAIDiagnosis(
       messages: [
         {
           role: 'system',
-          content: 'あなたは雨漏り診断の専門家です。写真を分析して、正確な診断結果をJSON形式で返してください。',
+          content: 'あなたは雨漏り診断の専門家です。写真を分析して、正確な診断結果をJSON形式で返してください。PDF詳細レポート用の追加項目も必ず含めてください。',
         },
         {
           role: 'user',
@@ -111,6 +132,30 @@ export async function performAIDiagnosis(
                 type: 'string',
                 description: '推奨プラン',
               },
+              detailedAnalysis: {
+                type: 'string',
+                description: '建物全体の状態評価（PDF詳細レポート用）',
+              },
+              estimatedCause: {
+                type: 'string',
+                description: '推定原因の分析（PDF詳細レポート用）',
+              },
+              repairComparison: {
+                type: 'string',
+                description: '修繕工法の比較（PDF詳細レポート用）',
+              },
+              neglectRisk: {
+                type: 'string',
+                description: '放置リスクの解説（PDF詳細レポート用）',
+              },
+              insuranceTips: {
+                type: 'string',
+                description: '火災保険申請のポイント（PDF詳細レポート用）',
+              },
+              imageFindings: {
+                type: 'string',
+                description: '写真別の詳細所見（PDF詳細レポート用）',
+              },
             },
             required: [
               'damageLocations',
@@ -121,6 +166,12 @@ export async function performAIDiagnosis(
               'firstAidCost',
               'insuranceLikelihood',
               'recommendedPlan',
+              'detailedAnalysis',
+              'estimatedCause',
+              'repairComparison',
+              'neglectRisk',
+              'insuranceTips',
+              'imageFindings',
             ],
             additionalProperties: false,
           },
