@@ -654,7 +654,7 @@ export default function Home() {
 /* ─── Stats Sub-component ─── */
 function StatsSection() {
   const stat1 = useCountUp({ end: 1247, duration: 2000 });
-  const stat2 = useCountUp({ end: 57, duration: 2000 });
+  const stat2 = useCountUp({ end: 3, duration: 2000 });
   const stat3 = useCountUp({ end: 12, duration: 2000 });
   const stat4 = useCountUp({ end: 4.8, duration: 2000, decimals: 1 });
 
