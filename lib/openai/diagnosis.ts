@@ -13,7 +13,7 @@ export interface DiagnosisResult {
   firstAidCost: number;
   insuranceLikelihood: 'high' | 'medium' | 'low' | 'none';
   recommendedPlan: string;
-  // PDF専用の詳細分析フィールド
+  // PDF専用の詳細分析フィールド（簡潔版）
   detailedAnalysis: string;
   estimatedCause: string;
   repairComparison: string;
@@ -28,57 +28,57 @@ export interface DiagnosisResult {
 export async function performAIDiagnosis(
   imageUrls: string[]
 ): Promise<DiagnosisResult> {
-  const prompt = `あなたは雨漏り診断の専門家です。提供された写真を分析し、以下の情報をJSON形式で返してください。
+  const prompt = `あなたは雨漏り診断の専門家です。写真を分析し、以下のJSON形式で返してください。
 
-**重要な注意事項：**
-- 建物の損傷や雨漏りの痕跡が確認できない場合（猫、犬、人物、風景、食べ物など無関係な画像の場合）は、すべての数値を0、insuranceLikelihoodを"none"、recommendedPlanを"該当なし"として返してください。
-- 建物と関係ない画像の場合は、damageDescriptionで画像の内容を説明し、適切な画像をアップロードするよう案内してください。
+【絶対ルール】
+- 全項目を簡潔に。冗長な説明は禁止。
+- 文章は1項目あたり最大80文字。箇条書きは最大3つまで。
+- 建物と無関係な画像の場合：数値は全て0、insuranceLikelihoodは"none"、recommendedPlanは"該当なし"。
 
-**診断項目：**
-1. damageLocations: 修繕が必要な箇所（例：「天井、外壁、屋根」）。該当なしの場合は「該当なし」
-2. damageDescription: 損傷の詳細な説明。該当なしの場合は画像の内容を説明
-3. severityScore: 重症度（1-10の整数）。該当なしの場合は0
-4. estimatedCostMin: 概算修繕費用の下限（円）。該当なしの場合は0
-5. estimatedCostMax: 概算修繕費用の上限（円）。該当なしの場合は0
-6. firstAidCost: 応急処置の目安費用（円）。該当なしの場合は0
-7. insuranceLikelihood: 火災保険適用の可能性（"high", "medium", "low", "none"のいずれか）。該当なしの場合は"none"
-8. recommendedPlan: 推奨プラン（例：「現地調査」「応急処置」「本格修繕」「該当なし」）
+【基本診断項目】
+1. damageLocations: 修繕箇所（例："天井、外壁"）。該当なしは"該当なし"
+2. damageDescription: 損傷の要約（80文字以内）
+3. severityScore: 重症度 1-10の整数
+4. estimatedCostMin: 修繕費用下限（円）※最低25,000円〜
+5. estimatedCostMax: 修繕費用上限（円）
+6. firstAidCost: 応急処置費用（円）※最低25,000円〜
+7. insuranceLikelihood: "high","medium","low","none"のいずれか
+8. recommendedPlan: "現地調査","応急処置","本格修繕","該当なし"のいずれか
 
-**PDF詳細レポート専用の追加項目（各項目200〜400文字程度で詳しく記述）：**
-9. detailedAnalysis: 建物全体の状態評価。築年数の推定、全体的な劣化度、メンテナンス推奨事項を含む専門的な分析。該当なしの場合は「該当なし」
-10. estimatedCause: 推定原因の分析。経年劣化・風災・施工不良・結露など、考えられる原因を根拠とともに詳しく説明。該当なしの場合は「該当なし」
-11. repairComparison: 修繕工法の比較。応急処置と本復旧それぞれの工法名、費用目安、耐久年数、メリット・デメリットを詳しく説明。該当なしの場合は「該当なし」
-12. neglectRisk: 放置リスクの解説。1ヶ月後・半年後・1年後の被害拡大予測と費用増加リスクを具体的に説明。該当なしの場合は「該当なし」
-13. insuranceTips: 火災保険申請のポイント。必要書類・手順・コツ・申請期限のアドバイスを具体的に説明。該当なしの場合は「該当なし」
-14. imageFindings: 写真別の詳細所見。各画像（写真1、写真2、写真3）ごとに損傷の種類・位置・重症度を個別に分析。該当なしの場合は「該当なし」
+【PDF用追加項目（各80文字以内・箇条書き3つまで）】
+9. detailedAnalysis: 建物状態の要約。築年数推定と劣化度を1〜2文で。
+10. estimatedCause: 推定原因を箇条書き（最大3つ）。例："・経年劣化による防水層破損\n・外壁クラックからの浸水"
+11. repairComparison: 応急処置と本復旧を1行ずつ比較。例："応急:コーキング3〜5万/2年\n本復旧:屋根葺替15〜30万/15年"
+12. neglectRisk: 放置した場合のリスクを1〜2文で。
+13. insuranceTips: 保険申請の要点を1〜2文で。
+14. imageFindings: 写真ごとの所見を1行ずつ。例："写真1:天井に水染み30cm\n写真2:外壁クラック0.3mm"
 
-**JSON形式の例：**
+JSON例:
 {
   "damageLocations": "天井、外壁",
-  "damageDescription": "天井に水染みが確認でき、外壁にひび割れが見られます。",
+  "damageDescription": "天井に水染み、外壁にひび割れを確認。早期修繕を推奨。",
   "severityScore": 7,
   "estimatedCostMin": 150000,
   "estimatedCostMax": 300000,
   "firstAidCost": 50000,
   "insuranceLikelihood": "high",
   "recommendedPlan": "現地調査",
-  "detailedAnalysis": "築15〜20年程度と推定される木造住宅です。外壁のクラックや天井のシミから...",
-  "estimatedCause": "主な原因として経年劣化による防水層の劣化が考えられます。特に...",
-  "repairComparison": "【応急処置】コーキング補修：費用3〜5万円、耐久2〜3年...【本復旧】屋根葺き替え：費用15〜30万円、耐久15〜20年...",
-  "neglectRisk": "1ヶ月後：カビの発生リスクが高まり...半年後：構造材への浸水が進行し...1年後：大規模な修繕が必要になり費用が2〜3倍に...",
-  "insuranceTips": "風災や雪災が原因の場合、火災保険の申請が可能です。必要書類：1.保険証券 2.被害状況の写真...",
-  "imageFindings": "【写真1】天井部分に直径約30cmの水染みが確認。色の濃さから...【写真2】外壁に幅0.3mm程度のクラックが...【写真3】..."
-}
-
-写真を分析して、上記の形式でJSONを返してください。`;
+  "detailedAnalysis": "築15〜20年の木造住宅。外壁・屋根に経年劣化が見られる。",
+  "estimatedCause": "・防水層の経年劣化\\n・外壁クラックからの雨水浸入",
+  "repairComparison": "応急:コーキング補修3〜5万円/耐久2年\\n本復旧:屋根葺替15〜30万円/耐久15年",
+  "neglectRisk": "半年後に構造材腐食の恐れ。1年後には費用が2〜3倍に増加。",
+  "insuranceTips": "風災が原因なら火災保険申請可。被害写真と修理見積書を準備。",
+  "imageFindings": "写真1:天井に直径30cmの水染み\\n写真2:外壁に幅0.3mmのクラック"
+}`;
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-5.1',
+      model: 'gpt-4o',
+      max_tokens: 1500,
       messages: [
         {
           role: 'system',
-          content: 'あなたは雨漏り診断の専門家です。写真を分析して、正確な診断結果をJSON形式で返してください。PDF詳細レポート用の追加項目も必ず含めてください。',
+          content: 'あなたは雨漏り診断の専門家です。写真を分析し、簡潔な診断結果をJSON形式で返してください。各項目は80文字以内、箇条書きは最大3つまで。冗長な説明は一切不要です。',
         },
         {
           role: 'user',
@@ -101,32 +101,32 @@ export async function performAIDiagnosis(
             properties: {
               damageLocations: {
                 type: 'string',
-                description: '修繕が必要な箇所',
+                description: '修繕箇所',
               },
               damageDescription: {
                 type: 'string',
-                description: '損傷の詳細な説明',
+                description: '損傷の要約（80文字以内）',
               },
               severityScore: {
                 type: 'integer',
-                description: '重症度（1-10）',
+                description: '重症度1-10',
               },
               estimatedCostMin: {
                 type: 'integer',
-                description: '概算修繕費用の下限（円）',
+                description: '修繕費用下限（円）',
               },
               estimatedCostMax: {
                 type: 'integer',
-                description: '概算修繕費用の上限（円）',
+                description: '修繕費用上限（円）',
               },
               firstAidCost: {
                 type: 'integer',
-                description: '応急処置の目安費用（円）',
+                description: '応急処置費用（円）',
               },
               insuranceLikelihood: {
                 type: 'string',
                 enum: ['high', 'medium', 'low', 'none'],
-                description: '火災保険適用の可能性',
+                description: '火災保険適用可能性',
               },
               recommendedPlan: {
                 type: 'string',
@@ -134,27 +134,27 @@ export async function performAIDiagnosis(
               },
               detailedAnalysis: {
                 type: 'string',
-                description: '建物全体の状態評価（PDF詳細レポート用）',
+                description: '建物状態の要約（80文字以内）',
               },
               estimatedCause: {
                 type: 'string',
-                description: '推定原因の分析（PDF詳細レポート用）',
+                description: '推定原因（箇条書き最大3つ）',
               },
               repairComparison: {
                 type: 'string',
-                description: '修繕工法の比較（PDF詳細レポート用）',
+                description: '応急処置vs本復旧の比較（各1行）',
               },
               neglectRisk: {
                 type: 'string',
-                description: '放置リスクの解説（PDF詳細レポート用）',
+                description: '放置リスク（80文字以内）',
               },
               insuranceTips: {
                 type: 'string',
-                description: '火災保険申請のポイント（PDF詳細レポート用）',
+                description: '保険申請の要点（80文字以内）',
               },
               imageFindings: {
                 type: 'string',
-                description: '写真別の詳細所見（PDF詳細レポート用）',
+                description: '写真ごとの所見（各1行）',
               },
             },
             required: [
