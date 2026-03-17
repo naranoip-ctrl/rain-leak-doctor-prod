@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         sessionId: session.id,
+        secretCode,
         customerName,
         customerPhone,
         customerEmail,

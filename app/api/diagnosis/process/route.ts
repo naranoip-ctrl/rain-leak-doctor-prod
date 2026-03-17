@@ -3,14 +3,16 @@
  * バックグラウンドAI診断処理エンドポイント
  * 
  * /api/diagnosis から非同期で呼び出される。
- * AI診断 → PDF生成 → DB更新 → メール通知 を実行する。
+ * AI診断 → PDF生成 → Storageアップロード → DB更新 → 顧客同期 → メール通知 を実行する。
  * 
  * ※ LINE Webhookの仕組みには一切触れない（既存のまま維持）
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/server';
 import { performAIDiagnosis } from '@/lib/openai/diagnosis';
-import { generateDiagnosisPDF } from '@/lib/pdf/generator';
+import { generatePDF } from '@/lib/pdf/generator';
+import { syncCustomer } from '@/lib/supabase/customer-sync';
+import { notifyNewDiagnosis } from '@/lib/email/notification';
 
 // Vercel Serverless Functionsの最大実行時間を60秒に設定
 export const maxDuration = 60;
@@ -24,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { sessionId, customerName, customerPhone, customerEmail, imageUrls } = body;
+    const { sessionId, secretCode, customerName, customerPhone, customerEmail, imageUrls } = body;
 
     console.log(`[バックグラウンド処理開始] Session: ${sessionId}`);
 
@@ -36,39 +38,71 @@ export async function POST(request: NextRequest) {
       const diagnosisResult = await performAIDiagnosis(imageUrls);
       console.log('[AI診断] 完了:', diagnosisResult.severityScore);
 
-      // 2. PDF生成
+      // 2. PDF生成（既存のgeneratePDF関数を使用）
       console.log('[PDF生成] 開始...');
-      const pdfUrl = await generateDiagnosisPDF({
-        customerName,
-        customerPhone,
-        diagnosisResult,
-        imageUrls,
-      });
-      console.log('[PDF生成] 完了:', pdfUrl);
+      let pdfUrl: string | null = null;
+      try {
+        const pdfBuffer = await generatePDF({
+          customerName,
+          diagnosisId: sessionId,
+          ...diagnosisResult,
+          imageUrls,
+        });
 
-      // 3. DBを更新（診断結果 + PDF URL）
+        // 3. Supabase Storageにアップロード
+        const pdfFileName = `diagnosis_${sessionId}.pdf`;
+        const { error: uploadError } = await supabaseAdmin.storage
+          .from('pdfs')
+          .upload(pdfFileName, pdfBuffer, {
+            contentType: 'application/pdf',
+            upsert: true,
+          });
+
+        if (uploadError) {
+          console.error('[PDF Storageアップロードエラー]', uploadError);
+          // PDF失敗は致命的ではない（後でリトライ可能）
+        } else {
+          // PDF URLを取得
+          const { data: pdfUrlData } = supabaseAdmin.storage
+            .from('pdfs')
+            .getPublicUrl(pdfFileName);
+          pdfUrl = pdfUrlData.publicUrl;
+          console.log('[PDF生成] 完了:', pdfUrl);
+        }
+      } catch (pdfError) {
+        console.error('[PDF生成エラー (non-fatal)]', pdfError);
+        // PDF生成失敗は致命的ではない
+      }
+
+      // 4. DBを更新（診断結果 + PDF URL）
+      const updateData: Record<string, unknown> = {
+        damage_locations: diagnosisResult.damageLocations,
+        damage_description: diagnosisResult.damageDescription,
+        severity_score: diagnosisResult.severityScore,
+        estimated_cost_min: diagnosisResult.estimatedCostMin,
+        estimated_cost_max: diagnosisResult.estimatedCostMax,
+        first_aid_cost: diagnosisResult.firstAidCost,
+        insurance_likelihood: diagnosisResult.insuranceLikelihood,
+        recommended_plan: diagnosisResult.recommendedPlan,
+        // PDF用の詳細フィールド
+        detailed_analysis: diagnosisResult.detailedAnalysis,
+        estimated_cause: diagnosisResult.estimatedCause,
+        repair_comparison: diagnosisResult.repairComparison,
+        neglect_risk: diagnosisResult.neglectRisk,
+        insurance_tips: diagnosisResult.insuranceTips,
+        image_findings: diagnosisResult.imageFindings,
+        // ステータス
+        status: 'completed',
+      };
+
+      // PDF URLがある場合のみ設定
+      if (pdfUrl) {
+        updateData.pdf_url = pdfUrl;
+      }
+
       const { error: updateError } = await supabaseAdmin
         .from('diagnosis_sessions')
-        .update({
-          damage_locations: diagnosisResult.damageLocations,
-          damage_description: diagnosisResult.damageDescription,
-          severity_score: diagnosisResult.severityScore,
-          estimated_cost_min: diagnosisResult.estimatedCostMin,
-          estimated_cost_max: diagnosisResult.estimatedCostMax,
-          first_aid_cost: diagnosisResult.firstAidCost,
-          insurance_likelihood: diagnosisResult.insuranceLikelihood,
-          recommended_plan: diagnosisResult.recommendedPlan,
-          // PDF用の詳細フィールド
-          detailed_analysis: diagnosisResult.detailedAnalysis,
-          estimated_cause: diagnosisResult.estimatedCause,
-          repair_comparison: diagnosisResult.repairComparison,
-          neglect_risk: diagnosisResult.neglectRisk,
-          insurance_tips: diagnosisResult.insuranceTips,
-          image_findings: diagnosisResult.imageFindings,
-          // PDF URL & ステータス
-          pdf_url: pdfUrl,
-          status: 'completed',
-        })
+        .update(updateData)
         .eq('id', sessionId);
 
       if (updateError) {
@@ -78,16 +112,36 @@ export async function POST(request: NextRequest) {
 
       console.log(`[バックグラウンド処理完了] Session: ${sessionId}`);
 
-      // 4. メール通知（オプション）
-      if (customerEmail) {
-        try {
-          // Resendでメール送信（既存のメール機能がある場合）
-          // await sendDiagnosisEmail(customerEmail, customerName, diagnosisResult);
-          console.log(`[メール通知] ${customerEmail} に送信予定`);
-        } catch (emailError) {
-          console.error('[メール通知エラー]', emailError);
-          // メール送信失敗は致命的ではないのでスキップ
-        }
+      // 5. 顧客情報をcustomersテーブルに自動同期（管理画面用）
+      try {
+        await syncCustomer(supabaseAdmin, {
+          name: customerName,
+          phone: customerPhone,
+          email: customerEmail || undefined,
+        });
+      } catch (syncError) {
+        console.error('[顧客同期エラー (non-fatal)]', syncError);
+        // 顧客同期失敗は致命的ではない
+      }
+
+      // 6. 管理者にメール通知を送信
+      try {
+        await notifyNewDiagnosis({
+          customerName,
+          customerPhone,
+          customerEmail: customerEmail || undefined,
+          damageLocations: diagnosisResult.damageLocations,
+          estimatedCostMin: diagnosisResult.estimatedCostMin,
+          estimatedCostMax: diagnosisResult.estimatedCostMax,
+          insuranceLikelihood: diagnosisResult.insuranceLikelihood,
+          severityScore: diagnosisResult.severityScore,
+          recommendedPlan: diagnosisResult.recommendedPlan,
+          secretCode,
+          sessionId,
+        });
+      } catch (emailError) {
+        console.error('[メール通知エラー (non-fatal)]', emailError);
+        // メール通知失敗は致命的ではない
       }
 
       return NextResponse.json({
