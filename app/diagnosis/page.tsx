@@ -5,13 +5,13 @@
  * 【修正版】
  * - 画像はフロントエンドで圧縮してからアップロード
  * - 送信後、即座に4桁番号を表示（1-2秒以内）
- * - 「AIが解析中」のローディングアニメーション表示
+ * - 「AIが解析中」のローディングアニメーション表示（30秒後に完了メッセージに切替）
  * - PDFダウンロードボタンは不要（LINEで自動送信）
  * - LINE誘導の案内を表示
  */
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ImageUpload } from '@/components/ImageUpload';
@@ -36,6 +36,19 @@ export default function DiagnosisPage() {
   const [error, setError] = useState('');
   const [uploadProgress, setUploadProgress] = useState('');
   const [copied, setCopied] = useState(false);
+
+  // 解析完了タイマー
+  const [analysisComplete, setAnalysisComplete] = useState(false);
+
+  // 結果画面に遷移してから30秒後にローディングを完了メッセージに切り替え
+  useEffect(() => {
+    if (step === 'result' && !analysisComplete) {
+      const timer = setTimeout(() => {
+        setAnalysisComplete(true);
+      }, 30000); // 30秒
+      return () => clearTimeout(timer);
+    }
+  }, [step, analysisComplete]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,6 +118,7 @@ export default function DiagnosisPage() {
       // 3. 即座に結果画面を表示
       setSecretCode(diagResult.secretCode);
       setSessionId(diagResult.sessionId);
+      setAnalysisComplete(false); // タイマーリセット
       setStep('result');
     } catch (err: any) {
       console.error('Diagnosis error:', err);
@@ -162,30 +176,50 @@ export default function DiagnosisPage() {
             </div>
           </div>
 
-          {/* AI解析中のローディングアニメーション */}
-          <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
-            <div className="flex items-center justify-center mb-4">
-              <div className="relative">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200"></div>
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent absolute top-0 left-0"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-xl">🔍</span>
+          {/* AI解析ステータス（30秒後に完了メッセージに切替） */}
+          {!analysisComplete ? (
+            <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
+              <div className="flex items-center justify-center mb-4">
+                <div className="relative">
+                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200"></div>
+                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent absolute top-0 left-0"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xl">🔍</span>
+                  </div>
                 </div>
               </div>
+              <h3 className="text-lg font-bold text-center text-gray-800 mb-2">
+                現在AIが解析しています
+              </h3>
+              <p className="text-sm text-gray-600 text-center leading-relaxed">
+                写真の解析とPDFレポートの生成には<br />
+                約15〜30秒かかります。
+              </p>
+              <div className="mt-4 flex justify-center space-x-1">
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
             </div>
-            <h3 className="text-lg font-bold text-center text-gray-800 mb-2">
-              現在AIが解析しています
-            </h3>
-            <p className="text-sm text-gray-600 text-center leading-relaxed">
-              写真の解析とPDFレポートの生成には<br />
-              約15〜30秒かかります。
-            </p>
-            <div className="mt-4 flex justify-center space-x-1">
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          ) : (
+            <div className="bg-white rounded-2xl shadow-md p-6 mb-6 border-2 border-green-200">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-center text-green-700 mb-2">
+                AI解析が完了しました！
+              </h3>
+              <p className="text-sm text-gray-600 text-center leading-relaxed">
+                PDFレポートの準備ができました。<br />
+                LINEで合言葉「<strong className="text-green-700">{secretCode}</strong>」を送信して<br />
+                診断結果を受け取ってください。
+              </p>
             </div>
-          </div>
+          )}
 
           {/* LINE誘導カード */}
           <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 mb-6">
