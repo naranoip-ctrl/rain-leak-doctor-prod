@@ -2,19 +2,20 @@
  * app/api/diagnosis/route.ts
  * AI雨漏り診断APIエンドポイント
  * 
- * 1. OpenAI Vision APIで画像を分析
- * 2. 4桁の合言葉を生成
- * 3. Supabaseに診断結果を保存
- * 4. PDFを生成してStorageにアップロード
- * 5. セッションIDと合言葉を返す
+ * 【修正版】即時レスポンス＋バックグラウンド処理
+ * 
+ * フロー:
+ * 1. 4桁の合言葉を即座に生成
+ * 2. DBにstatus='processing'で仮保存
+ * 3. セッションIDと合言葉を即座に返却（1-2秒以内）
+ * 4. バックグラウンドでAI診断→PDF生成→DB更新を実行
+ * 
+ * ※ Vercel Serverless Functionsでは waitUntil が使えないため、
+ *    別のAPIエンドポイント（/api/diagnosis/process）を非同期で呼び出す方式を採用
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/server';
 import { generateUniqueSecretCode } from '@/lib/supabase/secret-code';
-import { performAIDiagnosis } from '@/lib/openai/diagnosis';
-import { generatePDF } from '@/lib/pdf/generator';
-import { syncCustomer } from '@/lib/supabase/customer-sync';
-import { notifyNewDiagnosis } from '@/lib/email/notification';
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,18 +37,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. AI診断実行
-    console.log('Performing AI diagnosis...');
-    const diagnosisResult = await performAIDiagnosis(imageUrls);
-
-    // 2. 4桁の合言葉を生成（衝突しないユニークなコード）
+    // 1. 4桁の合言葉を即座に生成
     const secretCode = await generateUniqueSecretCode();
 
-    // 3. 有効期限を設定（24時間後）
+    // 2. 有効期限を設定（24時間後）
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
 
-    // 4. 診断セッションをデータベースに保存
+    // 3. DBにstatus='processing'で仮保存
     const supabaseAdmin = getSupabaseAdmin();
     const { data: session, error: insertError } = await supabaseAdmin
       .from('diagnosis_sessions')
@@ -56,16 +53,18 @@ export async function POST(request: NextRequest) {
         customer_name: customerName,
         customer_phone: customerPhone,
         customer_email: customerEmail || null,
-        damage_locations: diagnosisResult.damageLocations,
-        damage_description: diagnosisResult.damageDescription,
-        severity_score: diagnosisResult.severityScore,
-        estimated_cost_min: diagnosisResult.estimatedCostMin,
-        estimated_cost_max: diagnosisResult.estimatedCostMax,
-        first_aid_cost: diagnosisResult.firstAidCost,
-        insurance_likelihood: diagnosisResult.insuranceLikelihood,
-        recommended_plan: diagnosisResult.recommendedPlan,
         image_urls: imageUrls,
         expires_at: expiresAt.toISOString(),
+        // 仮の値（バックグラウンド処理で更新される）
+        damage_locations: '診断中...',
+        damage_description: '診断中...',
+        severity_score: 0,
+        estimated_cost_min: 0,
+        estimated_cost_max: 0,
+        first_aid_cost: 0,
+        insurance_likelihood: 'low',
+        recommended_plan: '診断中...',
+        status: 'processing',
       })
       .select()
       .single();
@@ -78,81 +77,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 5. PDFを生成してSupabase Storageにアップロード
-    console.log('Generating PDF...');
-    try {
-      const pdfBuffer = await generatePDF({
-        customerName,
-        diagnosisId: session.id,
-        ...diagnosisResult,
-        imageUrls,
-      });
-
-      const pdfFileName = `diagnosis_${session.id}.pdf`;
-      const { error: uploadError } = await supabaseAdmin.storage
-        .from('pdfs')
-        .upload(pdfFileName, pdfBuffer, {
-          contentType: 'application/pdf',
-          upsert: true,
-        });
-
-      if (uploadError) {
-        console.error('Error uploading PDF:', uploadError);
-        // PDF失敗は致命的ではない（後でリトライ可能）
-      } else {
-        // PDF URLを取得してセッションに保存
-        const { data: pdfUrlData } = supabaseAdmin.storage
-          .from('pdfs')
-          .getPublicUrl(pdfFileName);
-
-        await supabaseAdmin
-          .from('diagnosis_sessions')
-          .update({ pdf_url: pdfUrlData.publicUrl })
-          .eq('id', session.id);
-      }
-    } catch (pdfError) {
-      console.error('PDF generation error (non-fatal):', pdfError);
-      // PDF生成失敗は致命的ではない
-    }
-
-    // 6. 顧客情報をcustomersテーブルに自動同期（管理画面用）
-    try {
-      await syncCustomer(supabaseAdmin, {
-        name: customerName,
-        phone: customerPhone,
-        email: customerEmail || undefined,
-      });
-    } catch (syncError) {
-      console.error('Customer sync error (non-fatal):', syncError);
-      // 顧客同期失敗は致命的ではない
-    }
-
-    // 7. 管理者にメール通知を送信
-    try {
-      await notifyNewDiagnosis({
+    // 4. バックグラウンド処理を非同期で開始
+    //    自分自身のサーバーの /api/diagnosis/process を呼び出す
+    //    レスポンスを待たずに即座にクライアントに返す
+    const baseUrl = request.nextUrl.origin;
+    fetch(`${baseUrl}/api/diagnosis/process`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // 内部呼び出し用のシークレットキー
+        'x-internal-secret': process.env.INTERNAL_API_SECRET || 'internal-secret-key',
+      },
+      body: JSON.stringify({
+        sessionId: session.id,
         customerName,
         customerPhone,
-        customerEmail: customerEmail || undefined,
-        damageLocations: diagnosisResult.damageLocations,
-        estimatedCostMin: diagnosisResult.estimatedCostMin,
-        estimatedCostMax: diagnosisResult.estimatedCostMax,
-        insuranceLikelihood: diagnosisResult.insuranceLikelihood,
-        severityScore: diagnosisResult.severityScore,
-        recommendedPlan: diagnosisResult.recommendedPlan,
-        secretCode,
-        sessionId: session.id,
-      });
-    } catch (emailError) {
-      console.error('Email notification error (non-fatal):', emailError);
-      // メール通知失敗は致命的ではない
-    }
+        customerEmail,
+        imageUrls,
+      }),
+    }).catch((err) => {
+      // fetch自体のエラーはログに記録するが、クライアントには影響しない
+      console.error('Failed to trigger background processing:', err);
+    });
 
-    // 8. 成功レスポンス
+    // 5. 即座にレスポンスを返す（1-2秒以内）
     return NextResponse.json({
       success: true,
       sessionId: session.id,
       secretCode,
-      diagnosisResult,
+      status: 'processing',
+      message: 'AI診断を開始しました。バックグラウンドで処理中です。',
     });
   } catch (error) {
     console.error('Error in diagnosis API:', error);

@@ -2,6 +2,9 @@
  * app/api/webhook/line/route.ts
  * LINE Webhookエンドポイント
  * 
+ * ※ このファイルは既存のまま変更なし
+ * ※ 4桁合言葉 → PDF URL返信の仕組みはそのまま維持
+ * 
  * サーバーサイドで実行 → supabaseAdmin を server.ts からインポート
  */
 import { NextRequest, NextResponse } from 'next/server';
@@ -171,12 +174,22 @@ export async function POST(request: NextRequest) {
             { type: 'text', text: session.pdf_url },
           ]);
         } else {
-          await sendLineMessage(replyToken, [
-            {
-              type: 'text',
-              text: 'PDFレポートの生成中です。しばらくお待ちください。',
-            },
-          ]);
+          // 【修正】status='processing'の場合はAI解析中のメッセージを返す
+          if (session.status === 'processing') {
+            await sendLineMessage(replyToken, [
+              {
+                type: 'text',
+                text: 'AIによる解析がまだ完了していません。\n\n約15〜30秒後にもう一度合言葉を送信してください。\n\n解析が完了次第、PDFレポートをお送りします。',
+              },
+            ]);
+          } else {
+            await sendLineMessage(replyToken, [
+              {
+                type: 'text',
+                text: 'PDFレポートの生成中です。しばらくお待ちください。',
+              },
+            ]);
+          }
         }
       }
     }

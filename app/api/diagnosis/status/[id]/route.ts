@@ -1,11 +1,9 @@
 /**
- * app/api/result/[id]/route.ts
- * 診断結果取得APIエンドポイント
+ * app/api/diagnosis/status/[id]/route.ts
+ * 診断ステータス確認APIエンドポイント
  * 
- * クライアントサイドからのRLS問題を回避するため、
- * サーバーサイドでsupabaseAdminを使用してデータを取得する。
- * 
- * ※ 結果ページ（app/result/[id]/page.tsx）から呼び出される
+ * フロントエンドのポーリングで使用。
+ * 診断が完了したかどうかを確認する。
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/server';
@@ -27,28 +25,24 @@ export async function GET(
     const supabaseAdmin = getSupabaseAdmin();
     const { data, error } = await supabaseAdmin
       .from('diagnosis_sessions')
-      .select('*')
+      .select('id, status, pdf_url')
       .eq('id', id)
       .single();
 
-    if (error) {
-      console.error('Supabase Error:', error);
+    if (error || !data) {
       return NextResponse.json(
-        { error: 'データの取得に失敗しました。' },
-        { status: 500 }
-      );
-    }
-
-    if (!data) {
-      return NextResponse.json(
-        { error: '診断データが見つかりませんでした。' },
+        { error: 'セッションが見つかりませんでした。' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ data });
+    return NextResponse.json({
+      id: data.id,
+      status: data.status,
+      hasPdf: !!data.pdf_url,
+    });
   } catch (error) {
-    console.error('Result API Error:', error);
+    console.error('Status API Error:', error);
     return NextResponse.json(
       { error: '予期せぬエラーが発生しました。' },
       { status: 500 }
