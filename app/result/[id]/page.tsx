@@ -49,7 +49,7 @@ export default function ResultPage() {
     }
 
     try {
-      const response = await fetch(`/api/result/${id}`);
+      const response = await fetch(`/api/diagnosis/result/${id}`);
       const json = await response.json();
 
       if (!response.ok) {

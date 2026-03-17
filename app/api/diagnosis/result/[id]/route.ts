@@ -1,11 +1,13 @@
 /**
- * app/api/result/[id]/route.ts
+ * app/api/diagnosis/result/[id]/route.ts
  * 診断結果取得APIエンドポイント
  * 
  * クライアントサイドからのRLS問題を回避するため、
  * サーバーサイドでsupabaseAdminを使用してデータを取得する。
  * 
  * ※ 結果ページ（app/result/[id]/page.tsx）から呼び出される
+ * ※ Next.js App Routerでは同じパスにpage.tsxとroute.tsを共存できないため、
+ *    /api/diagnosis/result/[id] に配置
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/server';
