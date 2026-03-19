@@ -74,7 +74,7 @@ JSON例:
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-5.4-mini',
-      max_tokens: 1500,
+      max_completion_tokens: 1500,
       messages: [
         {
           role: 'system',
