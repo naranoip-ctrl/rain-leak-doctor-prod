@@ -1,6 +1,6 @@
 /**
  * app/api/admin/dashboard/route.ts
- * 管理画面ダッシュボード用API
+ * 管理画面ダッシュボード用API（パフォーマンス最適化版）
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/server';
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
-    // 統計データ取得
+    // 統計データ + 一覧データを全て並列で取得
     const [
       { count: totalContacts },
       { count: contactsThisMonth },
@@ -19,13 +19,33 @@ export async function GET(request: NextRequest) {
       { count: diagnosesThisMonth },
       { count: totalAppointments },
       { count: appointmentsThisMonth },
+      { data: contacts },
+      { data: diagnoses },
+      { data: appointments },
     ] = await Promise.all([
+      // 統計カウント（head: true で行データを返さない）
       supabase.from('inquiries').select('*', { count: 'exact', head: true }),
       supabase.from('inquiries').select('*', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth),
       supabase.from('diagnosis_sessions').select('*', { count: 'exact', head: true }),
       supabase.from('diagnosis_sessions').select('*', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth),
       supabase.from('appointments').select('*', { count: 'exact', head: true }),
       supabase.from('appointments').select('*', { count: 'exact', head: true }).gte('created_at', firstDayOfMonth),
+      // 一覧データ（必要カラムのみ取得、最新20件）
+      supabase
+        .from('inquiries')
+        .select('id, customer_name, name, customer_email, email, customer_phone, phone, message, inquiry_content, status, created_at')
+        .order('created_at', { ascending: false })
+        .limit(20),
+      supabase
+        .from('diagnosis_sessions')
+        .select('id, customer_name, customer_phone, customer_email, damage_locations, estimated_cost_min, estimated_cost_max, insurance_likelihood, recommended_plan, damage_description, severity_score, first_aid_cost, secret_code, admin_status, created_at')
+        .order('created_at', { ascending: false })
+        .limit(20),
+      supabase
+        .from('appointments')
+        .select('id, customer_name, customer_email, customer_phone, address, preferred_date, preferred_time, status, notes, diagnosis_session_id, created_at')
+        .order('created_at', { ascending: false })
+        .limit(20),
     ]);
 
     const stats = {
@@ -41,13 +61,6 @@ export async function GET(request: NextRequest) {
       conversionRateChange: 0,
     };
 
-    // お問い合わせ一覧
-    const { data: contacts } = await supabase
-      .from('inquiries')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(20);
-
     const contactList = (contacts || []).map((c: any) => ({
       id: c.id,
       name: c.customer_name || c.name || '',
@@ -57,13 +70,6 @@ export async function GET(request: NextRequest) {
       status: c.status || '未対応',
       createdAt: c.created_at,
     }));
-
-    // AI診断一覧
-    const { data: diagnoses } = await supabase
-      .from('diagnosis_sessions')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(20);
 
     const diagnosisList = (diagnoses || []).map((d: any) => ({
       id: d.id,
@@ -78,18 +84,10 @@ export async function GET(request: NextRequest) {
       diagnosisDetails: d.damage_description || '',
       severityScore: d.severity_score || 0,
       firstAidCost: d.first_aid_cost || 0,
-      imageUrls: d.image_urls || [],
       claimCode: d.secret_code || '',
       adminStatus: d.admin_status || '未対応',
       createdAt: d.created_at,
     }));
-
-    // 予約一覧
-    const { data: appointments } = await supabase
-      .from('appointments')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(20);
 
     const appointmentList = (appointments || []).map((a: any) => ({
       id: a.id,
