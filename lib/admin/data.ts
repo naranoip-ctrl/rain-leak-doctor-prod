@@ -32,6 +32,8 @@ export type Diagnosis = {
   name: string;
   phone: string;
   email: string;
+  address: string;
+  buildingAge: string;
   repairLocation: string;
   estimatedCostMin: number;
   estimatedCostMax: number;
