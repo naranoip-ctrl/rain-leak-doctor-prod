@@ -23,7 +23,7 @@ export default function PrivacyPolicy() {
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 space-y-8 text-slate-700 leading-relaxed">
           <p>
-            株式会社CJW TRUST（以下「当社」）は、AI雨漏りドクター（以下「本サービス」）における
+            株式会社ドローン工務店（以下「当社」）は、AI雨漏りドクター（以下「本サービス」）における
             お客様の個人情報の取扱いについて、以下のとおりプライバシーポリシーを定めます。
           </p>
 
@@ -99,7 +99,7 @@ export default function PrivacyPolicy() {
             <h2 className="text-xl font-bold text-slate-800 mb-3">8. お問い合わせ窓口</h2>
             <p>個人情報の取扱いに関するお問い合わせは、以下までご連絡ください。</p>
             <div className="mt-3 p-4 bg-slate-50 rounded-lg">
-              <p className="font-bold">株式会社CJW TRUST</p>
+              <p className="font-bold">株式会社ドローン工務店</p>
               <p>AI雨漏りドクター 個人情報相談窓口</p>
               <p>電話: 0120-410-654</p>
             </div>
