@@ -997,7 +997,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4 flex-shrink-0" />
-                  <a href="mailto:drone@loki-group.com" className="hover:text-white transition-colors">drone@loki-group.com</a>
+                  <a href="mailto:info@loki-drone.com" className="hover:text-white transition-colors">info@loki-drone.com</a>
                 </li>
               </ul>
             </div>

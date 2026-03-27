@@ -42,7 +42,7 @@ export default function Terms() {
               </tr>
               <tr>
                 <td className="py-4 pr-4 font-bold text-slate-800 align-top whitespace-nowrap">メールアドレス</td>
-                <td className="py-4">drone@loki-group.com</td>
+                <td className="py-4">info@loki-drone.com</td>
               </tr>
               <tr>
                 <td className="py-4 pr-4 font-bold text-slate-800 align-top whitespace-nowrap">サービス内容</td>
