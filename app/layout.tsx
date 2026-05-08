@@ -20,6 +20,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const isProd = process.env.VERCEL_ENV === 'production';
+
   return (
     <html lang="ja">
       <head>
@@ -29,15 +31,17 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         {children}
         <Analytics />
-        <Script id="ms-clarity" strategy="afterInteractive">
-          {`(function(c,l,a,r,i,t,y){
-              c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-              t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-              y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-          })(window, document, "clarity", "script", "wnu3wz8k1n");`}
-        </Script>
+        {isProd && (
+          <Script id="ms-clarity" strategy="afterInteractive">
+            {`(function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "wnu3wz8k1n");`}
+          </Script>
+        )}
       </body>
-      <GoogleAnalytics gaId="G-W1EK1ERQJW" />
+      {isProd && <GoogleAnalytics gaId="G-W1EK1ERQJW" />}
     </html>
   );
 }
