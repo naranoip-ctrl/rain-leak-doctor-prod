@@ -150,14 +150,14 @@ export default function Home() {
             </button>
 
             <div className="hidden md:flex gap-3">
-              <a href="tel:0120-410-654" className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-bold border-2 transition-colors ${!isScrolled ? 'bg-white/10 text-white border-white/30 hover:bg-white/20' : 'border-primary text-primary hover:bg-primary/5'}`}>
-                <Phone className="h-4 w-4 mr-2" />
-                0120-410-654
-              </a>
-              <Link href="/diagnosis" className="inline-flex items-center px-5 py-2 rounded-md text-sm font-bold bg-cta text-white hover:bg-cta-dark shadow-lg shadow-cta/30 border-none transition-all">
+              <Link href="/diagnosis" className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-bold border-2 transition-colors ${!isScrolled ? 'bg-white/10 text-white border-white/30 hover:bg-white/20' : 'border-primary text-primary hover:bg-primary/5'}`}>
                 <Camera className="h-4 w-4 mr-2" />
-                無料AI診断
+                写真3枚で無料AI診断
               </Link>
+              <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-5 py-2 rounded-md text-sm font-bold bg-cta text-white hover:bg-cta-dark shadow-lg shadow-cta/30 border-none transition-all">
+                <MessageCircle className="h-4 w-4 mr-2" />
+                LINEで匿名相談
+              </a>
             </div>
           </div>
         </div>
@@ -185,12 +185,12 @@ export default function Home() {
                 })}
               </nav>
               <div className="mt-auto space-y-4">
-                <Link href="/diagnosis" className="flex items-center justify-center w-full px-6 py-3 rounded-md bg-cta text-white font-bold text-lg">
+                <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full px-6 py-3 rounded-md bg-cta text-white font-bold text-lg hover:bg-cta-dark transition-colors">
+                  <MessageCircle className="h-5 w-5 mr-2" /> LINEで匿名相談・名前不要
+                </a>
+                <Link href="/diagnosis" className="flex items-center justify-center w-full px-6 py-3 rounded-md border-2 border-primary text-primary font-bold text-base hover:bg-primary/5 transition-colors">
                   <Camera className="h-5 w-5 mr-2" /> 写真3枚で無料AI診断
                 </Link>
-                <a href={LINE_URL} className="flex items-center justify-center w-full px-6 py-3 rounded-md bg-line text-white font-bold text-lg hover:bg-line-dark transition-colors">
-                  LINEで相談
-                </a>
               </div>
             </div>
           </div>
@@ -227,25 +227,27 @@ export default function Home() {
                 <span className="text-cta font-black text-2xl mx-1">最短3分</span>で分かります。
               </p>
 
-              {/* メインCTA：1つに絞り、オレンジ化 */}
+              {/* メインCTA：LINE匿名相談を主軸に */}
               <div className="flex flex-col gap-3 pt-2 items-center lg:items-start">
-                <Link
-                  href="/diagnosis"
+                <a
+                  href={LINE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="relative inline-flex items-center justify-center h-16 px-10 bg-cta text-white hover:bg-cta-dark text-xl font-black rounded-full shadow-[0_0_25px_rgba(255,107,53,0.5)] hover:shadow-[0_0_40px_rgba(255,107,53,0.7)] transition-all transform hover:-translate-y-1 animate-pulse-cta-glow overflow-hidden"
                 >
                   <span className="absolute inset-0 cta-shimmer"></span>
-                  <Camera className="h-6 w-6 mr-2 relative z-10" />
-                  <span className="relative z-10">写真3枚で今すぐ無料診断</span>
-                </Link>
+                  <MessageCircle className="h-6 w-6 mr-2 relative z-10" />
+                  <span className="relative z-10">LINEで匿名相談・名前不要</span>
+                </a>
                 <p className="text-slate-400 text-sm flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-accent" />
-                  登録不要・最短3分で結果表示・完全無料
+                  名前・住所不要・トーク非公開・無理な勧誘なし
                 </p>
-                {/* LINEはサブリンク化 */}
-                <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-line transition-colors">
-                  <MessageCircle className="h-4 w-4" />
-                  LINEで相談する →
-                </a>
+                {/* 写真3枚で無料AI診断は副CTAに格下げ */}
+                <Link href="/diagnosis" className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-cta transition-colors">
+                  <Camera className="h-4 w-4" />
+                  写真3枚で無料AI診断 →
+                </Link>
               </div>
 
               {/* 信頼バッジ強化 */}
@@ -509,88 +511,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════ Pricing Section ═══════════ */}
-      <section id="pricing" className="py-24 bg-slate-900 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/images/pattern-carbon-fibre.png')] opacity-20"></div>
-        <div className="container relative z-10">
-          <div className="text-center mb-12">
-            <span className="inline-block bg-cta text-white px-3 py-1 rounded-full text-sm font-bold mb-4">明朗会計</span>
-            <h2 className="text-3xl md:text-4xl font-black mb-4">修理費の目安、<span className="text-cta">先に</span>知っておきませんか？</h2>
-            <p className="text-slate-400">事前承認なしの追加費用は一切ありません。</p>
-          </div>
-
-          {/* AI診断を別格扱い */}
-          <div className="max-w-lg mx-auto mb-10">
-            <div className="relative bg-gradient-to-br from-cta to-cta-dark rounded-2xl p-8 text-center shadow-2xl border-2 border-cta-light/30">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-white text-cta px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-md">
-                まずはここから
-              </div>
-              <h3 className="text-white font-bold text-2xl mb-2">AI 3分診断</h3>
-              <div className="text-5xl font-black mt-2 mb-4 text-white">¥0</div>
-              <ul className="space-y-2 text-sm text-white/90 mb-6 text-left max-w-xs mx-auto">
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 最短3分で結果表示</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 火災保険の適用可能性を判定</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 概算費用レンジを提示</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 登録不要・完全無料</li>
-              </ul>
-              <Link href="/diagnosis" className="inline-flex items-center justify-center w-full max-w-xs h-14 bg-white text-cta hover:bg-slate-100 text-lg font-black rounded-full shadow-lg transition-all">
-                <Camera className="h-5 w-5 mr-2" /> 今すぐ無料AI診断
-              </Link>
-            </div>
-          </div>
-
-          <p className="text-center text-slate-400 text-sm mb-8">AI診断の結果を見てから、以下のプランをお選びいただけます ↓</p>
-
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {/* Light Plan */}
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-              <h3 className="text-accent font-bold text-lg mb-2">ライト現地診断</h3>
-              <div className="text-3xl font-bold mt-2 mb-6">¥8,800</div>
-              <ul className="space-y-3 text-sm text-slate-300 mb-6">
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 平日9〜18時対応</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 目視調査＋湿度計測</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 簡易報告書（写真付）</li>
-              </ul>
-              <a href="tel:0120-410-654" className="block w-full text-center py-3 rounded-md bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">
-                予約する
-              </a>
-            </div>
-
-            {/* Standard Plan (Featured) */}
-            <div className="relative bg-primary rounded-xl p-6 text-white border-2 border-accent shadow-2xl scale-105 z-10">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-primary px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider">
-                人気 No.1
-              </div>
-              <h3 className="text-accent font-bold text-lg mb-2">スタンダード</h3>
-              <div className="text-3xl font-bold mt-2 mb-6">¥33,000<span className="text-lg font-normal opacity-70">〜</span></div>
-              <ul className="space-y-3 text-sm text-slate-100 mb-6">
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 赤外線サーモグラフィ</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 散水試験（漏水再現）</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 保険申請用報告書</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> ドローン（必要時）</li>
-              </ul>
-              <a href="tel:0120-410-654" className="block w-full text-center py-3 rounded-md bg-accent text-primary hover:bg-accent/90 font-bold h-12 leading-6 transition-colors">
-                予約する
-              </a>
-            </div>
-
-            {/* Repair Plan */}
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-              <h3 className="text-accent font-bold text-lg mb-2">一次止水</h3>
-              <div className="text-3xl font-bold mt-2 mb-6">¥22,000<span className="text-lg font-normal opacity-70">〜</span></div>
-              <ul className="space-y-3 text-sm text-slate-300 mb-6">
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 応急処置（72h以内）</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> シール打ち替え/防水</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 30日間無料再訪保証</li>
-              </ul>
-              <a href="tel:0120-410-654" className="block w-full text-center py-3 rounded-md bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">
-                今すぐ電話
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ═══════════ Steps Section ═══════════ */}
       <section className="py-24 bg-white">
         <div className="container">
@@ -813,7 +733,7 @@ export default function Home() {
                   />
                   <div className="absolute -bottom-4 -right-4 bg-primary text-white px-4 py-2 rounded-lg shadow-lg">
                     <p className="text-xs">株式会社ドローン工務店</p>
-                    <p className="font-bold">代表</p>
+                    <p className="font-bold">代表 坂井 友哉</p>
                   </div>
                 </div>
               </div>
@@ -949,14 +869,92 @@ export default function Home() {
           </Link>
           <p className="mt-4 text-sm text-white/60">登録不要・最短3分で結果表示・完全無料</p>
 
-          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="mt-6 flex items-center justify-center">
             <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-white/70 hover:text-white font-bold transition-colors text-sm">
-              <MessageCircle className="h-4 w-4 mr-2" /> LINEで相談する
+              <MessageCircle className="h-4 w-4 mr-2" /> LINEで匿名相談する
             </a>
-            <span className="hidden sm:inline text-white/30">|</span>
-            <a href="tel:0120-410-654" className="inline-flex items-center text-white/70 hover:text-white font-bold transition-colors text-sm">
-              <Phone className="h-4 w-4 mr-2" /> 0120-410-654
-            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════ Pricing Section ═══════════ */}
+      <section id="pricing" className="py-24 bg-slate-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/images/pattern-carbon-fibre.png')] opacity-20"></div>
+        <div className="container relative z-10">
+          <div className="text-center mb-12">
+            <span className="inline-block bg-cta text-white px-3 py-1 rounded-full text-sm font-bold mb-4">明朗会計</span>
+            <h2 className="text-3xl md:text-4xl font-black mb-4">修理費の目安、<span className="text-cta">先に</span>知っておきませんか？</h2>
+            <p className="text-slate-400">事前承認なしの追加費用は一切ありません。</p>
+          </div>
+
+          {/* AI診断を別格扱い */}
+          <div className="max-w-lg mx-auto mb-10">
+            <div className="relative bg-gradient-to-br from-cta to-cta-dark rounded-2xl p-8 text-center shadow-2xl border-2 border-cta-light/30">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-white text-cta px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-md">
+                まずはここから
+              </div>
+              <h3 className="text-white font-bold text-2xl mb-2">AI 3分診断</h3>
+              <div className="text-5xl font-black mt-2 mb-4 text-white">¥0</div>
+              <ul className="space-y-2 text-sm text-white/90 mb-6 text-left max-w-xs mx-auto">
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 最短3分で結果表示</li>
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 火災保険の適用可能性を判定</li>
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 概算費用レンジを提示</li>
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 登録不要・完全無料</li>
+              </ul>
+              <Link href="/diagnosis" className="inline-flex items-center justify-center w-full max-w-xs h-14 bg-white text-cta hover:bg-slate-100 text-lg font-black rounded-full shadow-lg transition-all">
+                <Camera className="h-5 w-5 mr-2" /> 今すぐ無料AI診断
+              </Link>
+            </div>
+          </div>
+
+          <p className="text-center text-slate-400 text-sm mb-8">AI診断の結果を見てから、以下のプランをお選びいただけます ↓</p>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {/* Light Plan */}
+            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+              <h3 className="text-accent font-bold text-lg mb-2">ライト現地診断</h3>
+              <div className="text-3xl font-bold mt-2 mb-6">¥8,800</div>
+              <ul className="space-y-3 text-sm text-slate-300 mb-6">
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 平日9〜18時対応</li>
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 目視調査＋湿度計測</li>
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 簡易報告書（写真付）</li>
+              </ul>
+              <a href="tel:0120-410-654" className="block w-full text-center py-3 rounded-md bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">
+                予約する
+              </a>
+            </div>
+
+            {/* Standard Plan (Featured) */}
+            <div className="relative bg-primary rounded-xl p-6 text-white border-2 border-accent shadow-2xl scale-105 z-10">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-primary px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+                人気 No.1
+              </div>
+              <h3 className="text-accent font-bold text-lg mb-2">スタンダード</h3>
+              <div className="text-3xl font-bold mt-2 mb-6">¥33,000<span className="text-lg font-normal opacity-70">〜</span></div>
+              <ul className="space-y-3 text-sm text-slate-100 mb-6">
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 赤外線サーモグラフィ</li>
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 散水試験（漏水再現）</li>
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 保険申請用報告書</li>
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> ドローン（必要時）</li>
+              </ul>
+              <a href="tel:0120-410-654" className="block w-full text-center py-3 rounded-md bg-accent text-primary hover:bg-accent/90 font-bold h-12 leading-6 transition-colors">
+                予約する
+              </a>
+            </div>
+
+            {/* Repair Plan */}
+            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+              <h3 className="text-accent font-bold text-lg mb-2">一次止水</h3>
+              <div className="text-3xl font-bold mt-2 mb-6">¥22,000<span className="text-lg font-normal opacity-70">〜</span></div>
+              <ul className="space-y-3 text-sm text-slate-300 mb-6">
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 応急処置（72h以内）</li>
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> シール打ち替え/防水</li>
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 30日間無料再訪保証</li>
+              </ul>
+              <a href="tel:0120-410-654" className="block w-full text-center py-3 rounded-md bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">
+                予約する
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -1037,31 +1035,42 @@ export default function Home() {
       {/* ═══════════ Floating CTA Bar (Mobile) ═══════════ */}
       <div className={`floating-cta-bar md:hidden ${showFloatingCTA ? 'visible' : ''}`}>
         <div className="flex gap-2">
-          <Link
-            href="/diagnosis"
+          <a
+            href={LINE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex-[7] flex items-center justify-center gap-2 h-12 bg-cta text-white font-bold rounded-lg text-sm shadow-md"
           >
-            <Camera className="h-4 w-4" />
-            無料AI診断（3分）
-          </Link>
-          <a
-            href="tel:0120-410-654"
+            <MessageCircle className="h-4 w-4" />
+            LINEで匿名相談・名前不要
+          </a>
+          <Link
+            href="/diagnosis"
             className="flex-[3] flex items-center justify-center h-12 bg-primary text-white font-bold rounded-lg text-sm shadow-md"
           >
-            <Phone className="h-4 w-4" />
-          </a>
+            <Camera className="h-4 w-4" />
+          </Link>
         </div>
       </div>
 
       {/* ═══════════ Floating CTA (Desktop) ═══════════ */}
       {showFloatingCTA && (
-        <div className="hidden md:block fixed bottom-8 right-8 z-50">
-          <Link
-            href="/diagnosis"
+        <div className="hidden md:block fixed bottom-8 right-8 z-50 flex flex-col gap-3 items-end">
+          <a
+            href={LINE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 px-6 py-3 bg-cta text-white font-bold rounded-full shadow-xl hover:bg-cta-dark transition-all hover:-translate-y-1 animate-pulse-cta-glow"
           >
-            <Camera className="h-5 w-5" />
-            無料AI診断
+            <MessageCircle className="h-5 w-5" />
+            LINEで匿名相談
+          </a>
+          <Link
+            href="/diagnosis"
+            className="flex items-center gap-2 px-5 py-2 bg-white text-primary border border-primary/20 font-bold rounded-full shadow-md hover:shadow-lg transition-all text-sm"
+          >
+            <Camera className="h-4 w-4" />
+            写真3枚で無料AI診断
           </Link>
         </div>
       )}
