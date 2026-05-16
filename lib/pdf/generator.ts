@@ -22,25 +22,25 @@ interface PDFData {
   imageFindings?: string;
 }
 
-const FONT_URL_REGULAR = 'https://cdn.jsdelivr.net/gh/notofonts/noto-cjk/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf';
-const FONT_URL_BOLD = 'https://cdn.jsdelivr.net/gh/notofonts/noto-cjk/Sans/OTF/Japanese/NotoSansCJKjp-Bold.otf';
+// Noto Sans JP（Variable TTF）。CFF/OTFのサブセッターはpdf-libで壊れたPDFを生成する既知問題があるためTTFを使う。
+// 同じVariableフォントをRegular/Boldで共用（外観上は同一になるが、まず日本語が読める状態を最優先）。
+const FONT_URL = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosansjp/NotoSansJP%5Bwght%5D.ttf';
 const FONT_FETCH_TIMEOUT_MS = 25_000;
 
-let cachedRegularFont: ArrayBuffer | null = null;
-let cachedBoldFont: ArrayBuffer | null = null;
+let cachedFont: ArrayBuffer | null = null;
 
-async function fetchFontWithTimeout(url: string, label: string): Promise<ArrayBuffer> {
+async function fetchFontWithTimeout(url: string): Promise<ArrayBuffer> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FONT_FETCH_TIMEOUT_MS);
   try {
     const response = await fetch(url, { signal: controller.signal });
     if (!response.ok) {
-      throw new Error(`Failed to load ${label} font: HTTP ${response.status}`);
+      throw new Error(`Failed to load font: HTTP ${response.status}`);
     }
     return await response.arrayBuffer();
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
-      throw new Error(`Font fetch timed out after ${FONT_FETCH_TIMEOUT_MS}ms (${label})`);
+      throw new Error(`Font fetch timed out after ${FONT_FETCH_TIMEOUT_MS}ms`);
     }
     throw err;
   } finally {
@@ -49,15 +49,9 @@ async function fetchFontWithTimeout(url: string, label: string): Promise<ArrayBu
 }
 
 async function loadJapaneseFont(): Promise<ArrayBuffer> {
-  if (cachedRegularFont) return cachedRegularFont;
-  cachedRegularFont = await fetchFontWithTimeout(FONT_URL_REGULAR, 'Regular');
-  return cachedRegularFont;
-}
-
-async function loadJapaneseBoldFont(): Promise<ArrayBuffer> {
-  if (cachedBoldFont) return cachedBoldFont;
-  cachedBoldFont = await fetchFontWithTimeout(FONT_URL_BOLD, 'Bold');
-  return cachedBoldFont;
+  if (cachedFont) return cachedFont;
+  cachedFont = await fetchFontWithTimeout(FONT_URL);
+  return cachedFont;
 }
 
 /**
@@ -212,13 +206,11 @@ export async function generatePDF(data: PDFData): Promise<Buffer> {
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
 
-  const [fontBytes, boldFontBytes] = await Promise.all([
-    loadJapaneseFont(),
-    loadJapaneseBoldFont(),
-  ]);
-
-  const font = await pdfDoc.embedFont(fontBytes, { subset: true });
-  const boldFont = await pdfDoc.embedFont(boldFontBytes, { subset: true });
+  const fontBytes = await loadJapaneseFont();
+  // subset: true はVariableフォントで一部グリフが欠落するバグを誘発するため、フル埋め込みを使う
+  // （PDFは9〜10MBになるが、確実に全グリフが描画される）
+  const font = await pdfDoc.embedFont(fontBytes);
+  const boldFont = font;
 
   const pageWidth = 595.28;
   const pageHeight = 841.89;

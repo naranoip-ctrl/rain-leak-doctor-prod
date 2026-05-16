@@ -11,8 +11,7 @@ const start = performance.now();
 import { PDFDocument, rgb } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 
-const FONT_REG = 'https://cdn.jsdelivr.net/gh/notofonts/noto-cjk/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf';
-const FONT_BOLD = 'https://cdn.jsdelivr.net/gh/notofonts/noto-cjk/Sans/OTF/Japanese/NotoSansCJKjp-Bold.otf';
+const FONT_URL = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosansjp/NotoSansJP%5Bwght%5D.ttf';
 
 async function timed(label, fn) {
   const t0 = performance.now();
@@ -25,22 +24,20 @@ try {
   console.log('Node:', process.version);
   console.log('PDF生成テスト開始...');
 
-  const [regularBuf, boldBuf] = await timed('fonts download (regular + bold parallel)', async () => {
-    const [r, b] = await Promise.all([fetch(FONT_REG), fetch(FONT_BOLD)]);
-    if (!r.ok) throw new Error(`regular HTTP ${r.status}`);
-    if (!b.ok) throw new Error(`bold HTTP ${b.status}`);
-    return Promise.all([r.arrayBuffer(), b.arrayBuffer()]);
+  const fontBuf = await timed('font download', async () => {
+    const r = await fetch(FONT_URL);
+    if (!r.ok) throw new Error(`font HTTP ${r.status}`);
+    return r.arrayBuffer();
   });
 
-  console.log(`  Regular: ${(regularBuf.byteLength / 1024 / 1024).toFixed(2)} MB`);
-  console.log(`  Bold:    ${(boldBuf.byteLength / 1024 / 1024).toFixed(2)} MB`);
+  console.log(`  Font: ${(fontBuf.byteLength / 1024 / 1024).toFixed(2)} MB`);
 
   let jpFont, jpBold;
   const pdf = await timed('PDFDocument.create + embedFont(subset)', async () => {
     const d = await PDFDocument.create();
     d.registerFontkit(fontkit);
-    jpFont = await d.embedFont(regularBuf, { subset: true });
-    jpBold = await d.embedFont(boldBuf, { subset: true });
+    jpFont = await d.embedFont(fontBuf, { subset: true });
+    jpBold = jpFont;
     return d;
   });
 
