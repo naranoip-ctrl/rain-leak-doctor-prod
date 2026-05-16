@@ -22,25 +22,28 @@ interface PDFData {
   imageFindings?: string;
 }
 
-// Noto Sans JP（Variable TTF）。CFF/OTFのサブセッターはpdf-libで壊れたPDFを生成する既知問題があるためTTFを使う。
-// 同じVariableフォントをRegular/Boldで共用（外観上は同一になるが、まず日本語が読める状態を最優先）。
-const FONT_URL = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosansjp/NotoSansJP%5Bwght%5D.ttf';
+// BIZ UDPGothic（静的TTF）。Regular + Bold が個別ファイルで提供されており、
+// pdf-libのTTFサブセッターが堅牢に動作する。UD（Universal Design）フォントなので
+// ビジネス文書の可読性も高い。
+const FONT_URL_REGULAR = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/bizudpgothic/BIZUDPGothic-Regular.ttf';
+const FONT_URL_BOLD = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/bizudpgothic/BIZUDPGothic-Bold.ttf';
 const FONT_FETCH_TIMEOUT_MS = 25_000;
 
-let cachedFont: ArrayBuffer | null = null;
+let cachedRegularFont: ArrayBuffer | null = null;
+let cachedBoldFont: ArrayBuffer | null = null;
 
-async function fetchFontWithTimeout(url: string): Promise<ArrayBuffer> {
+async function fetchFontWithTimeout(url: string, label: string): Promise<ArrayBuffer> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FONT_FETCH_TIMEOUT_MS);
   try {
     const response = await fetch(url, { signal: controller.signal });
     if (!response.ok) {
-      throw new Error(`Failed to load font: HTTP ${response.status}`);
+      throw new Error(`Failed to load ${label} font: HTTP ${response.status}`);
     }
     return await response.arrayBuffer();
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
-      throw new Error(`Font fetch timed out after ${FONT_FETCH_TIMEOUT_MS}ms`);
+      throw new Error(`Font fetch timed out after ${FONT_FETCH_TIMEOUT_MS}ms (${label})`);
     }
     throw err;
   } finally {
@@ -49,9 +52,15 @@ async function fetchFontWithTimeout(url: string): Promise<ArrayBuffer> {
 }
 
 async function loadJapaneseFont(): Promise<ArrayBuffer> {
-  if (cachedFont) return cachedFont;
-  cachedFont = await fetchFontWithTimeout(FONT_URL);
-  return cachedFont;
+  if (cachedRegularFont) return cachedRegularFont;
+  cachedRegularFont = await fetchFontWithTimeout(FONT_URL_REGULAR, 'Regular');
+  return cachedRegularFont;
+}
+
+async function loadJapaneseBoldFont(): Promise<ArrayBuffer> {
+  if (cachedBoldFont) return cachedBoldFont;
+  cachedBoldFont = await fetchFontWithTimeout(FONT_URL_BOLD, 'Bold');
+  return cachedBoldFont;
 }
 
 /**
@@ -206,11 +215,14 @@ export async function generatePDF(data: PDFData): Promise<Buffer> {
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
 
-  const fontBytes = await loadJapaneseFont();
-  // subset: true はVariableフォントで一部グリフが欠落するバグを誘発するため、フル埋め込みを使う
-  // （PDFは9〜10MBになるが、確実に全グリフが描画される）
+  const [fontBytes, boldFontBytes] = await Promise.all([
+    loadJapaneseFont(),
+    loadJapaneseBoldFont(),
+  ]);
+  // 静的TTF（Regular/Bold別ファイル）。サブセッター不要のフル埋め込み。
+  // BIZ UDPGothic Regular/Bold 合計約9MBの埋め込みになる。
   const font = await pdfDoc.embedFont(fontBytes);
-  const boldFont = font;
+  const boldFont = await pdfDoc.embedFont(boldFontBytes);
 
   const pageWidth = 595.28;
   const pageHeight = 841.89;
