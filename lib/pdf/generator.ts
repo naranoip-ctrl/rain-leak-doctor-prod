@@ -22,28 +22,42 @@ interface PDFData {
   imageFindings?: string;
 }
 
-/**
- * Google Noto Sans JPフォントをダウンロード
- */
-async function loadJapaneseFont(): Promise<ArrayBuffer> {
-  const fontUrl = 'https://cdn.jsdelivr.net/gh/notofonts/noto-cjk/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf';
-  const response = await fetch(fontUrl);
-  if (!response.ok) {
-    throw new Error('Failed to load Japanese font');
+const FONT_URL_REGULAR = 'https://cdn.jsdelivr.net/gh/notofonts/noto-cjk/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf';
+const FONT_URL_BOLD = 'https://cdn.jsdelivr.net/gh/notofonts/noto-cjk/Sans/OTF/Japanese/NotoSansCJKjp-Bold.otf';
+const FONT_FETCH_TIMEOUT_MS = 25_000;
+
+let cachedRegularFont: ArrayBuffer | null = null;
+let cachedBoldFont: ArrayBuffer | null = null;
+
+async function fetchFontWithTimeout(url: string, label: string): Promise<ArrayBuffer> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FONT_FETCH_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) {
+      throw new Error(`Failed to load ${label} font: HTTP ${response.status}`);
+    }
+    return await response.arrayBuffer();
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error(`Font fetch timed out after ${FONT_FETCH_TIMEOUT_MS}ms (${label})`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
   }
-  return response.arrayBuffer();
 }
 
-/**
- * Google Noto Sans JP Boldフォントをダウンロード
- */
+async function loadJapaneseFont(): Promise<ArrayBuffer> {
+  if (cachedRegularFont) return cachedRegularFont;
+  cachedRegularFont = await fetchFontWithTimeout(FONT_URL_REGULAR, 'Regular');
+  return cachedRegularFont;
+}
+
 async function loadJapaneseBoldFont(): Promise<ArrayBuffer> {
-  const fontUrl = 'https://cdn.jsdelivr.net/gh/notofonts/noto-cjk/Sans/OTF/Japanese/NotoSansCJKjp-Bold.otf';
-  const response = await fetch(fontUrl);
-  if (!response.ok) {
-    throw new Error('Failed to load Japanese bold font');
-  }
-  return response.arrayBuffer();
+  if (cachedBoldFont) return cachedBoldFont;
+  cachedBoldFont = await fetchFontWithTimeout(FONT_URL_BOLD, 'Bold');
+  return cachedBoldFont;
 }
 
 /**
@@ -203,8 +217,8 @@ export async function generatePDF(data: PDFData): Promise<Buffer> {
     loadJapaneseBoldFont(),
   ]);
 
-  const font = await pdfDoc.embedFont(fontBytes);
-  const boldFont = await pdfDoc.embedFont(boldFontBytes);
+  const font = await pdfDoc.embedFont(fontBytes, { subset: true });
+  const boldFont = await pdfDoc.embedFont(boldFontBytes, { subset: true });
 
   const pageWidth = 595.28;
   const pageHeight = 841.89;

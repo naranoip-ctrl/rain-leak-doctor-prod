@@ -98,18 +98,18 @@ export async function POST(request: NextRequest) {
         const diagnosisResult = await performAIDiagnosis(imageUrls);
         console.log('[AI診断] 完了:', diagnosisResult.severityScore);
 
-        // 4-2. PDF生成
+        // 4-2. PDF生成（1回失敗したら即時リトライを1度）
         console.log('[PDF生成] 開始...');
         let pdfUrl: string | null = null;
-        try {
+        let pdfErrorMessage: string | null = null;
+
+        const tryGenerateAndUpload = async () => {
           const pdfBuffer = await generatePDF({
             customerName,
             diagnosisId: session.id,
             ...diagnosisResult,
             imageUrls,
           });
-
-          // 4-3. Supabase Storageにアップロード
           const pdfFileName = `diagnosis_${session.id}.pdf`;
           const { error: uploadError } = await bgSupabase.storage
             .from('pdfs')
@@ -117,18 +117,28 @@ export async function POST(request: NextRequest) {
               contentType: 'application/pdf',
               upsert: true,
             });
-
           if (uploadError) {
-            console.error('[PDF Storageアップロードエラー]', uploadError);
-          } else {
-            const { data: pdfUrlData } = bgSupabase.storage
-              .from('pdfs')
-              .getPublicUrl(pdfFileName);
-            pdfUrl = pdfUrlData.publicUrl;
-            console.log('[PDF生成] 完了:', pdfUrl);
+            throw new Error(`Storage upload failed: ${uploadError.message}`);
           }
-        } catch (pdfError) {
-          console.error('[PDF生成エラー (non-fatal)]', pdfError);
+          const { data: pdfUrlData } = bgSupabase.storage
+            .from('pdfs')
+            .getPublicUrl(pdfFileName);
+          return pdfUrlData.publicUrl;
+        };
+
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            pdfUrl = await tryGenerateAndUpload();
+            console.log(`[PDF生成] 完了(試行${attempt}):`, pdfUrl);
+            pdfErrorMessage = null;
+            break;
+          } catch (pdfError) {
+            pdfErrorMessage = pdfError instanceof Error ? pdfError.message : String(pdfError);
+            console.error(`[PDF生成エラー 試行${attempt}/2]`, pdfErrorMessage);
+            if (attempt < 2) {
+              await new Promise((r) => setTimeout(r, 1000));
+            }
+          }
         }
 
         // 4-4. DBを更新（診断結果 + PDF URL）
@@ -141,7 +151,7 @@ export async function POST(request: NextRequest) {
           first_aid_cost: diagnosisResult.firstAidCost,
           insurance_likelihood: diagnosisResult.insuranceLikelihood,
           recommended_plan: diagnosisResult.recommendedPlan,
-          status: 'completed',
+          status: pdfUrl ? 'completed' : 'pdf_failed',
         };
 
         if (pdfUrl) {

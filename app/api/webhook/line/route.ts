@@ -182,6 +182,23 @@ export async function POST(request: NextRequest) {
                 text: 'AIによる解析がまだ完了していません。\n\n約15〜30秒後にもう一度合言葉を送信してください。\n\n解析が完了次第、PDFレポートをお送りします。',
               },
             ]);
+          } else if (session.status === 'pdf_failed' || session.status === 'completed') {
+            // 解析は完了しているがPDFが生成できていない（再発行が必要）
+            await sendLineMessage(replyToken, [
+              {
+                type: 'text',
+                text:
+                  '申し訳ございません。\nPDFレポートの生成に失敗しました。\n\nこのままお返事いただければ、担当者よりPDFを直接お送りいたします。\n\nまたはお電話 0120-410-654 までご連絡ください。',
+              },
+            ]);
+          } else if (session.status === 'error') {
+            await sendLineMessage(replyToken, [
+              {
+                type: 'text',
+                text:
+                  'AI診断中にエラーが発生しました。\n\nお手数ですが、もう一度診断をやり直してください。\n\nご不便をおかけし申し訳ございません。',
+              },
+            ]);
           } else {
             await sendLineMessage(replyToken, [
               {
