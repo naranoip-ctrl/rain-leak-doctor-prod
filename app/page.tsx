@@ -1038,16 +1038,17 @@ export default function Home() {
             href={LINE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-[7] flex items-center justify-center gap-2 h-12 bg-line text-white font-bold rounded-lg text-sm shadow-md"
+            className="flex-[6] flex items-center justify-center gap-1.5 h-12 bg-line text-white font-bold rounded-lg text-sm shadow-md"
           >
             <MessageCircle className="h-4 w-4" />
             LINEで匿名相談
           </a>
           <Link
             href="/diagnosis"
-            className="flex-[3] flex items-center justify-center h-12 bg-slate-200 text-slate-700 font-bold rounded-lg text-sm shadow-md"
+            className="flex-[4] flex items-center justify-center gap-1 h-12 bg-slate-100 text-slate-700 font-bold rounded-lg text-xs shadow-md border border-slate-300"
           >
-            <Camera className="h-4 w-4" />
+            <Camera className="h-3.5 w-3.5" />
+            写真でAI診断
           </Link>
         </div>
       </div>

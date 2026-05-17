@@ -11,8 +11,8 @@ const start = performance.now();
 import { PDFDocument, rgb } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 
-const FONT_REG = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/bizudpgothic/BIZUDPGothic-Regular.ttf';
-const FONT_BOLD = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/bizudpgothic/BIZUDPGothic-Bold.ttf';
+const FONT_REG = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/ibmplexsansjp/IBMPlexSansJP-Medium.ttf';
+const FONT_BOLD = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/ibmplexsansjp/IBMPlexSansJP-Bold.ttf';
 
 async function timed(label, fn) {
   const t0 = performance.now();

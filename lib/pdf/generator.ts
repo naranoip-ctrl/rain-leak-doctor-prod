@@ -22,11 +22,11 @@ interface PDFData {
   imageFindings?: string;
 }
 
-// BIZ UDPGothic（静的TTF）。Regular + Bold が個別ファイルで提供されており、
-// pdf-libのTTFサブセッターが堅牢に動作する。UD（Universal Design）フォントなので
-// ビジネス文書の可読性も高い。
-const FONT_URL_REGULAR = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/bizudpgothic/BIZUDPGothic-Regular.ttf';
-const FONT_URL_BOLD = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/bizudpgothic/BIZUDPGothic-Bold.ttf';
+// IBM Plex Sans JP（静的TTF）。
+// 本文には Medium を使い（Regular は線が細すぎて可読性が低いため）、強調には Bold を使う。
+// ビジネス向けのクリーンな字形でレポート用途に最適。
+const FONT_URL_REGULAR = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/ibmplexsansjp/IBMPlexSansJP-Medium.ttf';
+const FONT_URL_BOLD = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/ibmplexsansjp/IBMPlexSansJP-Bold.ttf';
 const FONT_FETCH_TIMEOUT_MS = 25_000;
 
 let cachedRegularFont: ArrayBuffer | null = null;
@@ -96,6 +96,7 @@ function wrapText(text: string, font: any, fontSize: number, maxWidth: number): 
 }
 
 // カラーパレット
+// 読みやすさ重視で本文系を濃くした（細い線でも視認性を確保）
 const COLORS = {
   primary: rgb(0.082, 0.306, 0.557),
   primaryLight: rgb(0.145, 0.388, 0.922),
@@ -103,10 +104,10 @@ const COLORS = {
   success: rgb(0.133, 0.616, 0.376),
   warning: rgb(0.918, 0.702, 0.078),
   danger: rgb(0.863, 0.204, 0.204),
-  black: rgb(0.1, 0.1, 0.1),
-  darkGray: rgb(0.25, 0.25, 0.25),
-  gray: rgb(0.45, 0.45, 0.45),
-  lightGray: rgb(0.75, 0.75, 0.75),
+  black: rgb(0.05, 0.05, 0.05),
+  darkGray: rgb(0.12, 0.12, 0.12),
+  gray: rgb(0.30, 0.30, 0.30),
+  lightGray: rgb(0.65, 0.65, 0.65),
   bgGray: rgb(0.95, 0.95, 0.95),
   white: rgb(1, 1, 1),
   headerBg: rgb(0.082, 0.306, 0.557),
