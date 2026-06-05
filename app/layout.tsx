@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Script from 'next/script';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { Analytics } from '@vercel/analytics/next';
+import { AttributionTracker } from '@/components/AttributionTracker';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased">
         {children}
+        <AttributionTracker />
         <Analytics />
         {isProd && (
           <>

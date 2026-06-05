@@ -11,10 +11,11 @@
  */
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ImageUpload } from '@/components/ImageUpload';
+import { trackFormStart, trackFormSubmit, trackLineClick } from '@/lib/analytics';
 
 type DiagnosisStep = 'form' | 'uploading' | 'result';
 
@@ -41,6 +42,14 @@ export default function DiagnosisPage() {
 
   // 解析完了タイマー
   const [analysisComplete, setAnalysisComplete] = useState(false);
+
+  // 計測: フォーム初回操作（form_start）をセッション内で1回だけ発火させるためのフラグ
+  const formStarted = useRef(false);
+  const handleFirstInteraction = () => {
+    if (formStarted.current) return;
+    formStarted.current = true;
+    trackFormStart();
+  };
 
   // 結果画面に遷移してから30秒後にローディングを完了メッセージに切り替え
   useEffect(() => {
@@ -132,6 +141,11 @@ export default function DiagnosisPage() {
       setSessionId(diagResult.sessionId);
       setAnalysisComplete(false); // タイマーリセット
       setStep('result');
+
+      // 計測: 診断送信成功（form_submit）。UTM/gclid は trackEvent 側で自動付与。
+      trackFormSubmit({ building_age: customerBuildingAge });
+      // TODO(Pass 3): 「希望（一次判定/現地点検/見積確認）」フィールド新設後、
+      //   現地点検が選択された送信では trackInspectionRequest() も発火させる。
     } catch (err: any) {
       console.error('Diagnosis error:', err);
       setError(err.message || 'エラーが発生しました。もう一度お試しください。');
@@ -259,6 +273,7 @@ export default function DiagnosisPage() {
                 href="https://lin.ee/LTMUhxy"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackLineClick('diagnosis_result')}
                 className="inline-flex items-center justify-center bg-[#06C755] text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#05b34d] transition-colors shadow-lg w-full"
               >
                 <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="currentColor">
@@ -337,7 +352,7 @@ export default function DiagnosisPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} onFocus={handleFirstInteraction} className="space-y-6">
           {/* お名前 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

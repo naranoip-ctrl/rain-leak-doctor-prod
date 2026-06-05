@@ -13,6 +13,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { trackLineClick } from '@/lib/analytics';
 
 interface DiagnosisSession {
   id: string;
@@ -183,6 +184,7 @@ export default function ResultPage() {
               href="https://lin.ee/LTMUhxy"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackLineClick('result_page')}
               className="inline-block bg-green-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors"
             >
               LINE公式アカウントを開く

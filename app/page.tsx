@@ -8,6 +8,7 @@ import {
   Twitter, Instagram, Youtube, QrCode, AlertTriangle, TrendingDown,
   FileText, Umbrella, Award, ChevronRight
 } from 'lucide-react';
+import { trackLineClick, trackCallClick, trackReportPurchaseClick } from '@/lib/analytics';
 
 /* ─── ローカル画像パス ─── */
 const DROCO_ICON_URL = "/images/droco-icon.jpg";
@@ -119,7 +120,7 @@ export default function Home() {
             </button>
 
             <div className="hidden md:flex gap-3">
-              <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-5 py-2 rounded-md text-sm font-bold bg-line text-white hover:bg-line-dark shadow-lg shadow-line/30 border-none transition-all">
+              <a href={LINE_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackLineClick('header')} className="inline-flex items-center px-5 py-2 rounded-md text-sm font-bold bg-line text-white hover:bg-line-dark shadow-lg shadow-line/30 border-none transition-all">
                 <MessageCircle className="h-4 w-4 mr-2" />
                 LINEで相談
               </a>
@@ -150,7 +151,7 @@ export default function Home() {
                 })}
               </nav>
               <div className="mt-auto space-y-4">
-                <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full px-6 py-3 rounded-md bg-line text-white font-bold text-lg hover:bg-line-dark transition-colors">
+                <a href={LINE_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackLineClick('mobile_menu')} className="flex items-center justify-center w-full px-6 py-3 rounded-md bg-line text-white font-bold text-lg hover:bg-line-dark transition-colors">
                   <MessageCircle className="h-5 w-5 mr-2" /> LINEで匿名相談・名前不要
                 </a>
                 <Link href="/diagnosis" className="flex items-center justify-center w-full px-6 py-3 rounded-md border-2 border-slate-300 text-slate-700 font-bold text-base hover:bg-slate-50 transition-colors">
@@ -210,6 +211,7 @@ export default function Home() {
                   href={LINE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackLineClick('hero_aux')}
                   className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white/90 border border-white/30 hover:border-white/70 hover:bg-white/5 rounded-full transition-colors"
                 >
                   <MessageCircle className="h-4 w-4" />
@@ -738,7 +740,7 @@ export default function Home() {
                   24時間365日、自動応答でご質問にお答えします。
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
-                  <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="px-6 py-3 bg-white text-line rounded-md font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center gap-2">
+                  <a href={LINE_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackLineClick('line_section')} className="px-6 py-3 bg-white text-line rounded-md font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center gap-2">
                     <QrCode className="w-5 h-5" />
                     友だち追加
                   </a>
@@ -831,7 +833,7 @@ export default function Home() {
           <p className="mt-4 text-sm text-white/60">無料・登録不要・写真3枚でOK</p>
 
           <div className="mt-6 flex justify-center">
-            <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white/90 border border-white/30 hover:border-white/70 hover:bg-white/5 rounded-full transition-colors">
+            <a href={LINE_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackLineClick('final_cta_aux')} className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white/90 border border-white/30 hover:border-white/70 hover:bg-white/5 rounded-full transition-colors">
               <MessageCircle className="h-4 w-4" /> お急ぎの方はLINEで相談（匿名OK）
             </a>
           </div>
@@ -880,7 +882,7 @@ export default function Home() {
                 <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 目視調査＋湿度計測</li>
                 <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 簡易報告書（写真付）</li>
               </ul>
-              <a href="tel:0120-410-654" className="block w-full text-center py-3 rounded-md bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">
+              <a href="tel:0120-410-654" onClick={() => { trackReportPurchaseClick('light_genchi'); trackCallClick('pricing_light'); }} className="block w-full text-center py-3 rounded-md bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">
                 予約する
               </a>
             </div>
@@ -898,7 +900,7 @@ export default function Home() {
                 <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 保険申請用報告書</li>
                 <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> ドローン（必要時）</li>
               </ul>
-              <a href="tel:0120-410-654" className="block w-full text-center py-3 rounded-md bg-accent text-primary hover:bg-accent/90 font-bold h-12 leading-6 transition-colors">
+              <a href="tel:0120-410-654" onClick={() => { trackReportPurchaseClick('standard'); trackCallClick('pricing_standard'); }} className="block w-full text-center py-3 rounded-md bg-accent text-primary hover:bg-accent/90 font-bold h-12 leading-6 transition-colors">
                 予約する
               </a>
             </div>
@@ -912,7 +914,7 @@ export default function Home() {
                 <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> シール打ち替え/防水</li>
                 <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 30日間無料再訪保証</li>
               </ul>
-              <a href="tel:0120-410-654" className="block w-full text-center py-3 rounded-md bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">
+              <a href="tel:0120-410-654" onClick={() => { trackReportPurchaseClick('ichiji_shisui'); trackCallClick('pricing_repair'); }} className="block w-full text-center py-3 rounded-md bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">
                 今すぐ電話
               </a>
             </div>
@@ -952,7 +954,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Phone className="h-4 w-4 flex-shrink-0" />
-                  <a href="tel:0120-410-654" className="hover:text-white transition-colors">0120-410-654</a>
+                  <a href="tel:0120-410-654" onClick={() => trackCallClick('footer')} className="hover:text-white transition-colors">0120-410-654</a>
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4 flex-shrink-0" />
@@ -1000,6 +1002,7 @@ export default function Home() {
             href={LINE_URL}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackLineClick('floating_mobile')}
             className="flex-[6] flex items-center justify-center gap-1.5 h-12 bg-line text-white font-bold rounded-lg text-sm shadow-md"
           >
             <MessageCircle className="h-4 w-4" />
@@ -1022,6 +1025,7 @@ export default function Home() {
             href={LINE_URL}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackLineClick('floating_desktop')}
             className="flex items-center gap-2 px-6 py-3 bg-line text-white font-bold rounded-full shadow-xl hover:bg-line-dark transition-all hover:-translate-y-1"
           >
             <MessageCircle className="h-5 w-5" />
