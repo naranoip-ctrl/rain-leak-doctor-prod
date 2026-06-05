@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Phone, Mail, MessageCircle, CheckCircle, Clock, Shield, Camera,
   Thermometer, Anchor, Menu, X, ArrowRight, Star, MapPin, Facebook,
   Twitter, Instagram, Youtube, QrCode, AlertTriangle, TrendingDown,
-  FileText, Umbrella, Users, Award, ChevronRight
+  FileText, Umbrella, Award, ChevronRight
 } from 'lucide-react';
 
 /* ─── ローカル画像パス ─── */
@@ -25,37 +25,6 @@ const CASE2_IMG = "/images/case2.jpg";
 const TECH1_IMG = "/images/tech1.jpg";
 const TECH2_IMG = "/images/tech2.jpg";
 const TECH3_IMG = "/images/tech3.jpg";
-
-/* ─── カウントアップフック ─── */
-function useCountUp({ end, duration = 2000, decimals = 0 }: { end: number; duration?: number; decimals?: number }) {
-  const [value, setValue] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const hasAnimated = useRef(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          const startTime = Date.now();
-          const animate = () => {
-            const elapsed = Date.now() - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            setValue(parseFloat((eased * end).toFixed(decimals)));
-            if (progress < 1) requestAnimationFrame(animate);
-          };
-          requestAnimationFrame(animate);
-        }
-      },
-      { threshold: 0.3 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [end, duration, decimals]);
-
-  return { ref, displayValue: decimals > 0 ? value.toFixed(decimals) : value };
-}
 
 /* ─── 中間CTAコンポーネント ─── */
 function MidCTA({ text, subtext }: { text: string; subtext?: string }) {
@@ -211,41 +180,41 @@ export default function Home() {
                 <span className="text-warning-light text-xs md:text-sm font-bold tracking-wide">{getSeasonalMessage()}</span>
               </div>
 
-              {/* 改善キャッチコピー：感情訴求型 */}
+              {/* 見出し：AIを主役から降格し「雨漏りの次の一手」を約束 */}
               <h1 className="text-3xl md:text-5xl lg:text-[3.4rem] font-black text-white leading-[1.2] tracking-tight">
-                その雨漏り、放置すると<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cta to-cta-light">修理費が3倍</span>に。
+                写真で、雨漏りの<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cta to-cta-light">危険度と次の一手</span>を整理。
               </h1>
 
               <p className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
-                写真3枚で<strong className="text-white">AIが即座に診断</strong>。<br />
-                <span className="text-accent font-bold">費用の目安</span>と<span className="text-accent font-bold">火災保険の適用可能性</span>が<br className="hidden md:block" />
-                <span className="text-cta font-black text-2xl mx-1">最短3分</span>で分かります。
+                AIと職人目線で、写真から分かる範囲を<strong className="text-white">一次判定</strong>。<br className="hidden md:block" />
+                費用の目安と確認すべき点を整理します。<br className="hidden md:block" />
+                <span className="text-slate-400 text-base">原因の断定には現地確認が必要です。</span>
               </p>
 
-              {/* メインCTA：LINEで匿名相談（名前不要） */}
+              {/* メインCTA（単一）：写真で雨漏りの危険度を見る */}
               <div className="flex flex-col gap-3 pt-2 items-center lg:items-start">
+                <Link
+                  href="/diagnosis"
+                  className="relative inline-flex items-center justify-center h-16 px-10 bg-cta text-white hover:bg-cta-dark text-xl font-black rounded-full shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1"
+                >
+                  <Camera className="h-6 w-6 mr-2" />
+                  <span>写真で雨漏りの危険度を見る</span>
+                </Link>
+                <p className="text-slate-400 text-sm flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-accent" />
+                  無料・登録不要・写真3枚でOK
+                </p>
+                {/* 補助導線：お急ぎの方（LINE・匿名OK） */}
                 <a
                   href={LINE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="relative inline-flex items-center justify-center h-16 px-10 bg-line text-white hover:bg-line-dark text-xl font-black rounded-full shadow-[0_0_25px_rgba(6,199,85,0.45)] hover:shadow-[0_0_40px_rgba(6,199,85,0.65)] transition-all transform hover:-translate-y-1 overflow-hidden"
-                >
-                  <MessageCircle className="h-6 w-6 mr-2 relative z-10" />
-                  <span className="relative z-10">LINEで匿名相談・名前不要</span>
-                </a>
-                <p className="text-slate-400 text-sm flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-accent" />
-                  名前・住所不要・写真ナシでも相談OK
-                </p>
-                {/* 副CTA：写真診断は格下げ */}
-                <Link
-                  href="/diagnosis"
                   className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white/90 border border-white/30 hover:border-white/70 hover:bg-white/5 rounded-full transition-colors"
                 >
-                  <Camera className="h-4 w-4" />
-                  写真3枚でAI診断を試す
-                </Link>
+                  <MessageCircle className="h-4 w-4" />
+                  お急ぎの方はLINEで相談（匿名OK）
+                </a>
               </div>
 
               {/* 信頼バッジ強化 */}
@@ -295,7 +264,7 @@ export default function Home() {
                     <div className="bg-green-50 rounded-lg p-3 border border-green-100">
                       <p className="text-xs text-slate-500 mb-1">火災保険</p>
                       <p className="text-lg font-bold text-green-700 flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4" /> 適用可能性あり
+                        <CheckCircle className="h-4 w-4" /> 確認の余地あり
                       </p>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
@@ -360,12 +329,12 @@ export default function Home() {
           {/* 解決宣言 */}
           <div className="bg-gradient-to-r from-primary to-primary-dark rounded-2xl p-8 md:p-12 text-white text-center max-w-4xl mx-auto">
             <h3 className="text-2xl md:text-3xl font-black mb-4">
-              AI雨漏りドクターなら、<br className="md:hidden" />すべて解決できます。
+              AI雨漏りドクターが、<br className="md:hidden" />次の一手まで整理します。
             </h3>
             <div className="grid md:grid-cols-3 gap-6 mt-8">
               {[
-                { icon: <Camera className="h-6 w-6" />, title: "写真3枚で即診断", desc: "費用の目安が3分で分かる" },
-                { icon: <Umbrella className="h-6 w-6" />, title: "火災保険も自動判定", desc: "適用可能性をAIがチェック" },
+                { icon: <Camera className="h-6 w-6" />, title: "写真3枚で一次判定", desc: "費用の目安と確認点を整理" },
+                { icon: <Umbrella className="h-6 w-6" />, title: "保険の確認余地も整理", desc: "風災等の可能性を整理（保証なし）" },
                 { icon: <Shield className="h-6 w-6" />, title: "必要な工事だけ提案", desc: "過剰工事は一切しません" },
               ].map((item, i) => (
                 <div key={i} className="flex flex-col items-center gap-2">
@@ -449,7 +418,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════ Fire Insurance Section（火災保険訴求強化） ═══════════ */}
+      {/* ═══════════ Fire Insurance Section（火災保険「確認の余地」を整理・断定/0円訴求は排除） ═══════════ */}
       <section className="py-20 bg-white">
         <div className="container">
           <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 md:p-12 border border-green-100 max-w-5xl mx-auto">
@@ -457,23 +426,17 @@ export default function Home() {
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 border border-green-200 mb-4">
                   <Umbrella className="h-4 w-4 text-green-700" />
-                  <span className="text-green-700 text-sm font-bold">知らないと損！</span>
+                  <span className="text-green-700 text-sm font-bold">保険の「確認の余地」</span>
                 </div>
                 <h2 className="text-2xl md:text-3xl font-black text-primary mb-4">
-                  火災保険で<span className="text-green-600">実質0円</span>に<br />なるケースも。
+                  火災保険を<span className="text-green-600">確認する余地</span>が<br />あるケースも。
                 </h2>
                 <p className="text-slate-600 leading-relaxed mb-4">
-                  雨漏り修理は、台風・強風・雹（ひょう）などの自然災害が原因の場合、<strong className="text-primary">火災保険の「風災補償」</strong>で修理費用が全額カバーされることがあります。
+                  台風・強風・雹（ひょう）・飛来物などの自然災害や突発的な事故が原因の場合、<strong className="text-primary">火災保険の「風災補償」</strong>などを確認する余地があります。
                 </p>
                 <p className="text-slate-600 leading-relaxed mb-6">
-                  当社のAI診断では、損傷の状態から<strong className="text-primary">火災保険の適用可能性を自動判定</strong>。保険申請に必要な報告書の作成までサポートします。
+                  写真から損傷の状態を整理し、<strong className="text-primary">加入中の保険会社へ確認するための整理資料</strong>の作成までサポートします。<strong className="text-primary">保険適用を保証するものではありません</strong>（適用可否は保険会社の判断になります）。
                 </p>
-                <div className="bg-white rounded-lg p-4 border border-green-100">
-                  <p className="text-sm text-slate-500 mb-1">他社の現地調査費用</p>
-                  <p className="text-lg font-bold text-slate-400 line-through">平均 2〜5万円</p>
-                  <p className="text-sm text-slate-500 mt-2 mb-1">当社のAI診断</p>
-                  <p className="text-2xl font-black text-cta">0円 <span className="text-sm font-normal text-slate-500">（完全無料）</span></p>
-                </div>
               </div>
               <div className="space-y-4">
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-green-100">
@@ -481,27 +444,27 @@ export default function Home() {
                     <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                       <span className="text-green-700 font-bold text-lg">1</span>
                     </div>
-                    <h4 className="font-bold text-primary">AI診断で保険適用を判定</h4>
+                    <h4 className="font-bold text-primary">損傷の状態を整理</h4>
                   </div>
-                  <p className="text-sm text-slate-600 pl-[52px]">写真から損傷原因をAIが分析し、風災適用の可能性を判定します。</p>
+                  <p className="text-sm text-slate-600 pl-[52px]">写真から、風災など保険確認の余地がある損傷パターンかを整理します。</p>
                 </div>
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-green-100">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                       <span className="text-green-700 font-bold text-lg">2</span>
                     </div>
-                    <h4 className="font-bold text-primary">保険申請用の報告書を作成</h4>
+                    <h4 className="font-bold text-primary">確認用の整理資料を作成</h4>
                   </div>
-                  <p className="text-sm text-slate-600 pl-[52px]">現地調査後、保険会社に提出する詳細な報告書を作成します。</p>
+                  <p className="text-sm text-slate-600 pl-[52px]">現地確認後、保険会社へ相談・確認するための資料作成をサポートします。</p>
                 </div>
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-green-100">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                       <span className="text-green-700 font-bold text-lg">3</span>
                     </div>
-                    <h4 className="font-bold text-primary">保険適用で実質0円に</h4>
+                    <h4 className="font-bold text-primary">適用可否は保険会社の判断</h4>
                   </div>
-                  <p className="text-sm text-slate-600 pl-[52px]">風災認定されれば、修理費用の全額が保険でカバーされます。</p>
+                  <p className="text-sm text-slate-600 pl-[52px]">適用されるかは保険会社が判断します。当社は保険適用を保証しません。</p>
                 </div>
               </div>
             </div>
@@ -581,7 +544,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
                 <img src={CASE1_IMG} alt="スレート屋根の割れ修繕" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute bottom-4 left-4 z-20 text-white">
-                  <span className="inline-block bg-green-500 text-white px-2 py-0.5 rounded text-xs font-bold mb-2">🎉 風災適用・全額カバー</span>
+                  <span className="inline-block bg-green-500 text-white px-2 py-0.5 rounded text-xs font-bold mb-2">火災保険の申請をサポートした事例</span>
                   <h3 className="text-xl font-bold">スレート屋根の割れ修繕</h3>
                   <p className="text-sm opacity-90">大阪狭山市 / 費用 ¥58,000</p>
                 </div>
@@ -599,7 +562,7 @@ export default function Home() {
                 </div>
                 <div className="bg-green-50 rounded-lg p-3 border border-green-100 mb-3">
                   <p className="text-sm text-green-700 font-bold flex items-center gap-2">
-                    <Umbrella className="h-4 w-4" /> 火災保険適用で実質負担 ¥0
+                    <Umbrella className="h-4 w-4" /> 火災保険（風災補償）の申請をサポート
                   </p>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-primary bg-primary/5 p-3 rounded-lg">
@@ -614,7 +577,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
                 <img src={CASE2_IMG} alt="外壁シーリング打替え" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute bottom-4 left-4 z-20 text-white">
-                  <span className="inline-block bg-green-500 text-white px-2 py-0.5 rounded text-xs font-bold mb-2">🎉 全額保険適用</span>
+                  <span className="inline-block bg-green-500 text-white px-2 py-0.5 rounded text-xs font-bold mb-2">火災保険の申請をサポートした事例</span>
                   <h3 className="text-xl font-bold">外壁シーリング打替え</h3>
                   <p className="text-sm opacity-90">尼崎市 / 費用 ¥98,000</p>
                 </div>
@@ -632,7 +595,7 @@ export default function Home() {
                 </div>
                 <div className="bg-green-50 rounded-lg p-3 border border-green-100 mb-3">
                   <p className="text-sm text-green-700 font-bold flex items-center gap-2">
-                    <Umbrella className="h-4 w-4" /> 火災保険適用で実質負担 ¥0
+                    <Umbrella className="h-4 w-4" /> 火災保険（風災補償）の申請をサポート
                   </p>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-primary bg-primary/5 p-3 rounded-lg">
@@ -685,7 +648,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { name: "M様", area: "大阪市旭区 / 50代女性", txt: "他社では屋根全体の葺き替えを提案されましたが、AI診断で部分修繕で済むと分かり、火災保険で全額カバーできました。スマホで写真を送るだけで本当に結果が来て驚きました。", highlight: "AI診断で部分修繕で済むと分かり" },
+              { name: "M様", area: "大阪市旭区 / 50代女性", txt: "他社では屋根全体の葺き替えを提案されましたが、一次判定で部分修繕の可能性が見え、火災保険の申請についても相談できました。スマホで写真を送るだけで結果が届き、助かりました。", highlight: "AI診断で部分修繕で済むと分かり" },
               { name: "T様", area: "大阪狭山市 / 40代男性", txt: "48時間以内に現地診断に来ていただき、72時間で一次止水を完了。AI診断の概算と実際の費用がほぼ一致していて、信頼できると感じました。他社の見積もりと比較する材料にもなりました。", highlight: "AI診断の概算と実際の費用がほぼ一致" },
               { name: "K様", area: "尼崎市 / 60代女性", txt: "ロープアクセスで足場不要だったので、近所に迷惑をかけずに済みました。最初は高額請求が心配でしたが、AI診断で事前に費用が分かっていたので安心して依頼できました。", highlight: "AI診断で事前に費用が分かっていたので安心" }
             ].map((item, i) => (
@@ -839,39 +802,38 @@ export default function Home() {
             <span className="text-sm font-bold text-white/80">「高すぎる見積もり」に、もう悩まない。</span>
           </div>
           <h2 className="text-3xl md:text-5xl font-black mb-6">
-            写真3枚でOK。<br />今すぐAIが概算します。
+            写真3枚でOK。<br />雨漏りの危険度と次の一手を整理します。
           </h2>
           <p className="text-xl md:text-2xl mb-8 opacity-90 font-medium">
-            スマホで撮って送るだけ。<br className="md:hidden" />最短3分で費用の目安と火災保険の適用可能性が分かります。
+            スマホで撮って送るだけ。<br className="md:hidden" />最短3分で費用の目安と確認すべき点が分かります。
           </p>
 
-          {/* 社会的証明 */}
+          {/* 社会的証明：実証できる数字のみ掲載。未確定の実績件数・評価は出さない。
+              TODO(実績数値): 実証可能な「累計件数」「Google評価」が確定したら、ここに正確な値で掲載する（盛らない・撤去優先）。 */}
           <div className="flex flex-wrap items-center justify-center gap-6 mb-10 text-sm">
             <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
-              <Users className="h-4 w-4 text-accent" />
-              <span>累計 <strong>1,247件</strong> の診断実績</span>
+              <Shield className="h-4 w-4 text-accent" />
+              <span>建設業許可 取得済</span>
             </div>
             <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <span>Google評価 <strong>4.8</strong></span>
+              <MapPin className="h-4 w-4 text-accent" />
+              <span>関西エリア対応</span>
             </div>
           </div>
 
-          <a
-            href={LINE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative inline-flex items-center justify-center h-16 px-12 text-xl font-black bg-line text-white hover:bg-line-dark shadow-[0_0_30px_rgba(6,199,85,0.45)] rounded-full transition-all transform hover:-translate-y-1 overflow-hidden"
+          <Link
+            href="/diagnosis"
+            className="relative inline-flex items-center justify-center h-16 px-12 text-xl font-black bg-cta text-white hover:bg-cta-dark shadow-xl hover:shadow-2xl rounded-full transition-all transform hover:-translate-y-1"
           >
-            <MessageCircle className="h-6 w-6 mr-2 relative z-10" />
-            <span className="relative z-10">LINEで匿名相談・名前不要</span>
-          </a>
-          <p className="mt-4 text-sm text-white/60">名前・住所不要・写真ナシでも相談OK</p>
+            <Camera className="h-6 w-6 mr-2" />
+            <span>写真で雨漏りの危険度を見る</span>
+          </Link>
+          <p className="mt-4 text-sm text-white/60">無料・登録不要・写真3枚でOK</p>
 
           <div className="mt-6 flex justify-center">
-            <Link href="/diagnosis" className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white/90 border border-white/30 hover:border-white/70 hover:bg-white/5 rounded-full transition-colors">
-              <Camera className="h-4 w-4" /> 写真3枚でAI診断を試す
-            </Link>
+            <a href={LINE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white/90 border border-white/30 hover:border-white/70 hover:bg-white/5 rounded-full transition-colors">
+              <MessageCircle className="h-4 w-4" /> お急ぎの方はLINEで相談（匿名OK）
+            </a>
           </div>
         </div>
       </section>
@@ -1006,7 +968,7 @@ export default function Home() {
               </ul>
               <div className="mt-6">
                 <p className="text-xs text-white/60 mb-2">建設業許可</p>
-                <p className="text-sm text-white/80">（般ー6）笖161998号</p>
+                <p className="text-sm text-white/80">大阪府知事許可（般-6）161998号</p>
               </div>
             </div>
           </div>
@@ -1016,7 +978,7 @@ export default function Home() {
           <div className="container py-6">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-4">
               <div className="flex items-center gap-2">
-                <img src={DROCO_ICON_URL} alt="ドロコ" className="w-6 h-6 rounded-sm object-contain" />
+                <img src={DROCO_ICON_URL} alt="株式会社ドローン工務店" className="w-6 h-6 rounded-sm object-contain" />
                 <span className="text-xs text-white/50">運営：株式会社ドローン工務店</span>
               </div>
               <div className="flex items-center gap-2">
@@ -1071,33 +1033,25 @@ export default function Home() {
   );
 }
 
-/* ─── Stats Sub-component ─── */
+/* ─── Stats Sub-component ───
+   実証できない数値（実績件数・満足度・評価・提携社数）は出さない方針（撤去優先）。
+   TODO(実績数値): 実証可能な「累計件数」「Google評価」等が確定したら、ここに正確な値で掲載する。 */
 function StatsSection() {
-  const stat1 = useCountUp({ end: 1247, duration: 2000 });
-  const stat2 = useCountUp({ end: 3, duration: 2000 });
-  const stat3 = useCountUp({ end: 12, duration: 2000 });
-  const stat4 = useCountUp({ end: 4.8, duration: 2000, decimals: 1 });
+  const items = [
+    { val: "関西エリア", label: "対応（大阪・京都・兵庫ほか）" },
+    { val: "写真3枚", label: "一次判定に必要なもの" },
+    { val: "建設業許可", label: "取得済（株式会社ドローン工務店）" },
+    { val: "現地確認", label: "原因の断定は現地で実施" },
+  ];
 
   return (
     <section className="relative -mt-10 z-20 container px-4">
       <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-8 md:p-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-slate-100">
-          {[
-            { ref: stat1.ref, val: stat1.displayValue, unit: "件", label: "AI診断 累計" },
-            { ref: stat2.ref, val: stat2.displayValue, unit: "分", label: "最短診断時間" },
-            { ref: stat3.ref, val: stat3.displayValue, unit: "社", label: "提携職人" },
-            { ref: stat4.ref, val: stat4.displayValue, unit: "", label: "Google評価" }
-          ].map((item, i) => (
-            <div key={i} ref={item.ref} className="text-center px-2">
-              <div className="text-3xl md:text-4xl font-black text-primary">
-                {item.val}<span className="text-lg font-bold ml-1">{item.unit}</span>
-              </div>
-              <div className="text-xs md:text-sm font-bold text-slate-500 mt-1 uppercase tracking-wider">{item.label}</div>
-              {i === 3 && (
-                <div className="flex items-center justify-center gap-0.5 mt-1">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-3 w-3 text-yellow-400 fill-current" />)}
-                </div>
-              )}
+          {items.map((item, i) => (
+            <div key={i} className="text-center px-2">
+              <div className="text-2xl md:text-3xl font-black text-primary">{item.val}</div>
+              <div className="text-xs md:text-sm font-bold text-slate-500 mt-1">{item.label}</div>
             </div>
           ))}
         </div>
