@@ -32,8 +32,7 @@ const PREFECTURES = [
   '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県',
 ];
 
-// third-place-ai.jp（他社見積チェック）への導線。
-// TODO(URL): third-place の最終的な見積チェック入口URLが確定したら差し替える。
+// third-place-ai.jp（他社見積チェック）への導線。URLは確定済み。
 const THIRD_PLACE_QUOTE_URL = 'https://third-place-ai.jp/';
 
 export default function DiagnosisPage() {

@@ -873,12 +873,21 @@ export default function Home() {
               <ul className="space-y-3 text-sm text-slate-300 mb-6">
                 <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 応急処置（72h以内）</li>
                 <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> シール打ち替え/防水</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 30日間無料再訪保証</li>
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 応急処置のため保証対象外（本修繕で再漏水1年保証）</li>
               </ul>
               <a href="tel:0120-410-654" onClick={() => { trackReportPurchaseClick('ichiji_shisui'); trackCallClick('pricing_repair'); }} className="block w-full text-center py-3 rounded-md bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">
                 今すぐ電話
               </a>
             </div>
+          </div>
+
+          {/* 保証区分（応急=対象外 / 本修繕=再漏水1年 / 原因未特定=対象外） */}
+          <div className="max-w-2xl mx-auto mt-10 text-center">
+            <p className="text-slate-400 text-xs leading-relaxed">
+              <span className="font-bold text-slate-300">保証について：</span>
+              応急処置（一次止水）は保証対象外です。本修繕（根本修繕）は再漏水について<strong className="text-slate-300">1年保証</strong>。
+              現地確認で原因が特定できない場合は保証対象外となります。
+            </p>
           </div>
         </div>
       </section>
