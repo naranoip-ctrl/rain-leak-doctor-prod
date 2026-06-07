@@ -708,9 +708,10 @@ export default function Home() {
                     お客様が「本当にこの金額が適正なのか」と不安を抱えたまま契約するのは、あってはならないことです。
                   </p>
                   <p className="text-slate-700 leading-loose text-sm md:text-base mt-4 relative z-10">
-                    だからこそ、<strong className="text-primary">AIを使って適正価格を可視化</strong>し、
-                    お客様が損をしない仕組みを作りました。ドローンやサーモグラフィなどの最新技術と、
-                    職人の経験を組み合わせることで、<strong className="text-primary">証拠に基づいた確実な診断</strong>を提供しています。
+                    だからこそ、写真からの一次判定で<strong className="text-primary">費用の目安と確認すべき点を整理</strong>し、
+                    お客様が損をしない仕組みを作りました。ドローンやサーモグラフィなどの技術と
+                    職人の経験を組み合わせ、<strong className="text-primary">根拠の残る現地診断</strong>につなげます
+                    （原因の断定は現地確認で行います）。
                   </p>
                   <p className="text-slate-700 leading-loose text-sm md:text-base mt-4 relative z-10">
                     「必要な工事だけ、適正価格で」。これが私たちの信念です。
@@ -859,8 +860,8 @@ export default function Home() {
               <h3 className="text-white font-bold text-2xl mb-2">AI 3分診断</h3>
               <div className="text-5xl font-black mt-2 mb-4 text-white">¥0</div>
               <ul className="space-y-2 text-sm text-white/90 mb-6 text-left max-w-xs mx-auto">
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 最短3分で結果表示</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 火災保険の適用可能性を判定</li>
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 所要3分ほどで一次判定を表示</li>
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 火災保険の確認の余地を整理</li>
                 <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 概算費用レンジを提示</li>
                 <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 登録不要・完全無料</li>
               </ul>

@@ -343,7 +343,7 @@ export default function DiagnosisPage() {
       <main className="container mx-auto px-4 py-8 max-w-lg">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">AI雨漏り診断</h1>
         <p className="text-gray-600 mb-8">
-          写真を3枚アップロードするだけで、AIが雨漏りの状況を診断します。
+          写真を3枚アップロードするだけで、AIが雨漏りの状況を一次判定します。原因の断定には現地確認が必要です。
         </p>
 
         {error && (

@@ -213,31 +213,38 @@ export default function ResultPage() {
         {/* 診断結果カード（完了時のみ表示） */}
         {!isStillProcessing && (
           <div className="bg-white rounded-lg shadow-md p-8 space-y-6">
-            <h2 className="text-2xl font-bold border-b pb-4">診断概要</h2>
+            <h2 className="text-2xl font-bold border-b pb-4">一次判定の概要</h2>
+
+            {/* 一次判定であることの明示（断定を避ける注記） */}
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-900">
+              これは<strong>写真からの一次判定</strong>です。原因の特定・最終的な費用・保険の適用可否は、
+              <strong>現地確認が必要</strong>です（本ページの内容は確定診断ではありません）。
+            </div>
 
             <div>
-              <h3 className="font-bold text-lg mb-2">重症度スコア</h3>
+              <h3 className="font-bold text-lg mb-2">緊急度の目安</h3>
               <div className="flex items-center space-x-4">
                 <div className="text-4xl font-bold text-blue-600">{session.severity_score}</div>
-                <div className="text-gray-600">/ 10</div>
+                <div className="text-gray-600">/ 10（写真からの目安）</div>
               </div>
             </div>
 
             {!isNotApplicable && (
               <>
                 <div>
-                  <h3 className="font-bold text-lg mb-2">修繕が必要な箇所</h3>
+                  <h3 className="font-bold text-lg mb-2">注目したい箇所（要現地確認）</h3>
                   <p className="text-gray-700">{session.damage_locations}</p>
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg mb-2">損傷の詳細</h3>
+                  <h3 className="font-bold text-lg mb-2">写真から見られる状態</h3>
                   <p className="text-gray-700 whitespace-pre-wrap">{session.damage_description}</p>
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg mb-2">概算修繕費用</h3>
+                  <h3 className="font-bold text-lg mb-2">概算費用レンジ（目安）</h3>
                   <p className="text-2xl font-bold text-blue-600">
                     &yen;{Number(session.estimated_cost_min).toLocaleString()} 〜 &yen;{Number(session.estimated_cost_max).toLocaleString()}
                   </p>
+                  <p className="text-xs text-gray-500 mt-1">現地確認で変わる場合があります。</p>
                 </div>
                 <div>
                   <h3 className="font-bold text-lg mb-2">応急処置の目安費用</h3>
@@ -246,13 +253,14 @@ export default function ResultPage() {
                   </p>
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg mb-2">火災保険適用の可能性</h3>
+                  <h3 className="font-bold text-lg mb-2">火災保険の確認余地</h3>
                   <p className={`text-2xl font-bold ${getInsuranceLikelihoodColor(session.insurance_likelihood)}`}>
                     {getInsuranceLikelihoodText(session.insurance_likelihood)}
                   </p>
+                  <p className="text-xs text-gray-500 mt-1">適用可否は保険会社が判断します。当社は保険適用を保証しません。</p>
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg mb-2">推奨プラン</h3>
+                  <h3 className="font-bold text-lg mb-2">次の一手の目安</h3>
                   <p className="text-gray-700">{session.recommended_plan}</p>
                 </div>
               </>
