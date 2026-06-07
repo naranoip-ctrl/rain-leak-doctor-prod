@@ -27,22 +27,38 @@ export const maxDuration = 60;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { customerName, customerPhone, customerEmail, customerAddress, customerBuildingAge, imageUrls } = body;
+    const {
+      customerName,
+      customerPhone,
+      customerEmail,
+      customerAddress,
+      customerBuildingAge,
+      imageUrls,
+      // 新規項目（任意・匿名可。一次判定の文脈・導線分岐・管理通知に使用）
+      leakSituation,
+      prefecture,
+      hasQuote,
+      requestType,
+    } = body;
 
-    // バリデーション
-    if (!customerName || !customerPhone || !imageUrls || imageUrls.length === 0) {
+    // バリデーション（写真3枚のみ必須。連絡先・属性は任意・匿名可）
+    if (!imageUrls || imageUrls.length === 0) {
       return NextResponse.json(
-        { error: '必須項目が入力されていません。' },
+        { error: '写真がアップロードされていません。' },
         { status: 400 }
       );
     }
 
     if (imageUrls.length !== 3) {
       return NextResponse.json(
-        { error: '画像は3枚アップロードしてください。' },
+        { error: '写真は3枚アップロードしてください。' },
         { status: 400 }
       );
     }
+
+    // 匿名送信に備えた安全な既定値（DBの NOT NULL / PDF・通知の表示崩れを防ぐ）
+    const safeName = (customerName && String(customerName).trim()) || '匿名希望';
+    const safePhone = (customerPhone && String(customerPhone).trim()) || '未入力';
 
     // 1. 4桁の合言葉を即座に生成
     const secretCode = await generateUniqueSecretCode();
@@ -57,8 +73,8 @@ export async function POST(request: NextRequest) {
       .from('diagnosis_sessions')
       .insert({
         secret_code: secretCode,
-        customer_name: customerName,
-        customer_phone: customerPhone,
+        customer_name: safeName,
+        customer_phone: safePhone,
         customer_email: customerEmail || null,
         customer_address: customerAddress || null,
         building_age: customerBuildingAge || null,
@@ -105,7 +121,7 @@ export async function POST(request: NextRequest) {
 
         const tryGenerateAndUpload = async () => {
           const pdfBuffer = await generatePDF({
-            customerName,
+            customerName: safeName,
             diagnosisId: session.id,
             ...diagnosisResult,
             imageUrls,
@@ -173,8 +189,8 @@ export async function POST(request: NextRequest) {
         // 4-5. 顧客情報をcustomersテーブルに自動同期
         try {
           await syncCustomer(bgSupabase, {
-            name: customerName,
-            phone: customerPhone,
+            name: safeName,
+            phone: safePhone,
             email: customerEmail || undefined,
             address: customerAddress || undefined,
             buildingAge: customerBuildingAge || undefined,
@@ -186,11 +202,16 @@ export async function POST(request: NextRequest) {
         // 4-6. 管理者にメール通知を送信
         try {
           await notifyNewDiagnosis({
-            customerName,
-            customerPhone,
+            customerName: safeName,
+            customerPhone: safePhone,
             customerEmail: customerEmail || undefined,
             customerAddress: customerAddress || undefined,
             customerBuildingAge: customerBuildingAge || undefined,
+            // 新規項目（管理通知でリード文脈・希望導線を確認できるように）
+            leakSituation: leakSituation || undefined,
+            prefecture: prefecture || undefined,
+            hasQuote: hasQuote || undefined,
+            requestType: requestType || undefined,
             damageLocations: diagnosisResult.damageLocations,
             estimatedCostMin: diagnosisResult.estimatedCostMin,
             estimatedCostMax: diagnosisResult.estimatedCostMax,

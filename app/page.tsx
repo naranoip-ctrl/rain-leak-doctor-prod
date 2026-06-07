@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import {
   Phone, Mail, MessageCircle, CheckCircle, Clock, Shield, Camera,
-  Thermometer, Anchor, Menu, X, ArrowRight, Star, MapPin, Facebook,
+  Thermometer, Anchor, Menu, X, ArrowRight, MapPin, Facebook,
   Twitter, Instagram, Youtube, QrCode, AlertTriangle, TrendingDown,
   FileText, Umbrella, Award, ChevronRight
 } from 'lucide-react';
@@ -100,8 +100,8 @@ export default function Home() {
           </Link>
 
           <nav className="hidden lg:flex items-center gap-8">
-            {['サービス', '料金', '事例', 'お客様の声'].map((item, i) => {
-              const hrefs = ['#services', '#pricing', '#cases', '#testimonials'];
+            {['サービス', '料金', '事例'].map((item, i) => {
+              const hrefs = ['#services', '#pricing', '#cases'];
               return (
                 <a key={i} href={hrefs[i]} onClick={(e) => smoothScroll(e, hrefs[i])} className={`text-sm font-bold transition-colors relative group ${isScrolled ? 'text-slate-600 hover:text-primary' : 'text-slate-100 hover:text-white'}`}>
                   {item}
@@ -141,8 +141,8 @@ export default function Home() {
                 </button>
               </div>
               <nav className="flex flex-col space-y-6 text-center">
-                {['サービス', '料金', '事例', 'お客様の声'].map((item, i) => {
-                  const hrefs = ['#services', '#pricing', '#cases', '#testimonials'];
+                {['サービス', '料金', '事例'].map((item, i) => {
+                  const hrefs = ['#services', '#pricing', '#cases'];
                   return (
                     <a key={i} href={hrefs[i]} onClick={(e) => smoothScroll(e, hrefs[i])} className="text-xl font-bold text-slate-700 hover:text-primary">
                       {item}
@@ -232,14 +232,10 @@ export default function Home() {
                 ))}
               </div>
 
+              {/* 実証できる加盟情報のみ掲載（Google評価4.8は実証不可のため撤去） */}
               <div className="flex items-center gap-3 justify-center lg:justify-start">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />)}
-                </div>
-                <span className="text-sm text-slate-300">Google評価 <strong className="text-white">4.8</strong></span>
-                <span className="text-slate-500">|</span>
                 <img src={LIXIL_BADGE_URL} alt="LIXILリフォームネット" className="w-5 h-5 rounded-sm object-contain opacity-70" />
-                <span className="text-xs text-slate-400">LIXIL加盟店</span>
+                <span className="text-xs text-slate-400">LIXILリフォームネット加盟店</span>
               </div>
             </div>
 
@@ -640,44 +636,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════ Testimonials ═══════════ */}
-      <section id="testimonials" className="py-24 bg-primary text-white">
-        <div className="container">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-black mb-4">AI診断を使った方の、<span className="text-cta">リアルな声</span></h2>
-            <p className="text-slate-300">実際にご利用いただいたお客様からの声をご紹介します</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { name: "M様", area: "大阪市旭区 / 50代女性", txt: "他社では屋根全体の葺き替えを提案されましたが、一次判定で部分修繕の可能性が見え、火災保険の申請についても相談できました。スマホで写真を送るだけで結果が届き、助かりました。", highlight: "AI診断で部分修繕で済むと分かり" },
-              { name: "T様", area: "大阪狭山市 / 40代男性", txt: "48時間以内に現地診断に来ていただき、72時間で一次止水を完了。AI診断の概算と実際の費用がほぼ一致していて、信頼できると感じました。他社の見積もりと比較する材料にもなりました。", highlight: "AI診断の概算と実際の費用がほぼ一致" },
-              { name: "K様", area: "尼崎市 / 60代女性", txt: "ロープアクセスで足場不要だったので、近所に迷惑をかけずに済みました。最初は高額請求が心配でしたが、AI診断で事前に費用が分かっていたので安心して依頼できました。", highlight: "AI診断で事前に費用が分かっていたので安心" }
-            ].map((item, i) => (
-              <div key={i} className="bg-primary-dark rounded-xl p-6 border border-white/10">
-                <div className="flex items-center gap-1 mb-3">
-                  {[...Array(5)].map((_, j) => <Star key={j} className="h-4 w-4 text-yellow-400 fill-current" />)}
-                </div>
-                <h3 className="text-lg font-bold mb-1">{item.name}</h3>
-                <p className="text-sm text-slate-400 mb-4">{item.area}</p>
-                <p className="text-sm leading-relaxed opacity-90">&ldquo;{item.txt}&rdquo;</p>
-              </div>
-            ))}
-          </div>
-
-          {/* 中間CTA */}
-          <div className="py-8 text-center">
-            <Link
-              href="/diagnosis"
-              className="group inline-flex items-center gap-3 px-8 py-4 bg-cta hover:bg-cta-dark text-white text-lg font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
-            >
-              <Camera className="h-5 w-5" />
-              皆さまのように、まずはAI診断から
-              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Testimonials（お客様の声）は実証不可のため撤去。実証可能な声が確定したら、
+          掲載許諾の取れた実名/イニシャルで再掲する（TODO実績数値と統一）。 */}
 
       {/* ═══════════ Representative Message（代表者メッセージ） ═══════════ */}
       <section className="py-24 bg-white">

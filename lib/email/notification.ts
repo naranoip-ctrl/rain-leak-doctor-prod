@@ -115,6 +115,11 @@ export async function notifyNewDiagnosis(params: {
   customerEmail?: string;
   customerAddress?: string;
   customerBuildingAge?: string;
+  // 新規項目（任意・匿名可。リード文脈と希望導線）
+  leakSituation?: string;
+  prefecture?: string;
+  hasQuote?: string;
+  requestType?: string;
   damageLocations: string;
   estimatedCostMin: number;
   estimatedCostMax: number;
@@ -178,6 +183,30 @@ export async function notifyNewDiagnosis(params: {
           <tr>
             <td style="padding: 8px 12px; background: #f1f5f9; font-weight: bold; border: 1px solid #e2e8f0;">築年数</td>
             <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">${params.customerBuildingAge}</td>
+          </tr>
+          ` : ''}
+          ${params.requestType ? `
+          <tr>
+            <td style="padding: 8px 12px; background: #fef3c7; font-weight: bold; border: 1px solid #e2e8f0;">ご希望</td>
+            <td style="padding: 8px 12px; border: 1px solid #e2e8f0; font-weight: bold;">${params.requestType}</td>
+          </tr>
+          ` : ''}
+          ${params.prefecture ? `
+          <tr>
+            <td style="padding: 8px 12px; background: #f1f5f9; font-weight: bold; border: 1px solid #e2e8f0;">都道府県</td>
+            <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">${params.prefecture}</td>
+          </tr>
+          ` : ''}
+          ${params.hasQuote ? `
+          <tr>
+            <td style="padding: 8px 12px; background: #f1f5f9; font-weight: bold; border: 1px solid #e2e8f0;">他社見積</td>
+            <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">${params.hasQuote}</td>
+          </tr>
+          ` : ''}
+          ${params.leakSituation ? `
+          <tr>
+            <td style="padding: 8px 12px; background: #f1f5f9; font-weight: bold; border: 1px solid #e2e8f0;">状況メモ</td>
+            <td style="padding: 8px 12px; border: 1px solid #e2e8f0; white-space: pre-wrap;">${params.leakSituation}</td>
           </tr>
           ` : ''}
           <tr>

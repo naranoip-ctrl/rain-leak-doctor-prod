@@ -15,21 +15,47 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ImageUpload } from '@/components/ImageUpload';
-import { trackFormStart, trackFormSubmit, trackLineClick } from '@/lib/analytics';
+import { trackFormStart, trackFormSubmit, trackLineClick, trackInspectionRequest } from '@/lib/analytics';
 
 type DiagnosisStep = 'form' | 'uploading' | 'result';
+
+// 関西6府県（現地点検案内の対象）。関西外はオンライン完結を案内する。
+const KANSAI_PREFECTURES = ['大阪府', '京都府', '兵庫県', '奈良県', '滋賀県', '和歌山県'];
+
+const PREFECTURES = [
+  '北海道', '青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県',
+  '茨城県', '栃木県', '群馬県', '埼玉県', '千葉県', '東京都', '神奈川県',
+  '新潟県', '富山県', '石川県', '福井県', '山梨県', '長野県', '岐阜県',
+  '静岡県', '愛知県', '三重県', '滋賀県', '京都府', '大阪府', '兵庫県',
+  '奈良県', '和歌山県', '鳥取県', '島根県', '岡山県', '広島県', '山口県',
+  '徳島県', '香川県', '愛媛県', '高知県', '福岡県', '佐賀県', '長崎県',
+  '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県',
+];
+
+// third-place-ai.jp（他社見積チェック）への導線。
+// TODO(URL): third-place の最終的な見積チェック入口URLが確定したら差し替える。
+const THIRD_PLACE_QUOTE_URL = 'https://third-place-ai.jp/';
 
 export default function DiagnosisPage() {
   const router = useRouter();
   const [step, setStep] = useState<DiagnosisStep>('form');
 
   // フォーム入力
+  // 雨漏りの状況・希望（一次判定の文脈／導線分岐に使用。写真以外は任意）
+  const [leakSituation, setLeakSituation] = useState('');
+  const [prefecture, setPrefecture] = useState('');
+  const [hasQuote, setHasQuote] = useState(''); // 他社見積の有無
+  const [requestType, setRequestType] = useState('無料一次判定'); // 希望
+  // 連絡先（任意・匿名可）
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [customerBuildingAge, setCustomerBuildingAge] = useState('');
   const [images, setImages] = useState<File[]>([]);
+
+  // 関西判定（現地点検案内 / 関西外はオンライン完結）
+  const isKansai = KANSAI_PREFECTURES.includes(prefecture);
 
   // 結果
   const [secretCode, setSecretCode] = useState('');
@@ -65,25 +91,9 @@ export default function DiagnosisPage() {
     e.preventDefault();
     setError('');
 
-    // バリデーション
-    if (!customerName.trim()) {
-      setError('お名前を入力してください。');
-      return;
-    }
-    if (!customerPhone.trim()) {
-      setError('電話番号を入力してください。');
-      return;
-    }
-    if (!customerAddress.trim()) {
-      setError('住所を入力してください。');
-      return;
-    }
-    if (!customerBuildingAge) {
-      setError('築年数を選択してください。');
-      return;
-    }
+    // バリデーション（写真3枚のみ必須。連絡先・属性は任意・匿名可）
     if (images.length !== 3) {
-      setError('画像を3枚アップロードしてください。');
+      setError('写真を3枚アップロードしてください。');
       return;
     }
 
@@ -126,6 +136,11 @@ export default function DiagnosisPage() {
           customerAddress,
           customerBuildingAge,
           imageUrls,
+          // 新規項目（一次判定の文脈・導線分岐・管理通知用）
+          leakSituation,
+          prefecture,
+          hasQuote,
+          requestType,
         }),
       });
 
@@ -143,9 +158,17 @@ export default function DiagnosisPage() {
       setStep('result');
 
       // 計測: 診断送信成功（form_submit）。UTM/gclid は trackEvent 側で自動付与。
-      trackFormSubmit({ building_age: customerBuildingAge });
-      // TODO(Pass 3): 「希望（一次判定/現地点検/見積確認）」フィールド新設後、
-      //   現地点検が選択された送信では trackInspectionRequest() も発火させる。
+      trackFormSubmit({
+        building_age: customerBuildingAge,
+        prefecture,
+        request_type: requestType,
+        has_quote: hasQuote,
+        is_kansai: isKansai,
+      });
+      // 希望が「現地点検」の送信は inspection_request も発火（現地点検リードの計測）。
+      if (requestType === '現地点検') {
+        trackInspectionRequest({ prefecture, is_kansai: isKansai });
+      }
     } catch (err: any) {
       console.error('Diagnosis error:', err);
       setError(err.message || 'エラーが発生しました。もう一度お試しください。');
@@ -353,92 +376,177 @@ export default function DiagnosisPage() {
         )}
 
         <form onSubmit={handleSubmit} onFocus={handleFirstInteraction} className="space-y-6">
-          {/* お名前 */}
+          {/* ① 雨漏りの状況（任意） */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              お名前 <span className="text-red-500">*</span>
+              気になっている症状・状況（任意）
             </label>
-            <input
-              type="text"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
+            <textarea
+              value={leakSituation}
+              onChange={(e) => setLeakSituation(e.target.value)}
+              rows={3}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="山田 太郎"
-              required
+              placeholder="例：先週の大雨のあと、2階の天井にシミが出てきた"
             />
           </div>
 
-          {/* 電話番号 */}
+          {/* ② 写真（必須） */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              電話番号 <span className="text-red-500">*</span>
+              写真（3枚）<span className="text-red-500">*</span>
             </label>
-            <input
-              type="tel"
-              value={customerPhone}
-              onChange={(e) => setCustomerPhone(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="090-1234-5678"
-              required
+            <p className="text-xs text-gray-500 mb-3">一次判定に使う写真です。雨漏りの跡・気になる箇所を3枚アップロードしてください。</p>
+            <ImageUpload
+              maxImages={3}
+              images={images}
+              onImagesChange={setImages}
             />
           </div>
 
-          {/* メールアドレス */}
+          {/* ③ 物件所在地（都道府県・任意）＋関西分岐 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              メールアドレス（任意）
-            </label>
-            <input
-              type="email"
-              value={customerEmail}
-              onChange={(e) => setCustomerEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="example@email.com"
-            />
-          </div>
-
-          {/* 住所 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              住所 <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={customerAddress}
-              onChange={(e) => setCustomerAddress(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="大阪府大阪市旭区高殿2-12-6"
-              required
-            />
-          </div>
-
-          {/* 築年数 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              築年数 <span className="text-red-500">*</span>
+              物件の所在地（都道府県・任意）
             </label>
             <select
-              value={customerBuildingAge}
-              onChange={(e) => setCustomerBuildingAge(e.target.value)}
+              value={prefecture}
+              onChange={(e) => setPrefecture(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              required
             >
               <option value="">選択してください</option>
-              <option value="5年未満">5年未満</option>
-              <option value="5〜10年">5〜10年</option>
-              <option value="10〜20年">10〜20年</option>
-              <option value="20〜30年">20〜30年</option>
-              <option value="30年以上">30年以上</option>
-              <option value="不明">不明</option>
+              {PREFECTURES.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
             </select>
+            {prefecture && (
+              isKansai ? (
+                <p className="mt-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                  {prefecture}は現地点検の対応エリアです。一次判定のあと、ご希望に応じて現地点検をご案内します。
+                </p>
+              ) : (
+                <p className="mt-2 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                  関西エリア外のため、まずは写真からのオンライン一次判定で対応します（現地点検は対象外の場合があります）。
+                </p>
+              )
+            )}
           </div>
 
-          {/* 画像アップロード */}
-          <ImageUpload
-            maxImages={3}
-            images={images}
-            onImagesChange={setImages}
-          />
+          {/* ④ 他社見積の有無（「高い気がする」→ third-place 導線） */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              他社の見積もりはありますか？（任意）
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: '高い気がする', label: '見積もりがある（高い気がする）' },
+                { value: '適正か不明', label: '見積もりがある（適正か分からない）' },
+                { value: 'ない', label: 'まだ見積もりはない' },
+              ].map((opt) => (
+                <label key={opt.value} className="flex items-center gap-3 px-4 py-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                  <input
+                    type="radio"
+                    name="hasQuote"
+                    value={opt.value}
+                    checked={hasQuote === opt.value}
+                    onChange={(e) => setHasQuote(e.target.value)}
+                    className="h-4 w-4 text-blue-600"
+                  />
+                  <span className="text-sm text-gray-700">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+            {hasQuote === '高い気がする' && (
+              <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-900">
+                <p className="font-bold mb-1">見積もりが適正か、先に確認できます</p>
+                <p className="mb-3">他社の見積書を一次チェックし、必要工事と任意工事の分け方などを整理できます。当社施工を前提としない確認です。</p>
+                <a
+                  href={THIRD_PLACE_QUOTE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center bg-amber-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-amber-700 transition-colors"
+                >
+                  見積もりチェックを見る
+                </a>
+              </div>
+            )}
+          </div>
+
+          {/* ⑤ 希望 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              ご希望（任意）
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: '無料一次判定', label: 'まずは無料の一次判定だけ' },
+                { value: '現地点検', label: '現地点検を希望（関西エリア）' },
+                { value: '見積確認', label: '他社見積の確認をしたい' },
+              ].map((opt) => (
+                <label key={opt.value} className="flex items-center gap-3 px-4 py-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                  <input
+                    type="radio"
+                    name="requestType"
+                    value={opt.value}
+                    checked={requestType === opt.value}
+                    onChange={(e) => setRequestType(e.target.value)}
+                    className="h-4 w-4 text-blue-600"
+                  />
+                  <span className="text-sm text-gray-700">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* ⑥ 連絡先（任意・匿名可） */}
+          <div className="border-t border-gray-200 pt-6">
+            <p className="text-sm font-medium text-gray-700 mb-1">連絡先（任意・匿名でもOK）</p>
+            <p className="text-xs text-gray-500 mb-4">
+              結果はこのあと表示する4桁の合言葉でLINEから受け取れます。連絡先の入力は任意です。
+            </p>
+            <div className="space-y-4">
+              <input
+                type="text"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="お名前（任意）"
+              />
+              <input
+                type="tel"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="電話番号（任意）"
+              />
+              <input
+                type="email"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="メールアドレス（任意）"
+              />
+              <select
+                value={customerBuildingAge}
+                onChange={(e) => setCustomerBuildingAge(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              >
+                <option value="">築年数（任意）</option>
+                <option value="5年未満">5年未満</option>
+                <option value="5〜10年">5〜10年</option>
+                <option value="10〜20年">10〜20年</option>
+                <option value="20〜30年">20〜30年</option>
+                <option value="30年以上">30年以上</option>
+                <option value="不明">不明</option>
+              </select>
+              <input
+                type="text"
+                value={customerAddress}
+                onChange={(e) => setCustomerAddress(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="住所（任意・現地点検をご希望の場合）"
+              />
+            </div>
+          </div>
 
           {/* 送信ボタン */}
           <button
@@ -450,7 +558,7 @@ export default function DiagnosisPage() {
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >
-            AI診断を開始する
+            写真で一次判定を受ける
           </button>
         </form>
 
