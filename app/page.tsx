@@ -928,6 +928,10 @@ export default function Home() {
               <ul className="space-y-2 text-sm">
                 <li><Link href="/privacy" className="text-white/80 hover:text-white transition-colors">プライバシーポリシー</Link></li>
                 <li><Link href="/terms" className="text-white/80 hover:text-white transition-colors">利用規約</Link></li>
+                {/* TODO(loki-drone統一): 「特定商取引法に基づく表記」へのリンクを追加する。
+                    リンク先は loki-drone.com の正規ページ（最終URL未確定）。存在しないページへ
+                    リンクさせないため、URL確定までは項目を追加しない。会社概要/プライバシー/特商法は
+                    最終的に loki-drone 正規1セットへ統一する設計。 */}
               </ul>
               <div className="mt-6">
                 <p className="text-xs text-white/60 mb-2">建設業許可</p>
