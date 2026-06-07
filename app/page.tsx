@@ -100,8 +100,8 @@ export default function Home() {
           </Link>
 
           <nav className="hidden lg:flex items-center gap-8">
-            {['サービス', '料金', '事例'].map((item, i) => {
-              const hrefs = ['#services', '#pricing', '#cases'];
+            {['サービス', '料金', '事例', 'FAQ'].map((item, i) => {
+              const hrefs = ['#services', '#pricing', '#cases', '#faq'];
               return (
                 <a key={i} href={hrefs[i]} onClick={(e) => smoothScroll(e, hrefs[i])} className={`text-sm font-bold transition-colors relative group ${isScrolled ? 'text-slate-600 hover:text-primary' : 'text-slate-100 hover:text-white'}`}>
                   {item}
@@ -141,8 +141,8 @@ export default function Home() {
                 </button>
               </div>
               <nav className="flex flex-col space-y-6 text-center">
-                {['サービス', '料金', '事例'].map((item, i) => {
-                  const hrefs = ['#services', '#pricing', '#cases'];
+                {['サービス', '料金', '事例', 'FAQ'].map((item, i) => {
+                  const hrefs = ['#services', '#pricing', '#cases', '#faq'];
                   return (
                     <a key={i} href={hrefs[i]} onClick={(e) => smoothScroll(e, hrefs[i])} className="text-xl font-bold text-slate-700 hover:text-primary">
                       {item}
@@ -351,6 +351,89 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ═══════════ Cases Section（実例：信頼を先に） ═══════════ */}
+      <section id="cases" className="py-24 bg-slate-50">
+        <div className="container">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-black text-primary mb-4">実際にAI診断から<span className="text-cta">修理された事例</span></h2>
+              <p className="text-slate-600">証拠に基づく診断と、再発を防ぐ根本修繕</p>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Case 1 */}
+            <div className="bg-white rounded-xl overflow-hidden shadow-lg group cursor-pointer border border-slate-100">
+              <div className="relative h-64 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+                <img src={CASE1_IMG} alt="スレート屋根の割れ修繕" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                <div className="absolute bottom-4 left-4 z-20 text-white">
+                  <span className="inline-block bg-green-500 text-white px-2 py-0.5 rounded text-xs font-bold mb-2">火災保険の申請をサポートした事例</span>
+                  <h3 className="text-xl font-bold">スレート屋根の割れ修繕</h3>
+                  <p className="text-sm opacity-90">大阪狭山市 / 費用 ¥58,000</p>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                  <div>
+                    <span className="block text-slate-400 text-xs">症状</span>
+                    <span className="font-medium text-slate-700">天井のシミ、カビ臭</span>
+                  </div>
+                  <div>
+                    <span className="block text-slate-400 text-xs">処置</span>
+                    <span className="font-medium text-slate-700">割れ補修＋棟板金</span>
+                  </div>
+                </div>
+                <div className="bg-green-50 rounded-lg p-3 border border-green-100 mb-3">
+                  <p className="text-sm text-green-700 font-bold flex items-center gap-2">
+                    <Umbrella className="h-4 w-4" /> 火災保険（風災補償）の申請をサポート
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-primary bg-primary/5 p-3 rounded-lg">
+                  <Camera className="h-4 w-4" /> 証拠資料：サーモグラフィ、散水動画
+                </div>
+              </div>
+            </div>
+
+            {/* Case 2 */}
+            <div className="bg-white rounded-xl overflow-hidden shadow-lg group cursor-pointer border border-slate-100">
+              <div className="relative h-64 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+                <img src={CASE2_IMG} alt="外壁シーリング打替え" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                <div className="absolute bottom-4 left-4 z-20 text-white">
+                  <span className="inline-block bg-green-500 text-white px-2 py-0.5 rounded text-xs font-bold mb-2">火災保険の申請をサポートした事例</span>
+                  <h3 className="text-xl font-bold">外壁シーリング打替え</h3>
+                  <p className="text-sm opacity-90">尼崎市 / 費用 ¥98,000</p>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                  <div>
+                    <span className="block text-slate-400 text-xs">症状</span>
+                    <span className="font-medium text-slate-700">サッシ周りの黒カビ</span>
+                  </div>
+                  <div>
+                    <span className="block text-slate-400 text-xs">処置</span>
+                    <span className="font-medium text-slate-700">ロープ作業＋打替え</span>
+                  </div>
+                </div>
+                <div className="bg-green-50 rounded-lg p-3 border border-green-100 mb-3">
+                  <p className="text-sm text-green-700 font-bold flex items-center gap-2">
+                    <Umbrella className="h-4 w-4" /> 火災保険（風災補償）の申請をサポート
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-primary bg-primary/5 p-3 rounded-lg">
+                  <Camera className="h-4 w-4" /> 証拠資料：ロープ撮影動画、劣化写真
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 中間CTA */}
+          <MidCTA text="あなたの雨漏りも診断してみませんか？" subtext="写真3枚で費用と保険適用の目安が分かります" />
+        </div>
+      </section>
+
       {/* ═══════════ Services (3つの約束) ═══════════ */}
       <section id="services" className="py-24 bg-slate-50">
         <div className="container">
@@ -525,88 +608,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════ Cases Section ═══════════ */}
-      <section id="cases" className="py-24 bg-slate-50">
-        <div className="container">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-black text-primary mb-4">実際にAI診断から<span className="text-cta">修理された事例</span></h2>
-              <p className="text-slate-600">証拠に基づく確実な診断と、再発を防ぐ根本修繕</p>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Case 1 */}
-            <div className="bg-white rounded-xl overflow-hidden shadow-lg group cursor-pointer border border-slate-100">
-              <div className="relative h-64 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-                <img src={CASE1_IMG} alt="スレート屋根の割れ修繕" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                <div className="absolute bottom-4 left-4 z-20 text-white">
-                  <span className="inline-block bg-green-500 text-white px-2 py-0.5 rounded text-xs font-bold mb-2">火災保険の申請をサポートした事例</span>
-                  <h3 className="text-xl font-bold">スレート屋根の割れ修繕</h3>
-                  <p className="text-sm opacity-90">大阪狭山市 / 費用 ¥58,000</p>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                  <div>
-                    <span className="block text-slate-400 text-xs">症状</span>
-                    <span className="font-medium text-slate-700">天井のシミ、カビ臭</span>
-                  </div>
-                  <div>
-                    <span className="block text-slate-400 text-xs">処置</span>
-                    <span className="font-medium text-slate-700">割れ補修＋棟板金</span>
-                  </div>
-                </div>
-                <div className="bg-green-50 rounded-lg p-3 border border-green-100 mb-3">
-                  <p className="text-sm text-green-700 font-bold flex items-center gap-2">
-                    <Umbrella className="h-4 w-4" /> 火災保険（風災補償）の申請をサポート
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 text-xs font-bold text-primary bg-primary/5 p-3 rounded-lg">
-                  <Camera className="h-4 w-4" /> 証拠資料：サーモグラフィ、散水動画
-                </div>
-              </div>
-            </div>
-
-            {/* Case 2 */}
-            <div className="bg-white rounded-xl overflow-hidden shadow-lg group cursor-pointer border border-slate-100">
-              <div className="relative h-64 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-                <img src={CASE2_IMG} alt="外壁シーリング打替え" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                <div className="absolute bottom-4 left-4 z-20 text-white">
-                  <span className="inline-block bg-green-500 text-white px-2 py-0.5 rounded text-xs font-bold mb-2">火災保険の申請をサポートした事例</span>
-                  <h3 className="text-xl font-bold">外壁シーリング打替え</h3>
-                  <p className="text-sm opacity-90">尼崎市 / 費用 ¥98,000</p>
-                </div>
-              </div>
-              <div className="p-6">
-                <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                  <div>
-                    <span className="block text-slate-400 text-xs">症状</span>
-                    <span className="font-medium text-slate-700">サッシ周りの黒カビ</span>
-                  </div>
-                  <div>
-                    <span className="block text-slate-400 text-xs">処置</span>
-                    <span className="font-medium text-slate-700">ロープ作業＋打替え</span>
-                  </div>
-                </div>
-                <div className="bg-green-50 rounded-lg p-3 border border-green-100 mb-3">
-                  <p className="text-sm text-green-700 font-bold flex items-center gap-2">
-                    <Umbrella className="h-4 w-4" /> 火災保険（風災補償）の申請をサポート
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 text-xs font-bold text-primary bg-primary/5 p-3 rounded-lg">
-                  <Camera className="h-4 w-4" /> 証拠資料：ロープ撮影動画、劣化写真
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 中間CTA */}
-          <MidCTA text="あなたの雨漏りも診断してみませんか？" subtext="写真3枚で費用と保険適用の目安が分かります" />
-        </div>
-      </section>
+      {/* Cases（実例）は Pain Points の直後（Services の前）へ移動 */}
 
       {/* ═══════════ Tech Section ═══════════ */}
       <section className="py-24 bg-white">
@@ -754,52 +756,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════ Final CTA ═══════════ */}
-      <section className="py-24 bg-gradient-to-br from-primary-dark to-primary text-white text-center relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-cta/10 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-[120px]" />
-        </div>
-        <div className="container max-w-4xl mx-auto relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 mb-6">
-            <span className="text-sm font-bold text-white/80">「高すぎる見積もり」に、もう悩まない。</span>
-          </div>
-          <h2 className="text-3xl md:text-5xl font-black mb-6">
-            写真3枚でOK。<br />雨漏りの危険度と次の一手を整理します。
-          </h2>
-          <p className="text-xl md:text-2xl mb-8 opacity-90 font-medium">
-            スマホで撮って送るだけ。<br className="md:hidden" />最短3分で費用の目安と確認すべき点が分かります。
-          </p>
-
-          {/* 社会的証明：実証できる数字のみ掲載。未確定の実績件数・評価は出さない。
-              TODO(実績数値): 実証可能な「累計件数」「Google評価」が確定したら、ここに正確な値で掲載する（盛らない・撤去優先）。 */}
-          <div className="flex flex-wrap items-center justify-center gap-6 mb-10 text-sm">
-            <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
-              <Shield className="h-4 w-4 text-accent" />
-              <span>建設業許可 取得済</span>
-            </div>
-            <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
-              <MapPin className="h-4 w-4 text-accent" />
-              <span>関西エリア対応</span>
-            </div>
-          </div>
-
-          <Link
-            href="/diagnosis"
-            className="relative inline-flex items-center justify-center h-16 px-12 text-xl font-black bg-cta text-white hover:bg-cta-dark shadow-xl hover:shadow-2xl rounded-full transition-all transform hover:-translate-y-1"
-          >
-            <Camera className="h-6 w-6 mr-2" />
-            <span>写真で雨漏りの危険度を見る</span>
-          </Link>
-          <p className="mt-4 text-sm text-white/60">無料・登録不要・写真3枚でOK</p>
-
-          <div className="mt-6 flex justify-center">
-            <a href={LINE_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackLineClick('final_cta_aux')} className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white/90 border border-white/30 hover:border-white/70 hover:bg-white/5 rounded-full transition-colors">
-              <MessageCircle className="h-4 w-4" /> お急ぎの方はLINEで相談（匿名OK）
-            </a>
-          </div>
-        </div>
-      </section>
+      {/* Final CTA は料金の後ろ（FAQの直後・ページ最後尾）へ移動 */}
 
       {/* ═══════════ Pricing Section ═══════════ */}
       <section id="pricing" className="py-24 bg-slate-900 text-white relative overflow-hidden">
@@ -888,6 +845,56 @@ export default function Home() {
               応急処置（一次止水）は保証対象外です。本修繕（根本修繕）は再漏水について<strong className="text-slate-300">1年保証</strong>。
               現地確認で原因が特定できない場合は保証対象外となります。
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════ FAQ Section ═══════════ */}
+      <FAQSection />
+
+      {/* ═══════════ Final CTA（単一・ページ最後尾） ═══════════ */}
+      <section className="py-24 bg-gradient-to-br from-primary-dark to-primary text-white text-center relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-cta/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-[120px]" />
+        </div>
+        <div className="container max-w-4xl mx-auto relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 mb-6">
+            <span className="text-sm font-bold text-white/80">「高すぎる見積もり」に、もう悩まない。</span>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black mb-6">
+            写真3枚でOK。<br />雨漏りの危険度と次の一手を整理します。
+          </h2>
+          <p className="text-xl md:text-2xl mb-8 opacity-90 font-medium">
+            スマホで撮って送るだけ。<br className="md:hidden" />最短3分で費用の目安と確認すべき点が分かります。
+          </p>
+
+          {/* 社会的証明：実証できる数字のみ掲載。未確定の実績件数・評価は出さない。
+              TODO(実績数値): 実証可能な「累計件数」「Google評価」が確定したら、ここに正確な値で掲載する（盛らない・撤去優先）。 */}
+          <div className="flex flex-wrap items-center justify-center gap-6 mb-10 text-sm">
+            <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+              <Shield className="h-4 w-4 text-accent" />
+              <span>建設業許可 取得済</span>
+            </div>
+            <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full">
+              <MapPin className="h-4 w-4 text-accent" />
+              <span>関西エリア対応</span>
+            </div>
+          </div>
+
+          <Link
+            href="/diagnosis"
+            className="relative inline-flex items-center justify-center h-16 px-12 text-xl font-black bg-cta text-white hover:bg-cta-dark shadow-xl hover:shadow-2xl rounded-full transition-all transform hover:-translate-y-1"
+          >
+            <Camera className="h-6 w-6 mr-2" />
+            <span>写真で雨漏りの危険度を見る</span>
+          </Link>
+          <p className="mt-4 text-sm text-white/60">無料・登録不要・写真3枚でOK</p>
+
+          <div className="mt-6 flex justify-center">
+            <a href={LINE_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackLineClick('final_cta_aux')} className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white/90 border border-white/30 hover:border-white/70 hover:bg-white/5 rounded-full transition-colors">
+              <MessageCircle className="h-4 w-4" /> お急ぎの方はLINEで相談（匿名OK）
+            </a>
           </div>
         </div>
       </section>
@@ -1030,6 +1037,50 @@ function StatsSection() {
             <div key={i} className="text-center px-2">
               <div className="text-2xl md:text-3xl font-black text-primary">{item.val}</div>
               <div className="text-xs md:text-sm font-bold text-slate-500 mt-1">{item.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── FAQ Sub-component ───
+   サイトの実ポリシーに基づくFAQ（断定回避・保証3区分・匿名可・関西分岐・火災保険の確認余地を反映）。 */
+function FAQSection() {
+  const faqs = [
+    { q: "AI診断は本当に無料ですか？", a: "写真3枚での一次判定は無料・登録不要です。現地点検や工事をご依頼いただく場合のみ、別途お見積もりとなります。" },
+    { q: "AIで雨漏りの原因を断定してもらえますか？", a: "写真からの一次判定のため、原因の断定はできません。原因の特定・確定診断には現地確認が必要です。一次判定では、危険度の目安・費用レンジ・確認すべき点を整理します。" },
+    { q: "火災保険は使えますか？", a: "台風・強風・雹（ひょう）・飛来物などの自然災害が原因の場合、火災保険の風災補償などを確認する余地があります。確認用の整理資料の作成までサポートしますが、適用可否は保険会社の判断であり、当社は保険適用を保証しません。" },
+    { q: "保証はありますか？", a: "本修繕（根本修繕）は再漏水について1年保証です。応急処置（一次止水）と、現地確認で原因が特定できない場合は保証対象外となります。" },
+    { q: "対応エリアはどこですか？", a: "関西（大阪・京都・兵庫ほか）を中心に現地対応しています。関西エリア外の方は、写真からのオンライン一次判定で対応します。" },
+    { q: "匿名でも相談できますか？", a: "はい。診断フォームの連絡先は任意で、匿名のままでも一次判定を受けられます。お急ぎの方はLINEからも匿名でご相談いただけます。" },
+    { q: "他社の見積もりが高い気がします。", a: "他社見積の妥当性を一次チェックすることもできます（当社施工を前提としない確認です）。必要な工事と任意の工事を分けて整理するのにご活用ください。" },
+  ];
+  const [open, setOpen] = useState<number | null>(null);
+
+  return (
+    <section id="faq" className="py-24 bg-slate-50">
+      <div className="container max-w-3xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-black text-primary mb-4">よくあるご質問</h2>
+          <p className="text-slate-600">ご相談前に多いご質問をまとめました。</p>
+        </div>
+        <div className="space-y-3">
+          {faqs.map((item, i) => (
+            <div key={i} className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setOpen(open === i ? null : i)}
+                aria-expanded={open === i}
+                className="w-full flex items-center justify-between gap-4 text-left px-5 py-4 font-bold text-primary hover:bg-slate-50 transition-colors"
+              >
+                <span>{item.q}</span>
+                <ChevronRight className={`h-5 w-5 flex-shrink-0 transition-transform ${open === i ? 'rotate-90' : ''}`} />
+              </button>
+              {open === i && (
+                <div className="px-5 pb-5 text-sm text-slate-600 leading-relaxed">{item.a}</div>
+              )}
             </div>
           ))}
         </div>
