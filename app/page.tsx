@@ -11,7 +11,6 @@ import {
 import { trackLineClick, trackCallClick, trackReportPurchaseClick } from '@/lib/analytics';
 
 /* ─── ローカル画像パス ─── */
-const DROCO_ICON_URL = "/images/droco-icon.jpg";
 const LIXIL_BADGE_URL = "/images/lixil-badge.jpg";
 const APP_SCREEN_URL = "/images/app-screen.png";
 const LINE_QR_URL = "/images/line-qr.png";
@@ -960,7 +959,6 @@ export default function Home() {
           <div className="container py-6">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-4">
               <div className="flex items-center gap-2">
-                <img src={DROCO_ICON_URL} alt="株式会社ドローン工務店" className="w-6 h-6 rounded-sm object-contain" />
                 <span className="text-xs text-white/50">運営：株式会社ドローン工務店</span>
               </div>
               <div className="flex items-center gap-2">
