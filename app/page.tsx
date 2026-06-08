@@ -653,12 +653,12 @@ export default function Home() {
                 <div className="relative">
                   <img
                     src={REPRESENTATIVE_IMG}
-                    alt="代表"
+                    alt="代表 坂井友哉"
                     className="w-64 h-64 md:w-72 md:h-72 rounded-2xl object-cover shadow-xl"
                   />
                   <div className="absolute -bottom-4 -right-4 bg-primary text-white px-4 py-2 rounded-lg shadow-lg">
                     <p className="text-xs">株式会社ドローン工務店</p>
-                    <p className="font-bold">代表</p>
+                    <p className="font-bold">代表 坂井友哉</p>
                   </div>
                 </div>
               </div>
