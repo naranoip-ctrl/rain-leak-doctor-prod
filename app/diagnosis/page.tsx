@@ -90,9 +90,10 @@ export default function DiagnosisPage() {
     e.preventDefault();
     setError('');
 
-    // バリデーション（写真3枚のみ必須。連絡先・属性は任意・匿名可）
-    if (images.length !== 3) {
-      setError('写真を3枚アップロードしてください。');
+    // バリデーション（写真1枚以上で送信可・最大3枚。連絡先・属性は任意・匿名可）
+    // 「ちょうど3枚」必須は離脱要因(GA: form_start 11→submit 0)のため1〜3枚に緩和。
+    if (images.length < 1) {
+      setError('写真を1枚以上アップロードしてください。');
       return;
     }
 
@@ -365,7 +366,7 @@ export default function DiagnosisPage() {
       <main className="container mx-auto px-4 py-8 max-w-lg">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">AI雨漏り診断</h1>
         <p className="text-gray-600 mb-8">
-          写真を3枚アップロードするだけで、AIが雨漏りの状況を一次判定します。原因の断定には現地確認が必要です。
+          写真をアップロードするだけで、AIが雨漏りの状況を一次判定します。1枚でもOK（3枚あるとより正確）。原因の断定には現地確認が必要です。
         </p>
 
         {error && (
@@ -392,9 +393,9 @@ export default function DiagnosisPage() {
           {/* ② 写真（必須） */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              写真（3枚）<span className="text-red-500">*</span>
+              写真（1〜3枚）<span className="text-red-500">*</span>
             </label>
-            <p className="text-xs text-gray-500 mb-3">一次判定に使う写真です。雨漏りの跡・気になる箇所を3枚アップロードしてください。</p>
+            <p className="text-xs text-gray-500 mb-3">一次判定に使う写真です。雨漏りの跡・気になる箇所を撮ってアップロードしてください。1枚でも判定できます（3枚あるとより正確です）。</p>
             <ImageUpload
               maxImages={3}
               images={images}
@@ -550,15 +551,20 @@ export default function DiagnosisPage() {
           {/* 送信ボタン */}
           <button
             type="submit"
-            disabled={images.length !== 3}
+            disabled={images.length < 1}
             className={`w-full py-4 rounded-lg font-bold text-lg transition-colors ${
-              images.length === 3
+              images.length >= 1
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >
             写真で一次判定を受ける
           </button>
+          {images.length < 1 && (
+            <p className="text-xs text-gray-500 text-center -mt-3">
+              写真を1枚以上アップロードすると送信できます
+            </p>
+          )}
         </form>
 
         {/* 注意事項 */}

@@ -59,10 +59,10 @@ export function ImageUpload({
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">
-        雨漏り箇所の写真（{maxImages}枚） <span className="text-red-500">*</span>
+        雨漏り箇所の写真（最大{maxImages}枚） <span className="text-red-500">*</span>
       </label>
       <p className="text-sm text-gray-500 mb-4">
-        雨漏り箇所を異なる角度から{maxImages}枚撮影してください。
+        雨漏り箇所の写真をアップロードしてください。1枚でも判定できます（異なる角度から{maxImages}枚あるとより正確です）。
       </p>
 
       {images.length < maxImages && (

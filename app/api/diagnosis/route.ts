@@ -41,7 +41,8 @@ export async function POST(request: NextRequest) {
       requestType,
     } = body;
 
-    // バリデーション（写真3枚のみ必須。連絡先・属性は任意・匿名可）
+    // バリデーション（写真1〜3枚で受付。連絡先・属性は任意・匿名可）
+    // 「ちょうど3枚」必須は離脱要因(GA: form_start 11→submit 0)のため緩和。
     if (!imageUrls || imageUrls.length === 0) {
       return NextResponse.json(
         { error: '写真がアップロードされていません。' },
@@ -49,9 +50,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (imageUrls.length !== 3) {
+    if (imageUrls.length > 3) {
       return NextResponse.json(
-        { error: '写真は3枚アップロードしてください。' },
+        { error: '写真は3枚以内でアップロードしてください。' },
         { status: 400 }
       );
     }
