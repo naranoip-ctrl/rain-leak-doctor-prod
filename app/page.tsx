@@ -403,7 +403,7 @@ export default function Home() {
                 <div className="absolute bottom-4 left-4 z-20 text-white">
                   <span className="inline-block bg-green-500 text-white px-2 py-0.5 rounded text-xs font-bold mb-2">火災保険の申請をサポートした事例</span>
                   <h3 className="text-xl font-bold">外壁シーリング打替え</h3>
-                  <p className="text-sm opacity-90">尼崎市 / 費用 ¥98,000</p>
+                  <p className="text-sm opacity-90">尼崎市 / 費用 ¥20,000</p>
                 </div>
               </div>
               <div className="p-6">
