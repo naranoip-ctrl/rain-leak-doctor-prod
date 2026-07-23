@@ -20,7 +20,7 @@ const REPRESENTATIVE_IMG = "/images/representative.png";
 
 /* 事例画像 */
 const CASE1_IMG = "/images/case1.jpg";
-const CASE2_IMG = "/images/case2.jpg";
+const CASE2_IMG = "/images/case2-sealing.jpg";
 
 /* 技術画像 */
 const TECH1_IMG = "/images/tech1.jpg";
@@ -366,11 +366,11 @@ export default function Home() {
             <div className="bg-white rounded-xl overflow-hidden shadow-lg group cursor-pointer border border-slate-100">
               <div className="relative h-64 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-                <img src={CASE1_IMG} alt="スレート屋根の割れ修繕" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                <img src={CASE1_IMG} alt="スレート屋根の割れを屋根葺き替えで修繕（施工前後）" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute bottom-4 left-4 z-20 text-white">
                   <span className="inline-block bg-green-500 text-white px-2 py-0.5 rounded text-xs font-bold mb-2">火災保険の申請をサポートした事例</span>
-                  <h3 className="text-xl font-bold">スレート屋根の割れ修繕</h3>
-                  <p className="text-sm opacity-90">大阪狭山市 / 費用 ¥58,000</p>
+                  <h3 className="text-xl font-bold">スレート屋根の割れ・屋根葺き替え</h3>
+                  <p className="text-sm opacity-90">大阪狭山市 / 費用 ¥1,280,000</p>
                 </div>
               </div>
               <div className="p-6">
@@ -381,7 +381,7 @@ export default function Home() {
                   </div>
                   <div>
                     <span className="block text-slate-400 text-xs">処置</span>
-                    <span className="font-medium text-slate-700">割れ補修＋棟板金</span>
+                    <span className="font-medium text-slate-700">ガルバリウム鋼板へ葺き替え</span>
                   </div>
                 </div>
                 <div className="bg-green-50 rounded-lg p-3 border border-green-100 mb-3">
@@ -425,6 +425,7 @@ export default function Home() {
                 <div className="flex items-center gap-2 text-xs font-bold text-primary bg-primary/5 p-3 rounded-lg">
                   <Camera className="h-4 w-4" /> 証拠資料：ロープ撮影動画、劣化写真
                 </div>
+                <p className="text-[10px] text-slate-400 mt-3">※写真は当社施工のシーリング打替え作業の記録です。</p>
               </div>
             </div>
           </div>
