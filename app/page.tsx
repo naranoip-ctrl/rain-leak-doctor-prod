@@ -918,6 +918,12 @@ export default function Home() {
                 <li><a href="#pricing" className="text-white/80 hover:text-white transition-colors">料金プラン</a></li>
                 <li><a href="#cases" className="text-white/80 hover:text-white transition-colors">施工事例</a></li>
               </ul>
+              <h3 className="text-lg font-bold mt-6 mb-4">関連サービス</h3>
+              <ul className="space-y-2 text-sm">
+                <li><a href="https://third-place-ai.jp/" className="text-white/80 hover:text-white transition-colors">見積もりチェックAI（他社見積の無料診断）</a></li>
+                <li><a href="https://third-place-ai.jp/soba/amamori-shuri" className="text-white/80 hover:text-white transition-colors">雨漏り修理の費用相場</a></li>
+                <li><a href="https://third-place-ai.jp/soba/yane-shuri" className="text-white/80 hover:text-white transition-colors">屋根修理の費用相場</a></li>
+              </ul>
             </div>
             <div>
               <h3 className="text-lg font-bold mb-4">会社概要</h3>
