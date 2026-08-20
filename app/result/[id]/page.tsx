@@ -14,6 +14,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { trackLineClick } from '@/lib/analytics';
+import { useScrollReveal } from '@/components/useScrollReveal';
 
 interface DiagnosisSession {
   id: string;
@@ -41,6 +42,8 @@ export default function ResultPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [copied, setCopied] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  useScrollReveal('.result-refresh header, .result-refresh main > *');
 
   const fetchSession = useCallback(async () => {
     if (!id) {
@@ -119,10 +122,10 @@ export default function ResultPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="result-refresh min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">診断結果を読み込んでいます...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-dark mx-auto mb-4"></div>
+          <p className="text-slate-600 font-bold">診断結果を読み込んでいます...</p>
         </div>
       </div>
     );
@@ -130,11 +133,11 @@ export default function ResultPage() {
 
   if (errorMsg || !session) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center p-6 bg-white rounded-lg shadow max-w-md">
+      <div className="result-refresh min-h-screen flex items-center justify-center px-4">
+        <div className="text-center p-6 form-panel max-w-md">
           <h1 className="text-xl font-bold text-red-600 mb-2">エラー</h1>
-          <p className="text-gray-700 mb-4">{errorMsg || 'データが見つかりませんでした。'}</p>
-          <Link href="/" className="text-blue-600 underline hover:text-blue-800">
+          <p className="text-slate-700 mb-4">{errorMsg || 'データが見つかりませんでした。'}</p>
+          <Link href="/" className="text-primary underline hover:text-accent-dark font-bold">
             ホームに戻る
           </Link>
         </div>
@@ -146,35 +149,35 @@ export default function ResultPage() {
   const isStillProcessing = session.status === 'processing';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <header className="bg-white shadow-sm">
+    <div className="result-refresh min-h-screen">
+      <header className="bg-white/90 backdrop-blur-md border-b border-cyan-100 shadow-sm sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent-dark rounded-lg flex items-center justify-center shadow-lg shadow-cyan-900/10">
               <span className="text-white font-bold text-xl">雨</span>
             </div>
-            <span className="text-2xl font-bold text-blue-600">雨漏りドクター</span>
+            <span className="text-2xl font-black text-primary">雨漏りドクター</span>
           </Link>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-3xl">
+      <main className="container mx-auto px-4 py-10 max-w-4xl">
         {/* 合言葉カード */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold mb-4 text-center">
+        <div className="bg-gradient-to-br from-primary to-primary-dark text-white rounded-xl shadow-lg p-6 md:p-8 mb-8 border border-cyan-100/20">
+          <h2 className="text-2xl md:text-3xl font-black mb-4 text-center">
             {isStillProcessing ? 'AIが解析中です' : '診断が完了しました！'}
           </h2>
           <p className="text-center mb-6">
             詳細なPDFレポートを受け取るには、以下の合言葉をLINE公式アカウントに送信してください。
           </p>
-          <div className="bg-white text-gray-900 rounded-lg p-6 text-center">
-            <p className="text-sm text-gray-600 mb-2">合言葉（4桁）</p>
-            <p className="text-5xl font-bold tracking-wider mb-4">
+          <div className="bg-white text-slate-900 rounded-lg p-6 text-center">
+            <p className="text-sm text-slate-600 mb-2 font-bold">合言葉（4桁）</p>
+            <p className="text-5xl md:text-6xl font-black tracking-wider mb-4 text-primary">
               {session.secret_code}
             </p>
             <button
               onClick={copySecretCode}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="bg-cta text-white px-6 py-2 rounded-lg hover:bg-cta-dark transition-colors font-bold"
             >
               {copied ? 'コピーしました！' : '合言葉をコピー'}
             </button>
@@ -185,7 +188,7 @@ export default function ResultPage() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackLineClick('result_page')}
-              className="inline-block bg-green-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors"
+              className="inline-block bg-line text-white px-8 py-3 rounded-lg font-bold hover:bg-line-dark transition-colors shadow-lg shadow-green-900/10"
             >
               LINE公式アカウントを開く
             </a>
@@ -194,17 +197,17 @@ export default function ResultPage() {
 
         {/* 解析中の場合のローディング表示 */}
         {isStillProcessing && (
-          <div className="bg-white rounded-lg shadow-md p-8 mb-8 text-center">
+          <div className="form-panel p-8 mb-8 text-center">
             <div className="flex items-center justify-center mb-4">
               <div className="relative">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200"></div>
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent absolute top-0 left-0"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-cyan-100"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-accent-dark border-t-transparent absolute top-0 left-0"></div>
               </div>
             </div>
-            <h3 className="text-lg font-bold text-gray-800 mb-2">
+            <h3 className="text-lg font-bold text-primary mb-2">
               AIが写真を解析しています...
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-slate-600">
               解析完了まで約15〜30秒です。このままLINEを開いて合言葉を送信してください。
             </p>
           </div>
@@ -212,8 +215,8 @@ export default function ResultPage() {
 
         {/* 診断結果カード（完了時のみ表示） */}
         {!isStillProcessing && (
-          <div className="bg-white rounded-lg shadow-md p-8 space-y-6">
-            <h2 className="text-2xl font-bold border-b pb-4">一次判定の概要</h2>
+          <div className="form-panel p-6 md:p-8 space-y-6">
+            <h2 className="text-2xl md:text-3xl font-black text-primary border-b border-cyan-100 pb-4">一次判定の概要</h2>
 
             {/* 一次判定であることの明示（断定を避ける注記） */}
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-900">
@@ -224,8 +227,8 @@ export default function ResultPage() {
             <div>
               <h3 className="font-bold text-lg mb-2">緊急度の目安</h3>
               <div className="flex items-center space-x-4">
-                <div className="text-4xl font-bold text-blue-600">{session.severity_score}</div>
-                <div className="text-gray-600">/ 10（写真からの目安）</div>
+                <div className="text-5xl font-black text-accent-dark">{session.severity_score}</div>
+                <div className="text-slate-600 font-bold">/ 10（写真からの目安）</div>
               </div>
             </div>
 
@@ -233,22 +236,22 @@ export default function ResultPage() {
               <>
                 <div>
                   <h3 className="font-bold text-lg mb-2">注目したい箇所（要現地確認）</h3>
-                  <p className="text-gray-700">{session.damage_locations}</p>
+                  <p className="text-slate-700 leading-relaxed">{session.damage_locations}</p>
                 </div>
                 <div>
                   <h3 className="font-bold text-lg mb-2">写真から見られる状態</h3>
-                  <p className="text-gray-700 whitespace-pre-wrap">{session.damage_description}</p>
+                  <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{session.damage_description}</p>
                 </div>
                 <div>
                   <h3 className="font-bold text-lg mb-2">概算費用レンジ（目安）</h3>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl md:text-3xl font-black text-primary">
                     &yen;{Number(session.estimated_cost_min).toLocaleString()} 〜 &yen;{Number(session.estimated_cost_max).toLocaleString()}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">現地確認で変わる場合があります。</p>
+                  <p className="text-xs text-slate-500 mt-1">現地確認で変わる場合があります。</p>
                 </div>
                 <div>
                   <h3 className="font-bold text-lg mb-2">応急処置の目安費用</h3>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl md:text-3xl font-black text-primary">
                     &yen;{Number(session.first_aid_cost).toLocaleString()}
                   </p>
                 </div>
@@ -257,11 +260,11 @@ export default function ResultPage() {
                   <p className={`text-2xl font-bold ${getInsuranceLikelihoodColor(session.insurance_likelihood)}`}>
                     {getInsuranceLikelihoodText(session.insurance_likelihood)}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">適用可否は保険会社が判断します。当社は保険適用を保証しません。</p>
+                  <p className="text-xs text-slate-500 mt-1">適用可否は保険会社が判断します。当社は保険適用を保証しません。</p>
                 </div>
                 <div>
                   <h3 className="font-bold text-lg mb-2">次の一手の目安</h3>
-                  <p className="text-gray-700">{session.recommended_plan}</p>
+                  <p className="text-slate-700 leading-relaxed">{session.recommended_plan}</p>
                 </div>
               </>
             )}
@@ -269,7 +272,7 @@ export default function ResultPage() {
             {isNotApplicable && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                 <h3 className="font-bold text-lg mb-2 text-yellow-800">該当なし</h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{session.damage_description}</p>
+                <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{session.damage_description}</p>
               </div>
             )}
 
@@ -281,7 +284,7 @@ export default function ResultPage() {
                     key={index}
                     src={url}
                     alt={`診断画像 ${index + 1}`}
-                    className="w-full h-48 object-cover rounded-lg shadow-md"
+                    className="w-full h-32 md:h-48 object-cover rounded-lg shadow-md border border-slate-200"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
@@ -293,9 +296,9 @@ export default function ResultPage() {
           </div>
         )}
 
-        <div className="mt-8 bg-blue-50 rounded-lg p-6">
-          <h3 className="font-bold text-lg mb-2">次のステップ</h3>
-          <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+        <div className="mt-8 bg-cyan-50 border border-cyan-200 rounded-lg p-6">
+          <h3 className="font-black text-lg mb-2 text-primary">次のステップ</h3>
+          <ol className="list-decimal list-inside space-y-2 text-sm text-slate-700">
             <li>上記の合言葉をLINE公式アカウントに送信してください。</li>
             <li>詳細なPDFレポートが自動的に送信されます。</li>
             <li>PDFレポートを確認後、現地調査のご依頼をお待ちしております。</li>
@@ -303,7 +306,7 @@ export default function ResultPage() {
         </div>
 
         <div className="mt-8 text-center">
-          <Link href="/" className="text-blue-600 underline hover:text-blue-800">
+          <Link href="/" className="text-primary underline hover:text-accent-dark font-bold">
             ← ホームに戻る
           </Link>
         </div>

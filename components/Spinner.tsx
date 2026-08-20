@@ -14,7 +14,7 @@ export function Spinner({ size = 'md', className = '' }: SpinnerProps) {
 
   return (
     <div
-      className={`animate-spin rounded-full border-blue-600 border-t-transparent ${sizeStyles[size]} ${className}`}
+      className={`animate-spin rounded-full border-accent-dark border-t-transparent ${sizeStyles[size]} ${className}`}
       role="status"
       aria-label="読み込み中"
     >

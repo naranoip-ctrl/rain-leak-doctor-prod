@@ -10,24 +10,24 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#0F4C81',
-          dark: '#0A2540',
-          light: '#1a6bb5',
+          DEFAULT: '#12364A',
+          dark: '#0A2431',
+          light: '#2E6477',
         },
         accent: {
-          DEFAULT: '#00D4FF',
-          dark: '#00b8d9',
-          light: '#33ddff',
+          DEFAULT: '#49D4D0',
+          dark: '#0F9F9A',
+          light: '#8BE7E3',
         },
         cta: {
-          DEFAULT: '#FF6B35',
-          dark: '#E55A2B',
-          light: '#FF8555',
+          DEFAULT: '#0F9F9A',
+          dark: '#0A817E',
+          light: '#49D4D0',
         },
         warning: {
-          DEFAULT: '#E63946',
-          dark: '#C5303C',
-          light: '#FF4D5A',
+          DEFAULT: '#C96B2C',
+          dark: '#A5521E',
+          light: '#F3A35E',
         },
         line: {
           DEFAULT: '#06C755',
@@ -35,7 +35,16 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['Noto Sans JP', 'sans-serif'],
+        sans: [
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          '"Yu Gothic"',
+          '"Hiragino Kaku Gothic ProN"',
+          'Meiryo',
+          'sans-serif',
+        ],
       },
       keyframes: {
         'pulse-cta': {

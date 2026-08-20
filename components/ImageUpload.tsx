@@ -58,26 +58,26 @@ export function ImageUpload({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className="block text-sm font-bold text-primary mb-2">
         雨漏り箇所の写真（最大{maxImages}枚） <span className="text-red-500">*</span>
       </label>
-      <p className="text-sm text-gray-500 mb-4">
+      <p className="text-sm text-slate-600 mb-4 leading-relaxed">
         雨漏り箇所の写真をアップロードしてください。1枚でも判定できます（異なる角度から{maxImages}枚あるとより正確です）。
       </p>
 
       {images.length < maxImages && (
-        <label className={`block w-full border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 transition-colors ${compressing ? 'opacity-50 pointer-events-none' : ''}`}>
+        <label className={`block w-full border-2 border-dashed border-cyan-200 bg-cyan-50/50 rounded-lg p-8 text-center cursor-pointer hover:border-accent-dark hover:bg-cyan-50 transition-colors ${compressing ? 'opacity-50 pointer-events-none' : ''}`}>
           {compressing ? (
             <>
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-sm text-blue-600 font-medium">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-dark mx-auto"></div>
+              <p className="mt-2 text-sm text-primary font-bold">
                 画像を最適化しています...
               </p>
             </>
           ) : (
             <>
               <svg
-                className="mx-auto h-12 w-12 text-gray-400"
+                className="mx-auto h-12 w-12 text-accent-dark"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -89,7 +89,7 @@ export function ImageUpload({
                   d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                 />
               </svg>
-              <p className="mt-2 text-sm text-gray-600">
+              <p className="mt-2 text-sm text-primary font-bold">
                 クリックして画像を選択
               </p>
             </>
@@ -116,12 +116,12 @@ export function ImageUpload({
               <img
                 src={URL.createObjectURL(image)}
                 alt={`Preview ${index + 1}`}
-                className="w-full h-32 object-cover rounded-lg"
+                className="w-full h-32 object-cover rounded-lg border border-slate-200 shadow-sm"
               />
               <button
                 type="button"
                 onClick={() => removeImage(index)}
-                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-red-700 shadow"
                 disabled={compressing}
               >
                 ×

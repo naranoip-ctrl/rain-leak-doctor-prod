@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ImageUpload } from '@/components/ImageUpload';
 import { trackFormStart, trackFormSubmit, trackLineClick, trackInspectionRequest } from '@/lib/analytics';
+import { useScrollReveal } from '@/components/useScrollReveal';
 
 type DiagnosisStep = 'form' | 'uploading' | 'result';
 
@@ -67,6 +68,8 @@ export default function DiagnosisPage() {
 
   // 解析完了タイマー
   const [analysisComplete, setAnalysisComplete] = useState(false);
+
+  useScrollReveal('.diagnosis-refresh header, .diagnosis-refresh main > *');
 
   // 計測: フォーム初回操作（form_start）をセッション内で1回だけ発火させるためのフラグ
   const formStarted = useRef(false);
@@ -190,35 +193,35 @@ export default function DiagnosisPage() {
   // ============================================================
   if (step === 'result') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <div className="diagnosis-refresh min-h-screen">
         {/* ヘッダー */}
-        <header className="bg-white shadow-sm">
+        <header className="bg-white/90 backdrop-blur-md border-b border-cyan-100 shadow-sm">
           <div className="container mx-auto px-4 py-4">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent-dark rounded-lg flex items-center justify-center shadow-lg shadow-cyan-900/10">
                 <span className="text-white font-bold text-xl">雨</span>
               </div>
-              <span className="text-2xl font-bold text-blue-600">雨漏りドクター</span>
+              <span className="text-2xl font-black text-primary">雨漏りドクター</span>
             </Link>
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-8 max-w-lg">
+        <main className="container mx-auto px-4 py-10 max-w-lg">
           {/* 合言葉カード */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl shadow-xl p-8 mb-6">
+          <div className="bg-gradient-to-br from-primary to-primary-dark text-white rounded-2xl shadow-xl p-8 mb-6 border border-cyan-100/20">
             <h2 className="text-2xl font-bold mb-2 text-center">
               受付が完了しました！
             </h2>
-            <p className="text-center text-blue-100 mb-6 text-sm">
+            <p className="text-center text-cyan-100 mb-6 text-sm">
               あなたの合言葉（4桁番号）
             </p>
-            <div className="bg-white text-gray-900 rounded-xl p-6 text-center">
-              <p className="text-6xl font-bold tracking-[0.3em] mb-4 text-blue-700">
+            <div className="bg-white text-slate-900 rounded-xl p-6 text-center">
+              <p className="text-6xl font-black tracking-[0.18em] sm:tracking-[0.3em] mb-4 text-primary">
                 {secretCode}
               </p>
               <button
                 onClick={copySecretCode}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                className="bg-cta text-white px-6 py-2 rounded-lg hover:bg-cta-dark transition-colors text-sm font-bold"
               >
                 {copied ? '✓ コピーしました！' : '合言葉をコピー'}
               </button>
@@ -227,31 +230,31 @@ export default function DiagnosisPage() {
 
           {/* AI解析ステータス（30秒後に完了メッセージに切替） */}
           {!analysisComplete ? (
-            <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
+            <div className="form-panel p-6 mb-6">
               <div className="flex items-center justify-center mb-4">
                 <div className="relative">
-                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200"></div>
-                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent absolute top-0 left-0"></div>
+                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-cyan-100"></div>
+                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-accent-dark border-t-transparent absolute top-0 left-0"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-xl">🔍</span>
                   </div>
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-center text-gray-800 mb-2">
+              <h3 className="text-lg font-bold text-center text-primary mb-2">
                 現在AIが解析しています
               </h3>
-              <p className="text-sm text-gray-600 text-center leading-relaxed">
+              <p className="text-sm text-slate-600 text-center leading-relaxed">
                 写真の解析とPDFレポートの生成には<br />
                 約15〜30秒かかります。
               </p>
               <div className="mt-4 flex justify-center space-x-1">
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                <div className="w-2 h-2 bg-accent-dark rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-accent-dark rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-accent-dark rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl shadow-md p-6 mb-6 border-2 border-green-200">
+            <div className="form-panel p-6 mb-6 border-2 border-emerald-200">
               <div className="flex items-center justify-center mb-4">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
                   <svg className="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -262,7 +265,7 @@ export default function DiagnosisPage() {
               <h3 className="text-lg font-bold text-center text-green-700 mb-2">
                 AI解析が完了しました！
               </h3>
-              <p className="text-sm text-gray-600 text-center leading-relaxed">
+              <p className="text-sm text-slate-600 text-center leading-relaxed">
                 PDFレポートの準備ができました。<br />
                 LINEで合言葉「<strong className="text-green-700">{secretCode}</strong>」を送信して<br />
                 診断結果を受け取ってください。
@@ -271,11 +274,11 @@ export default function DiagnosisPage() {
           )}
 
           {/* LINE誘導カード */}
-          <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 mb-6">
+          <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-6 mb-6">
             <h3 className="text-lg font-bold text-green-800 mb-3 text-center">
               📱 LINEで結果を受け取る
             </h3>
-            <div className="space-y-3 text-sm text-gray-700">
+            <div className="space-y-3 text-sm text-slate-700">
               <div className="flex items-start space-x-3">
                 <span className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs font-bold">1</span>
                 <p>下のボタンからLINE公式アカウントを開いてください</p>
@@ -308,7 +311,7 @@ export default function DiagnosisPage() {
           </div>
 
           {/* 注意事項 */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm text-yellow-800">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900">
             <p className="font-bold mb-1">⚠️ ご注意</p>
             <ul className="list-disc list-inside space-y-1 text-xs">
               <li>合言葉の有効期限は24時間です</li>
@@ -319,7 +322,7 @@ export default function DiagnosisPage() {
 
           {/* ホームに戻る */}
           <div className="mt-6 text-center">
-            <Link href="/" className="text-blue-600 underline hover:text-blue-800 text-sm">
+            <Link href="/" className="text-primary underline hover:text-accent-dark text-sm font-bold">
               ← ホームに戻る
             </Link>
           </div>
@@ -333,14 +336,14 @@ export default function DiagnosisPage() {
   // ============================================================
   if (step === 'uploading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white">
+      <div className="diagnosis-refresh min-h-screen flex items-center justify-center">
         <div className="text-center p-8">
           <div className="relative mx-auto mb-6" style={{ width: 80, height: 80 }}>
-            <div className="animate-spin rounded-full h-20 w-20 border-4 border-blue-200"></div>
-            <div className="animate-spin rounded-full h-20 w-20 border-4 border-blue-600 border-t-transparent absolute top-0 left-0"></div>
+            <div className="animate-spin rounded-full h-20 w-20 border-4 border-cyan-100"></div>
+            <div className="animate-spin rounded-full h-20 w-20 border-4 border-accent-dark border-t-transparent absolute top-0 left-0"></div>
           </div>
-          <p className="text-lg font-semibold text-gray-700 mb-2">{uploadProgress}</p>
-          <p className="text-sm text-gray-500">しばらくお待ちください</p>
+          <p className="text-lg font-bold text-primary mb-2">{uploadProgress}</p>
+          <p className="text-sm text-slate-500">しばらくお待ちください</p>
         </div>
       </div>
     );
@@ -350,52 +353,57 @@ export default function DiagnosisPage() {
   // フォーム画面
   // ============================================================
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="diagnosis-refresh min-h-screen">
       {/* ヘッダー */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white/90 backdrop-blur-md border-b border-cyan-100 shadow-sm sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent-dark rounded-lg flex items-center justify-center shadow-lg shadow-cyan-900/10">
               <span className="text-white font-bold text-xl">雨</span>
             </div>
-            <span className="text-2xl font-bold text-blue-600">雨漏りドクター</span>
+            <span className="text-2xl font-black text-primary">雨漏りドクター</span>
           </Link>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-lg">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">AI雨漏り診断</h1>
-        <p className="text-gray-600 mb-8">
+      <main className="container mx-auto px-4 py-10 max-w-2xl">
+        <div className="mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-white/80 px-4 py-2 text-sm font-bold text-primary shadow-sm mb-4">
+            AI PHOTO CHECK
+          </div>
+          <h1 className="text-3xl md:text-4xl font-black text-primary mb-3 leading-tight">AI雨漏り診断</h1>
+          <p className="text-slate-600 leading-relaxed text-base md:text-lg">
           写真をアップロードするだけで、AIが雨漏りの状況を一次判定します。1枚でもOK（3枚あるとより正確）。原因の断定には現地確認が必要です。
-        </p>
+          </p>
+        </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6 font-bold">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} onFocus={handleFirstInteraction} className="space-y-6">
+        <form onSubmit={handleSubmit} onFocus={handleFirstInteraction} className="form-panel p-5 md:p-7 space-y-7">
           {/* ① 雨漏りの状況（任意） */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               気になっている症状・状況（任意）
             </label>
             <textarea
               value={leakSituation}
               onChange={(e) => setLeakSituation(e.target.value)}
               rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
               placeholder="例：先週の大雨のあと、2階の天井にシミが出てきた"
             />
           </div>
 
           {/* ② 写真（必須） */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               写真（1〜3枚）<span className="text-red-500">*</span>
             </label>
-            <p className="text-xs text-gray-500 mb-3">一次判定に使う写真です。雨漏りの跡・気になる箇所を撮ってアップロードしてください。1枚でも判定できます（3枚あるとより正確です）。</p>
+            <p className="text-xs text-slate-500 mb-3">一次判定に使う写真です。雨漏りの跡・気になる箇所を撮ってアップロードしてください。1枚でも判定できます（3枚あるとより正確です）。</p>
             <ImageUpload
               maxImages={3}
               images={images}
@@ -405,13 +413,13 @@ export default function DiagnosisPage() {
 
           {/* ③ 物件所在地（都道府県・任意）＋関西分岐 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               物件の所在地（都道府県・任意）
             </label>
             <select
               value={prefecture}
               onChange={(e) => setPrefecture(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control bg-white"
             >
               <option value="">選択してください</option>
               {PREFECTURES.map((p) => (
@@ -424,7 +432,7 @@ export default function DiagnosisPage() {
                   {prefecture}は現地点検の対応エリアです。一次判定のあと、ご希望に応じて現地点検をご案内します。
                 </p>
               ) : (
-                <p className="mt-2 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                <p className="mt-2 text-sm text-primary bg-cyan-50 border border-cyan-200 rounded-lg px-3 py-2">
                   関西エリア外のため、まずは写真からのオンライン一次判定で対応します（現地点検は対象外の場合があります）。
                 </p>
               )
@@ -433,7 +441,7 @@ export default function DiagnosisPage() {
 
           {/* ④ 他社見積の有無（「高い気がする」→ third-place 導線） */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               他社の見積もりはありますか？（任意）
             </label>
             <div className="space-y-2">
@@ -442,16 +450,16 @@ export default function DiagnosisPage() {
                 { value: '適正か不明', label: '見積もりがある（適正か分からない）' },
                 { value: 'ない', label: 'まだ見積もりはない' },
               ].map((opt) => (
-                <label key={opt.value} className="flex items-center gap-3 px-4 py-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                <label key={opt.value} className="flex items-center gap-3 px-4 py-3 border border-cyan-200 rounded-lg cursor-pointer hover:bg-cyan-50 bg-white/80 transition-colors">
                   <input
                     type="radio"
                     name="hasQuote"
                     value={opt.value}
                     checked={hasQuote === opt.value}
                     onChange={(e) => setHasQuote(e.target.value)}
-                    className="h-4 w-4 text-blue-600"
+                    className="h-4 w-4 text-accent-dark"
                   />
-                  <span className="text-sm text-gray-700">{opt.label}</span>
+                  <span className="text-sm text-slate-700">{opt.label}</span>
                 </label>
               ))}
             </div>
@@ -473,7 +481,7 @@ export default function DiagnosisPage() {
 
           {/* ⑤ 希望 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               ご希望（任意）
             </label>
             <div className="space-y-2">
@@ -482,25 +490,25 @@ export default function DiagnosisPage() {
                 { value: '現地点検', label: '現地点検を希望（関西エリア）' },
                 { value: '見積確認', label: '他社見積の確認をしたい' },
               ].map((opt) => (
-                <label key={opt.value} className="flex items-center gap-3 px-4 py-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                <label key={opt.value} className="flex items-center gap-3 px-4 py-3 border border-cyan-200 rounded-lg cursor-pointer hover:bg-cyan-50 bg-white/80 transition-colors">
                   <input
                     type="radio"
                     name="requestType"
                     value={opt.value}
                     checked={requestType === opt.value}
                     onChange={(e) => setRequestType(e.target.value)}
-                    className="h-4 w-4 text-blue-600"
+                    className="h-4 w-4 text-accent-dark"
                   />
-                  <span className="text-sm text-gray-700">{opt.label}</span>
+                  <span className="text-sm text-slate-700">{opt.label}</span>
                 </label>
               ))}
             </div>
           </div>
 
           {/* ⑥ 連絡先（任意・匿名可） */}
-          <div className="border-t border-gray-200 pt-6">
-            <p className="text-sm font-medium text-gray-700 mb-1">連絡先（任意・匿名でもOK）</p>
-            <p className="text-xs text-gray-500 mb-4">
+          <div className="border-t border-cyan-100 pt-6">
+            <p className="text-sm font-medium text-slate-700 mb-1">連絡先（任意・匿名でもOK）</p>
+            <p className="text-xs text-slate-500 mb-4">
               結果はこのあと表示する4桁の合言葉でLINEから受け取れます。連絡先の入力は任意です。
             </p>
             <div className="space-y-4">
@@ -508,27 +516,27 @@ export default function DiagnosisPage() {
                 type="text"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
                 placeholder="お名前（任意）"
               />
               <input
                 type="tel"
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
                 placeholder="電話番号（任意）"
               />
               <input
                 type="email"
                 value={customerEmail}
                 onChange={(e) => setCustomerEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
                 placeholder="メールアドレス（任意）"
               />
               <select
                 value={customerBuildingAge}
                 onChange={(e) => setCustomerBuildingAge(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control bg-white"
               >
                 <option value="">築年数（任意）</option>
                 <option value="5年未満">5年未満</option>
@@ -542,7 +550,7 @@ export default function DiagnosisPage() {
                 type="text"
                 value={customerAddress}
                 onChange={(e) => setCustomerAddress(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
                 placeholder="住所（任意・現地点検をご希望の場合）"
               />
             </div>
@@ -554,21 +562,21 @@ export default function DiagnosisPage() {
             disabled={images.length < 1}
             className={`w-full py-4 rounded-lg font-bold text-lg transition-colors ${
               images.length >= 1
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                ? 'bg-cta text-white hover:bg-cta-dark'
+                : 'bg-slate-200 text-slate-500 cursor-not-allowed'
             }`}
           >
             写真で一次判定を受ける
           </button>
           {images.length < 1 && (
-            <p className="text-xs text-gray-500 text-center -mt-3">
+            <p className="text-xs text-slate-500 text-center -mt-3">
               写真を1枚以上アップロードすると送信できます
             </p>
           )}
         </form>
 
         {/* 注意事項 */}
-        <div className="mt-8 bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
+        <div className="mt-8 bg-white/70 rounded-lg p-4 text-sm text-slate-600">
           <p className="font-bold mb-2">ご利用にあたって</p>
           <ul className="list-disc list-inside space-y-1">
             <li>診断結果はAIによる参考情報です。正確な診断は現地調査が必要です。</li>
@@ -580,3 +588,4 @@ export default function DiagnosisPage() {
     </div>
   );
 }
+
