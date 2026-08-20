@@ -184,24 +184,26 @@ export default function Home() {
               </div>
 
               {/* 見出し：AIを主役から降格し「雨漏りの次の一手」を約束 */}
-              <h1 className="text-3xl md:text-5xl lg:text-[3.4rem] font-black text-white leading-[1.2] tracking-normal">
+              <h1 className="text-[1.72rem] md:text-5xl lg:text-[3.4rem] font-black text-white leading-[1.25] md:leading-[1.2] tracking-normal">
                 写真で、雨漏りの<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-cta to-accent-light">危険度と次の一手</span>を整理。
               </h1>
 
-              <p className="text-slate-100 text-lg md:text-xl font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
-                AIと職人目線で、写真から分かる範囲を<strong className="text-white">一次判定</strong>。<br className="hidden md:block" />
-                費用の目安と確認すべき点を整理します。<br className="hidden md:block" />
-                <span className="text-slate-300 text-base">原因の断定には現地確認が必要です。</span>
+              {/* スマホは1文だけ・詳細文はmd以上で表示(文字の壁を作らない) */}
+              <p className="text-slate-100 text-base md:text-xl font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
+                AIと職人目線で、写真から分かる範囲を<strong className="text-white">一次判定</strong>。
+                <span className="hidden md:inline"><br className="hidden md:block" />
+                費用の目安と確認すべき点を整理します。</span><br className="hidden md:block" />
+                <span className="hidden md:inline text-slate-300 text-base">原因の断定には現地確認が必要です。</span>
               </p>
 
               {/* メインCTA（単一）：写真で雨漏りの危険度を見る */}
               <div className="flex flex-col gap-3 pt-2 items-center lg:items-start">
                 <Link
                   href="/diagnosis"
-                  className="relative inline-flex items-center justify-center h-16 px-10 bg-cta text-white hover:bg-cta-dark text-xl font-black rounded-full shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1"
+                  className="relative inline-flex items-center justify-center h-14 md:h-16 px-6 md:px-10 bg-cta text-white hover:bg-cta-dark text-base md:text-xl font-black rounded-full shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 whitespace-nowrap w-full max-w-sm md:w-auto md:max-w-none"
                 >
-                  <Camera className="h-6 w-6 mr-2" />
+                  <Camera className="h-5 w-5 md:h-6 md:w-6 mr-2 flex-shrink-0" />
                   <span>写真で雨漏りの危険度を見る</span>
                 </Link>
                 <p className="text-slate-200 text-sm flex items-center gap-2">
@@ -221,8 +223,8 @@ export default function Home() {
                 </a>
               </div>
 
-              {/* 信頼バッジ強化 */}
-              <div className="pt-4 flex flex-wrap gap-4 justify-center lg:justify-start text-sm font-medium text-slate-200">
+              {/* 信頼バッジ強化(スマホではカードの下に別途表示) */}
+              <div className="pt-4 hidden lg:flex flex-wrap gap-4 justify-center lg:justify-start text-sm font-medium text-slate-200">
                 {[
                   { icon: <CheckCircle className="h-4 w-4 text-accent" />, txt: '見積だけOK' },
                   { icon: <Shield className="h-4 w-4 text-accent" />, txt: '無理な勧誘なし' },
@@ -235,7 +237,7 @@ export default function Home() {
               </div>
 
               {/* 実証できる加盟情報のみ掲載（Google評価4.8は実証不可のため撤去） */}
-              <div className="flex items-center gap-3 justify-center lg:justify-start">
+              <div className="hidden lg:flex items-center gap-3 justify-center lg:justify-start">
                 <img src={LIXIL_BADGE_URL} alt="LIXILリフォームネット" className="w-5 h-5 rounded-sm object-contain opacity-70" />
                 <span className="text-xs text-slate-600 lg:text-slate-300">LIXILリフォームネット加盟店</span>
               </div>
@@ -243,7 +245,7 @@ export default function Home() {
 
             {/* 診断結果プレビュー（モックアップの代わり） */}
             <div className="relative flex justify-center lg:justify-end">
-              <div className="relative w-72 md:w-80 lg:w-[22rem]">
+              <div className="relative w-full max-w-sm md:w-80 lg:w-[22rem]">
                 {/* 結果プレビューカード */}
                 <div className="hero-ai-panel rounded-2xl shadow-2xl p-6 animate-float">
                   <div className="flex items-center gap-2 mb-4">
@@ -286,6 +288,23 @@ export default function Home() {
 
                 {/* 背景グロー */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] h-[90%] bg-cta/15 rounded-full blur-[80px] -z-10" />
+              </div>
+            </div>
+
+            {/* スマホ専用: カードの下に信頼チップを1行で(左カラムではlg以上のみ表示) */}
+            <div className="lg:hidden flex flex-wrap gap-2 justify-center text-xs font-medium text-slate-200">
+              {[
+                { icon: <CheckCircle className="h-3.5 w-3.5 text-accent" />, txt: '見積だけOK' },
+                { icon: <Shield className="h-3.5 w-3.5 text-accent" />, txt: '無理な勧誘なし' },
+                { icon: <Award className="h-3.5 w-3.5 text-accent" />, txt: '建設業許可取得済' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
+                  {item.icon} {item.txt}
+                </div>
+              ))}
+              <div className="w-full flex items-center gap-2 justify-center pt-1">
+                <img src={LIXIL_BADGE_URL} alt="LIXILリフォームネット" className="w-4 h-4 rounded-sm object-contain opacity-70" />
+                <span className="text-[11px] text-slate-300">LIXILリフォームネット加盟店</span>
               </div>
             </div>
           </div>
