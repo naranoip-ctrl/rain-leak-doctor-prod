@@ -20,9 +20,9 @@ export default function HeroDiagnosisDemo() {
         .hd-reflection{animation:hdReflection var(--hd-cycle) ease-in-out infinite}
         @keyframes hdReflection{0%,12%{transform:translateX(-130%) rotate(18deg);opacity:0}18%,37%{opacity:.42}48%,100%{transform:translateX(150%) rotate(18deg);opacity:0}}
         .hd-photo{animation-name:hdPhoto}
-        @keyframes hdPhoto{0%,8%{filter:saturate(.9) contrast(.95);transform:scale(1.025)}27%{filter:saturate(.95) contrast(1.02)}44%,100%{filter:saturate(.82) contrast(.92) brightness(.78);transform:scale(1)}}
+        @keyframes hdPhoto{0%,8%{filter:saturate(.86) contrast(.96);transform:scale(1.025)}27%{filter:saturate(.92) contrast(1.01)}44%,100%{filter:saturate(1) contrast(1) brightness(1);transform:scale(1)}}
         .hd-grid{animation-name:hdGrid}
-        @keyframes hdGrid{0%,9%{opacity:0;transform:scale(1.04)}15%,43%{opacity:.52;transform:scale(1)}52%,100%{opacity:.16;transform:scale(1)}}
+        @keyframes hdGrid{0%,9%{opacity:0;transform:scale(1.04)}15%,43%{opacity:.22;transform:scale(1)}52%,100%{opacity:.08;transform:scale(1)}}
         .hd-beam{animation-name:hdBeam}
         @keyframes hdBeam{0%,9%{transform:translateY(-135%);opacity:0}12%{opacity:1}36%{transform:translateY(455%);opacity:1}42%,100%{transform:translateY(455%);opacity:0}}
         .hd-afterglow{animation-name:hdAfterglow}
@@ -60,8 +60,8 @@ export default function HeroDiagnosisDemo() {
           .hd-cycle,.hd-phone,.hd-reflection,.hd-thinking-dot,.hd-lock-ping,.hd-check-ring,.hd-check-mark,.hd-tick{animation:none!important}
           .hd-phone,.hd-photo,.hd-grid,.hd-lock-a,.hd-lock-b,.hd-result-panel,.hd-line-1,.hd-line-2,.hd-line-3,.hd-note,.hd-complete{transform:none!important;filter:none!important}
           .hd-phone{transform:none!important}
-          .hd-photo{filter:saturate(.82) contrast(.92) brightness(.78)!important}
-          .hd-grid{opacity:.16!important}
+          .hd-photo{filter:saturate(1) contrast(1) brightness(1)!important}
+          .hd-grid{opacity:.08!important}
           .hd-beam,.hd-afterglow,.hd-scan-chip,.hd-reflection,.hd-lock-ping{display:none!important}
           .hd-lock-a,.hd-lock-b{opacity:.45!important}
           .hd-result-panel,.hd-line-1,.hd-line-2,.hd-line-3,.hd-note,.hd-complete{opacity:1!important}
@@ -79,18 +79,12 @@ export default function HeroDiagnosisDemo() {
             <div className="hd-reflection pointer-events-none absolute -left-24 top-0 z-20 h-full w-24 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent)]" />
 
             <section className="relative h-[212px] overflow-hidden">
-              <div className="hd-photo hd-cycle absolute inset-0 bg-[linear-gradient(154deg,#f1eadc_0%,#e4dccd_32%,#cdc4b2_63%,#afa48f_100%)]">
-                <div className="absolute inset-0 opacity-35 bg-[repeating-linear-gradient(96deg,transparent_0,transparent_42px,rgba(78,66,46,.32)_43px,transparent_45px)]" />
-                <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_28%_26%,rgba(255,255,255,.52),transparent_28%),radial-gradient(circle_at_78%_18%,rgba(80,62,38,.18),transparent_30%)]" />
-                <div className="absolute left-[13%] top-[18%] h-[118px] w-[158px] rounded-[58%_42%_54%_46%/50%_62%_38%_50%] bg-[radial-gradient(ellipse_at_42%_38%,rgba(79,55,30,.58)_0%,rgba(118,86,48,.42)_38%,rgba(148,116,75,.2)_68%,transparent_100%)]" />
-                <div className="absolute left-[22%] top-[31%] h-[56px] w-[88px] rounded-full bg-[radial-gradient(ellipse,rgba(64,44,24,.42)_0%,rgba(91,65,36,.24)_48%,transparent_73%)]" />
-                <div className="absolute left-[38%] top-[24%] h-[84px] w-[92px] rounded-full bg-[radial-gradient(ellipse,rgba(143,109,66,.18)_0%,transparent_72%)]" />
-                <svg className="absolute left-[58%] top-[26%] h-[72px] w-[116px] overflow-visible" viewBox="0 0 116 72" aria-hidden="true">
-                  <path d="M4 18 C20 20 27 12 40 18 S60 32 73 27 S93 17 112 26" fill="none" stroke="rgba(43,47,46,.58)" strokeWidth="2.2" strokeLinecap="round" />
-                  <path d="M51 24 C57 31 57 39 66 47" fill="none" stroke="rgba(43,47,46,.42)" strokeWidth="1.7" strokeLinecap="round" />
-                  <path d="M76 26 C84 32 90 31 98 40" fill="none" stroke="rgba(43,47,46,.34)" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </div>
+              <img
+                className="hd-photo hd-cycle absolute inset-0 h-full w-full object-cover object-top"
+                src="/images/demo-ceiling.jpg"
+                alt=""
+                aria-hidden="true"
+              />
 
               <div className="hd-afterglow hd-cycle absolute inset-0 bg-[linear-gradient(180deg,rgba(45,212,191,.18),rgba(103,232,249,.08),transparent_70%)]" />
               <div className="hd-grid hd-cycle absolute inset-0 bg-[linear-gradient(rgba(var(--hd-teal),.28)_1px,transparent_1px),linear-gradient(90deg,rgba(var(--hd-teal),.24)_1px,transparent_1px)] bg-[size:24px_24px]" />
@@ -105,7 +99,7 @@ export default function HeroDiagnosisDemo() {
                 AIスキャン中…
               </div>
 
-              <div className="hd-lock-a hd-cycle absolute left-[10%] top-[13%] z-10 h-[128px] w-[174px]">
+              <div className="hd-lock-a hd-cycle absolute left-[38%] top-[7%] z-10 h-[132px] w-[172px]">
                 <div className="hd-lock-ping absolute inset-2 rounded-[18px] border border-amber-300/45" />
                 <div className="absolute left-0 top-0 h-8 w-8 border-l-2 border-t-2 border-amber-300" />
                 <div className="absolute right-0 top-0 h-8 w-8 border-r-2 border-t-2 border-amber-300" />
@@ -114,13 +108,13 @@ export default function HeroDiagnosisDemo() {
                 <span className="absolute -top-4 left-3 rounded-md bg-amber-300 px-1.5 py-0.5 text-[10px] font-black leading-none text-slate-950 shadow-[0_5px_16px_rgba(0,0,0,.24)]">雨染み</span>
               </div>
 
-              <div className="hd-lock-b hd-cycle absolute left-[56%] top-[23%] z-10 h-[76px] w-[118px]">
+              <div className="hd-lock-b hd-cycle absolute left-[4%] top-[58%] z-10 h-[72px] w-[112px]">
                 <div className="hd-lock-ping absolute inset-2 rounded-[14px] border border-cyan-200/45" />
                 <div className="absolute left-0 top-0 h-6 w-6 border-l-2 border-t-2 border-cyan-200" />
                 <div className="absolute right-0 top-0 h-6 w-6 border-r-2 border-t-2 border-cyan-200" />
                 <div className="absolute bottom-0 left-0 h-6 w-6 border-b-2 border-l-2 border-cyan-200" />
                 <div className="absolute bottom-0 right-0 h-6 w-6 border-b-2 border-r-2 border-cyan-200" />
-                <span className="absolute -top-4 left-3 rounded-md bg-cyan-200 px-1.5 py-0.5 text-[10px] font-black leading-none text-slate-950 shadow-[0_5px_16px_rgba(0,0,0,.24)]">ひび</span>
+                <span className="absolute -top-4 left-3 rounded-md bg-cyan-200 px-1.5 py-0.5 text-[10px] font-black leading-none text-slate-950 shadow-[0_5px_16px_rgba(0,0,0,.24)]">剥がれ</span>
               </div>
             </section>
 
