@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { trackLineClick, trackCallClick, trackReportPurchaseClick } from '@/lib/analytics';
 import { useScrollReveal } from '@/components/useScrollReveal';
+import HeroDiagnosisDemo from '@/components/HeroDiagnosisDemo';
 
 /* ─── ローカル画像パス ─── */
 const DROCO_ICON_URL = "/images/droco-icon.jpg";
@@ -189,12 +190,11 @@ export default function Home() {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-cta to-accent-light">危険度と次の一手</span>を整理。
               </h1>
 
-              {/* スマホは1文だけ・詳細文はmd以上で表示(文字の壁を作らない) */}
-              <p className="text-slate-100 text-base md:text-xl font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
-                AIと職人目線で、写真から分かる範囲を<strong className="text-white">一次判定</strong>。
-                <span className="hidden md:inline"><br className="hidden md:block" />
-                費用の目安と確認すべき点を整理します。</span><br className="hidden md:block" />
-                <span className="hidden md:inline text-slate-300 text-base">原因の断定には現地確認が必要です。</span>
+              {/* スマホは説明文なし(デモが語る)・md以上でのみ表示 */}
+              <p className="hidden md:block text-slate-100 md:text-xl font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
+                AIと職人目線で、写真から分かる範囲を<strong className="text-white">一次判定</strong>。<br className="hidden md:block" />
+                費用の目安と確認すべき点を整理します。<br className="hidden md:block" />
+                <span className="text-slate-300 text-base">原因の断定には現地確認が必要です。</span>
               </p>
 
               {/* メインCTA（単一）：写真で雨漏りの危険度を見る */}
@@ -243,52 +243,9 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 診断結果プレビュー（モックアップの代わり） */}
+            {/* AI診断アニメーションデモ(写真→スキャン→検出→結果が自動再生) */}
             <div className="relative flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-sm md:w-80 lg:w-[22rem]">
-                {/* 結果プレビューカード */}
-                <div className="hero-ai-panel rounded-2xl shadow-2xl p-6 animate-float">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 bg-cta/10 rounded-full flex items-center justify-center">
-                      <CheckCircle className="h-5 w-5 text-cta" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500">AI診断結果サンプル</p>
-                      <p className="text-sm font-bold text-primary">こんな結果が3分で届きます</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="bg-slate-50 rounded-lg p-3">
-                      <p className="text-xs text-slate-500 mb-1">推定修理費</p>
-                      <p className="text-2xl font-black text-primary">¥58,000<span className="text-sm font-normal text-slate-500">〜</span></p>
-                    </div>
-                    <div className="bg-green-50 rounded-lg p-3 border border-green-100">
-                      <p className="text-xs text-slate-500 mb-1">火災保険</p>
-                      <p className="text-lg font-bold text-green-700 flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4" /> 確認の余地あり
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
-                        <p className="text-xs text-slate-500 mb-1">緊急度</p>
-                        <p className="text-sm font-bold text-amber-700">中（1ヶ月以内推奨）</p>
-                      </div>
-                      <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
-                        <p className="text-xs text-slate-500 mb-1">損傷タイプ</p>
-                        <p className="text-sm font-bold text-blue-700">屋根材の割れ</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-100 text-center">
-                    <p className="text-xs text-slate-400">※ 実際の診断結果の一例です</p>
-                  </div>
-                </div>
-
-                {/* 背景グロー */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] h-[90%] bg-cta/15 rounded-full blur-[80px] -z-10" />
-              </div>
+              <HeroDiagnosisDemo />
             </div>
 
             {/* スマホ専用: カードの下に信頼チップを1行で(左カラムではlg以上のみ表示) */}
