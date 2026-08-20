@@ -9,6 +9,7 @@ import {
   FileText, Umbrella, Award, ChevronRight
 } from 'lucide-react';
 import { trackLineClick, trackCallClick, trackReportPurchaseClick } from '@/lib/analytics';
+import { useScrollReveal } from '@/components/useScrollReveal';
 
 /* ─── ローカル画像パス ─── */
 const DROCO_ICON_URL = "/images/droco-icon.jpg";
@@ -60,6 +61,8 @@ export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showFloatingCTA, setShowFloatingCTA] = useState(false);
 
+  useScrollReveal('.site-refresh section, .site-refresh footer, .site-refresh .reveal-item');
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -81,9 +84,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
+    <div className="site-refresh min-h-screen font-sans">
       {/* ═══════════ Header ═══════════ */}
-      <header className={`fixed top-0 z-50 w-full transition-all duration-300 border-b ${isScrolled ? 'h-16 bg-white/90 backdrop-blur-md shadow-sm border-slate-200' : 'h-20 bg-transparent border-transparent'}`}>
+      <header className={`fixed top-0 z-50 w-full transition-all duration-300 border-b ${isScrolled ? 'h-16 bg-white/90 backdrop-blur-md shadow-sm border-slate-200' : 'h-20 bg-white/80 backdrop-blur-md border-white/50'}`}>
         <div className="container flex h-full items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className={`flex items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-dark text-white ${isScrolled ? 'w-8 h-8' : 'w-10 h-10'}`}>
@@ -94,7 +97,7 @@ export default function Home() {
                 <path d="M20 28c-1.5 0-2.5-1-2.5-2" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
-            <span className={`font-bold tracking-tight ${isScrolled ? 'text-lg text-primary' : 'text-xl text-white'}`}>
+            <span className={`font-bold tracking-tight ${isScrolled ? 'text-lg text-primary' : 'text-xl text-primary'}`}>
               雨漏りドクター
             </span>
           </Link>
@@ -103,7 +106,7 @@ export default function Home() {
             {['サービス', '料金', '事例', 'FAQ'].map((item, i) => {
               const hrefs = ['#services', '#pricing', '#cases', '#faq'];
               return (
-                <a key={i} href={hrefs[i]} onClick={(e) => smoothScroll(e, hrefs[i])} className={`text-sm font-bold transition-colors relative group ${isScrolled ? 'text-slate-600 hover:text-primary' : 'text-slate-100 hover:text-white'}`}>
+                <a key={i} href={hrefs[i]} onClick={(e) => smoothScroll(e, hrefs[i])} className={`text-sm font-bold transition-colors relative group ${isScrolled ? 'text-slate-600 hover:text-primary' : 'text-slate-700 hover:text-primary'}`}>
                   {item}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-cta transition-all duration-300 group-hover:w-full"></span>
                 </a>
@@ -113,7 +116,7 @@ export default function Home() {
 
           <div className="flex items-center gap-3">
             <button
-              className={`lg:hidden p-2 rounded-md ${!isScrolled ? 'text-white hover:bg-white/10' : 'text-slate-600 hover:bg-slate-100'}`}
+              className={`lg:hidden p-2 rounded-md ${!isScrolled ? 'text-primary hover:bg-white/60' : 'text-slate-600 hover:bg-slate-100'}`}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -164,33 +167,32 @@ export default function Home() {
       )}
 
       {/* ═══════════ Hero Section ═══════════ */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-primary">
+      <section className="relative pt-32 pb-20 lg:pt-44 lg:pb-28 overflow-hidden bg-primary">
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] bg-accent/10 rounded-full blur-[120px]" />
-          <div className="absolute bottom-[10%] right-[10%] w-[50%] h-[50%] bg-accent/5 rounded-full blur-[100px]" />
-          <div className="absolute inset-0 bg-[url('/images/pattern-cubes.png')] opacity-10"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary"></div>
+          <div className="absolute inset-0 bg-[url('/images/pattern-cubes.png')] opacity-[0.08]"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_22%,rgba(73,212,208,0.26),transparent_28rem),linear-gradient(135deg,#14384d_0%,#0f2f40_55%,#0a2431_100%)]"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/0 to-primary/20"></div>
         </div>
 
         <div className="container relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6 text-center lg:text-left">
               {/* 季節バッジ */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning/20 border border-warning/40 backdrop-blur-md">
-                <AlertTriangle className="h-3.5 w-3.5 text-warning-light" />
-                <span className="text-warning-light text-xs md:text-sm font-bold tracking-wide">{getSeasonalMessage()}</span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 border border-cyan-100 shadow-sm backdrop-blur-md">
+                <AlertTriangle className="h-4 w-4 text-warning" />
+                <span className="text-primary text-xs md:text-sm font-bold tracking-wide">{getSeasonalMessage()}</span>
               </div>
 
               {/* 見出し：AIを主役から降格し「雨漏りの次の一手」を約束 */}
-              <h1 className="text-3xl md:text-5xl lg:text-[3.4rem] font-black text-white leading-[1.2] tracking-tight">
+              <h1 className="text-3xl md:text-5xl lg:text-[3.4rem] font-black text-white leading-[1.2] tracking-normal">
                 写真で、雨漏りの<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cta to-cta-light">危険度と次の一手</span>を整理。
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cta to-accent-light">危険度と次の一手</span>を整理。
               </h1>
 
-              <p className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
+              <p className="text-slate-100 text-lg md:text-xl font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
                 AIと職人目線で、写真から分かる範囲を<strong className="text-white">一次判定</strong>。<br className="hidden md:block" />
                 費用の目安と確認すべき点を整理します。<br className="hidden md:block" />
-                <span className="text-slate-400 text-base">原因の断定には現地確認が必要です。</span>
+                <span className="text-slate-300 text-base">原因の断定には現地確認が必要です。</span>
               </p>
 
               {/* メインCTA（単一）：写真で雨漏りの危険度を見る */}
@@ -202,7 +204,7 @@ export default function Home() {
                   <Camera className="h-6 w-6 mr-2" />
                   <span>写真で雨漏りの危険度を見る</span>
                 </Link>
-                <p className="text-slate-400 text-sm flex items-center gap-2">
+                <p className="text-slate-200 text-sm flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-accent" />
                   無料・登録不要・写真3枚でOK
                 </p>
@@ -220,13 +222,13 @@ export default function Home() {
               </div>
 
               {/* 信頼バッジ強化 */}
-              <div className="pt-4 flex flex-wrap gap-4 justify-center lg:justify-start text-sm font-medium text-slate-300">
+              <div className="pt-4 flex flex-wrap gap-4 justify-center lg:justify-start text-sm font-medium text-slate-200">
                 {[
                   { icon: <CheckCircle className="h-4 w-4 text-accent" />, txt: '見積だけOK' },
                   { icon: <Shield className="h-4 w-4 text-accent" />, txt: '無理な勧誘なし' },
                   { icon: <Award className="h-4 w-4 text-accent" />, txt: '建設業許可取得済' },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+                  <div key={i} className="flex items-center gap-1.5 bg-white/70 lg:bg-white/10 px-3 py-1.5 rounded-full border border-cyan-100 lg:border-white/10">
                     {item.icon} {item.txt}
                   </div>
                 ))}
@@ -235,7 +237,7 @@ export default function Home() {
               {/* 実証できる加盟情報のみ掲載（Google評価4.8は実証不可のため撤去） */}
               <div className="flex items-center gap-3 justify-center lg:justify-start">
                 <img src={LIXIL_BADGE_URL} alt="LIXILリフォームネット" className="w-5 h-5 rounded-sm object-contain opacity-70" />
-                <span className="text-xs text-slate-400">LIXILリフォームネット加盟店</span>
+                <span className="text-xs text-slate-600 lg:text-slate-300">LIXILリフォームネット加盟店</span>
               </div>
             </div>
 
@@ -243,7 +245,7 @@ export default function Home() {
             <div className="relative flex justify-center lg:justify-end">
               <div className="relative w-72 md:w-80 lg:w-[22rem]">
                 {/* 結果プレビューカード */}
-                <div className="bg-white rounded-2xl shadow-2xl p-6 border border-slate-100 animate-float">
+                <div className="hero-ai-panel rounded-2xl shadow-2xl p-6 animate-float">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="w-8 h-8 bg-cta/10 rounded-full flex items-center justify-center">
                       <CheckCircle className="h-5 w-5 text-cta" />
@@ -807,7 +809,7 @@ export default function Home() {
             </div>
 
             {/* Standard Plan (Featured) */}
-            <div className="relative bg-primary rounded-xl p-6 text-white border-2 border-accent shadow-2xl scale-105 z-10">
+            <div className="relative bg-primary rounded-xl p-6 text-white border-2 border-accent shadow-2xl md:scale-105 z-10">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-primary px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider">
                 人気 No.1
               </div>

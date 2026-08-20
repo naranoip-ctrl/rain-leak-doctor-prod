@@ -23,12 +23,12 @@ export function Header() {
     >
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
-          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent-dark rounded-lg flex items-center justify-center shadow-lg shadow-cyan-900/10">
             <span className="text-white font-bold text-xl">雨</span>
           </div>
           <span
             className={`text-2xl font-bold transition-colors ${
-              isScrolled ? 'text-blue-600' : 'text-white'
+              isScrolled ? 'text-primary' : 'text-white'
             }`}
           >
             雨漏りドクター
@@ -39,8 +39,8 @@ export function Header() {
             href="#features"
             className={`transition-colors ${
               isScrolled
-                ? 'text-gray-600 hover:text-blue-600'
-                : 'text-white hover:text-blue-200'
+                ? 'text-slate-600 hover:text-primary'
+                : 'text-white hover:text-cyan-100'
             }`}
           >
             サービス
@@ -49,8 +49,8 @@ export function Header() {
             href="#how-it-works"
             className={`transition-colors ${
               isScrolled
-                ? 'text-gray-600 hover:text-blue-600'
-                : 'text-white hover:text-blue-200'
+                ? 'text-slate-600 hover:text-primary'
+                : 'text-white hover:text-cyan-100'
             }`}
           >
             診断の流れ
@@ -59,8 +59,8 @@ export function Header() {
             href="#stats"
             className={`transition-colors ${
               isScrolled
-                ? 'text-gray-600 hover:text-blue-600'
-                : 'text-white hover:text-blue-200'
+                ? 'text-slate-600 hover:text-primary'
+                : 'text-white hover:text-cyan-100'
             }`}
           >
             実績
