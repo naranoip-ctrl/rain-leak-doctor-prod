@@ -546,7 +546,7 @@ export default function Home() {
               {[
                 { step: "01", title: "AI診断", desc: "写真3枚で概算。保険目安と費用レンジを即表示します。", time: "3分", active: true },
                 { step: "02", title: "日程確定", desc: "最短48hで現地訪問の日程を調整します。", time: "最短48h", active: false },
-                { step: "03", title: "現地診断", desc: "必要に応じドローン／サーモで原因を特定。", time: "即日〜", active: false },
+                { step: "03", title: "現地診断", desc: "足場を組まずドローン／サーモで原因を特定。¥55,000・工事ご依頼で全額充当。", time: "即日〜", active: false },
                 { step: "04", title: "一次止水", desc: "原則72h以内を目指して応急処置を実施します。", time: "72h以内", active: false },
                 { step: "05", title: "本復旧", desc: "報告書を納品し、根本修繕を実施します。", time: "工事後", active: false },
               ].map((item, i) => (
@@ -770,38 +770,31 @@ export default function Home() {
           <p className="text-center text-slate-400 text-sm mb-8">AI診断の結果を見てから、以下のプランをお選びいただけます ↓</p>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {/* Light Plan */}
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-              <h3 className="text-accent font-bold text-lg mb-2">ライト現地診断</h3>
-              <div className="text-3xl font-bold mt-2 mb-6">¥8,800</div>
-              <ul className="space-y-3 text-sm text-slate-300 mb-6">
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 平日9〜18時対応</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 目視調査＋湿度計測</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 簡易報告書（写真付）</li>
-              </ul>
-              <a href="tel:0120-410-654" onClick={() => { trackReportPurchaseClick('light_genchi'); trackCallClick('pricing_light'); }} className="block w-full text-center py-3 rounded-md bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">
-                予約する
-              </a>
-            </div>
-
-            {/* Standard Plan (Featured) */}
-            <div className="relative bg-primary rounded-xl p-6 text-white border-2 border-accent shadow-2xl md:scale-105 z-10">
+            {/* 現地診断（有償・成約時は工事代から全額充当）会長決裁2026-08-24 */}
+            <div className="relative bg-primary rounded-xl p-6 text-white border-2 border-accent shadow-2xl md:scale-105 z-10 md:col-span-2">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-primary px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider">
-                人気 No.1
+                原因を特定したい方へ
               </div>
-              <h3 className="text-accent font-bold text-lg mb-2">スタンダード</h3>
-              <div className="text-3xl font-bold mt-2 mb-6">¥33,000<span className="text-lg font-normal opacity-70">〜</span></div>
-              <ul className="space-y-3 text-sm text-slate-100 mb-6">
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 赤外線サーモグラフィ</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 散水試験（漏水再現）</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 保険申請用報告書</li>
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> ドローン（必要時）</li>
-              </ul>
-              <a href="tel:0120-410-654" onClick={() => { trackReportPurchaseClick('standard'); trackCallClick('pricing_standard'); }} className="block w-full text-center py-3 rounded-md bg-accent text-primary hover:bg-accent/90 font-bold h-12 leading-6 transition-colors">
-                予約する
+              <h3 className="text-accent font-bold text-lg mb-2">現地診断（報告書付き）</h3>
+              <div className="text-3xl font-bold mt-2 mb-1">¥55,000<span className="text-base font-normal opacity-70">（税込）</span></div>
+              <p className="text-accent font-bold text-sm mb-5">工事をご依頼の場合、診断費は工事代から全額差し引きます</p>
+              <div className="grid sm:grid-cols-2 gap-x-6">
+                <ul className="space-y-3 text-sm text-slate-100 mb-6">
+                  <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 足場を組まずに高所を確認（ドローン／ロープ）</li>
+                  <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 赤外線サーモグラフィ・散水試験（必要時）</li>
+                  <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 原因と工事範囲を書いた診断レポート（PDF）</li>
+                </ul>
+                <ul className="space-y-3 text-sm text-slate-100 mb-6">
+                  <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 「工事は不要」という結論もそのまま報告</li>
+                  <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 他社見積があれば妥当性コメントを添付</li>
+                  <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 訪問当日の工事契約はお受けしません</li>
+                </ul>
+              </div>
+              <a href="tel:0120-410-654" onClick={() => { trackReportPurchaseClick('genchi_55000'); trackCallClick('pricing_genchi'); }} className="block w-full text-center py-3 rounded-md bg-accent text-primary hover:bg-accent/90 font-bold h-12 leading-6 transition-colors">
+                日程を相談する
               </a>
+              <p className="text-xs text-white/60 mt-3">大阪府内・戸建て〜3階建の目安。集合住宅は別途お見積り。足場は組みません。</p>
             </div>
-
             {/* Repair Plan */}
             <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
               <h3 className="text-accent font-bold text-lg mb-2">一次止水</h3>
@@ -1033,7 +1026,8 @@ function StatsSection() {
    サイトの実ポリシーに基づくFAQ（断定回避・保証3区分・匿名可・関西分岐・火災保険の確認余地を反映）。 */
 function FAQSection() {
   const faqs = [
-    { q: "AI診断は本当に無料ですか？", a: "写真3枚での一次判定は無料・登録不要です。現地点検や工事をご依頼いただく場合のみ、別途お見積もりとなります。" },
+    { q: "AI診断は本当に無料ですか？", a: "写真3枚での一次判定は無料・登録不要です。現地診断は¥55,000（税込）で、工事をご依頼いただく場合は工事代から全額差し引きます。" },
+    { q: "現地診断だけで、工事を頼まなくてもいいですか？", a: "はい。「工事は不要」という結論もそのまま報告します。診断レポートをお持ちになって他社で相見積もりを取っていただいて構いません。無料点検は工事の売り込みが前提になりがちなため、当社は診断を仕事としてお引き受けしています。" },
     { q: "AIで雨漏りの原因を断定してもらえますか？", a: "写真からの一次判定のため、原因の断定はできません。原因の特定・確定診断には現地確認が必要です。一次判定では、危険度の目安・費用レンジ・確認すべき点を整理します。" },
     { q: "火災保険は使えますか？", a: "台風・強風・雹（ひょう）・飛来物などの自然災害が原因の場合、火災保険の風災補償などを確認する余地があります。確認用の整理資料の作成までサポートしますが、適用可否は保険会社の判断であり、当社は保険適用を保証しません。" },
     { q: "保証はありますか？", a: "本修繕（根本修繕）は再漏水について1年保証です。応急処置（一次止水）と、現地確認で原因が特定できない場合は保証対象外となります。" },
