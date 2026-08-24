@@ -744,7 +744,7 @@ export default function Home() {
           <div className="text-center mb-12">
             <span className="inline-block bg-cta text-white px-3 py-1 rounded-full text-sm font-bold mb-4">明朗会計</span>
             <h2 className="text-3xl md:text-4xl font-black mb-4">修理費の目安、<span className="text-cta">先に</span>知っておきませんか？</h2>
-            <p className="text-slate-400">事前承認なしの追加費用は一切ありません。</p>
+            <p className="text-slate-400">無料点検は、工事の売り込みが前提になりがちです。当社は診断を仕事としてお引き受けし、「工事はしない」という結論もそのまま報告します。<br className="hidden md:block" />事前承認なしの追加費用は一切ありません。</p>
           </div>
 
           {/* AI診断を別格扱い */}
