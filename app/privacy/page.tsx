@@ -1,22 +1,10 @@
 
-import Link from 'next/link';
+import { PageHeader } from '@/components/PageHeader';
 
 export default function PrivacyPolicy() {
   return (
     <div className="legal-page min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-[#0c2d5a] to-[#164e8a] text-white font-bold text-xs">
-              AI
-            </div>
-            <span className="font-bold text-lg text-[#0c2d5a]">雨漏りドクター</span>
-          </Link>
-          <Link href="/" className="text-sm text-slate-500 hover:text-[#0c2d5a] transition-colors">
-            &larr; トップに戻る
-          </Link>
-        </div>
-      </header>
+      <PageHeader />
 
       <main className="container mx-auto px-4 py-12 max-w-3xl">
         <h1 className="text-3xl font-bold text-slate-800 mb-8">プライバシーポリシー</h1>

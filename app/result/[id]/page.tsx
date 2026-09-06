@@ -13,6 +13,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { PageHeader } from '@/components/PageHeader';
 import { trackLineClick } from '@/lib/analytics';
 import { useScrollReveal } from '@/components/useScrollReveal';
 
@@ -150,16 +151,7 @@ export default function ResultPage() {
 
   return (
     <div className="result-refresh min-h-screen">
-      <header className="bg-white/90 backdrop-blur-md border-b border-cyan-100 shadow-sm sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent-dark rounded-lg flex items-center justify-center shadow-lg shadow-cyan-900/10">
-              <span className="text-white font-bold text-xl">雨</span>
-            </div>
-            <span className="text-2xl font-black text-primary">雨漏りドクター</span>
-          </Link>
-        </div>
-      </header>
+      <PageHeader />
 
       <main className="container mx-auto px-4 py-10 max-w-4xl">
         {/* 合言葉カード */}

@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { BrandMark } from '@/components/BrandMark';
+import Image from 'next/image';
+import { useState, useEffect, useRef } from 'react';
 import {
   Phone, Mail, MessageCircle, CheckCircle, Clock, Shield, Camera,
   Thermometer, Anchor, Menu, X, ArrowRight, MapPin, Facebook,
@@ -48,19 +50,46 @@ function MidCTA({ text, subtext }: { text: string; subtext?: string }) {
   );
 }
 
-/* ─── 季節メッセージ ─── */
-function getSeasonalMessage(): string {
-  const month = new Date().getMonth() + 1;
-  if (month >= 5 && month <= 7) return "梅雨シーズン到来。雨漏りが増える前に、今すぐ診断を。";
-  if (month >= 8 && month <= 10) return "台風シーズンに備えて、今のうちに診断しておきませんか？";
-  if (month >= 11 || month <= 2) return "冬の結露・凍結による雨漏りが増える時期です。早めの診断を。";
-  return "春の長雨シーズン前に、屋根の状態を確認しませんか？";
-}
-
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showFloatingCTA, setShowFloatingCTA] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const desktopViewport = window.matchMedia('(min-width: 1024px)');
+    const closeMenuOnDesktop = () => {
+      if (desktopViewport.matches) setMobileMenuOpen(false);
+    };
+    desktopViewport.addEventListener('change', closeMenuOnDesktop);
+    closeMenuOnDesktop();
+    const controls = menuRef.current?.querySelectorAll<HTMLElement>('a, button');
+    controls?.[0]?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMobileMenuOpen(false);
+      if (event.key !== 'Tab' || !controls?.length) return;
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      desktopViewport.removeEventListener('change', closeMenuOnDesktop);
+      document.removeEventListener('keydown', handleKeyDown);
+      menuButtonRef.current?.focus({ preventScroll: true });
+    };
+  }, [mobileMenuOpen]);
 
   useScrollReveal('.site-refresh section, .site-refresh footer, .site-refresh .reveal-item');
 
@@ -89,19 +118,7 @@ export default function Home() {
       {/* ═══════════ Header ═══════════ */}
       <header className={`fixed top-0 z-50 w-full transition-all duration-300 border-b ${isScrolled ? 'h-16 bg-white/90 backdrop-blur-md shadow-sm border-slate-200' : 'h-20 bg-white/80 backdrop-blur-md border-white/50'}`}>
         <div className="container flex h-full items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className={`flex items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-dark text-white ${isScrolled ? 'w-8 h-8' : 'w-10 h-10'}`}>
-              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={`${isScrolled ? 'w-5 h-5' : 'w-6 h-6'}`}>
-                <path d="M20 4L3 18h5v14h24V18h5L20 4z" fill="none" stroke="white" strokeWidth="2.5" strokeLinejoin="round" />
-                <path d="M20 14c-5 0-9 3.5-9 8h3c0-1.5 1-3 3-3s3 1.5 3 3v6" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M20 14c5 0 9 3.5 9 8h-3c0-1.5-1-3-3-3" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M20 28c-1.5 0-2.5-1-2.5-2" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </div>
-            <span className={`font-bold tracking-tight ${isScrolled ? 'text-lg text-primary' : 'text-xl text-primary'}`}>
-              雨漏りドクター
-            </span>
-          </Link>
+          <BrandMark />
 
           <nav className="hidden lg:flex items-center gap-8">
             {['サービス', '料金', '事例', 'FAQ'].map((item, i) => {
@@ -117,6 +134,11 @@ export default function Home() {
 
           <div className="flex items-center gap-3">
             <button
+              ref={menuButtonRef}
+              type="button"
+              aria-label="メニューを開く"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
               className={`lg:hidden p-2 rounded-md ${!isScrolled ? 'text-primary hover:bg-white/60' : 'text-slate-600 hover:bg-slate-100'}`}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
@@ -135,16 +157,16 @@ export default function Home() {
 
       {/* ═══════════ Mobile Menu ═══════════ */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
+        <div id="mobile-menu" ref={menuRef} role="dialog" aria-modal="true" aria-label="メニュー" className="fixed inset-0 z-[60] lg:hidden">
           <div className="absolute inset-0 bg-primary/90 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
-          <div className="absolute top-0 right-0 h-full w-3/4 max-w-sm bg-white shadow-2xl">
-            <div className="flex flex-col p-6 h-full">
-              <div className="flex justify-end mb-8">
-                <button className="p-2 rounded-md hover:bg-slate-100" onClick={() => setMobileMenuOpen(false)}>
+          <div className="absolute top-0 right-0 h-dvh w-full max-w-sm overflow-y-auto overscroll-contain bg-white shadow-2xl">
+            <div className="flex min-h-full flex-col gap-6 p-6 pb-[max(24px,env(safe-area-inset-bottom))]">
+              <div className="flex shrink-0 justify-end">
+                <button type="button" aria-label="メニューを閉じる" className="p-2 rounded-md hover:bg-slate-100" onClick={() => setMobileMenuOpen(false)}>
                   <X className="h-6 w-6 text-slate-500" />
                 </button>
               </div>
-              <nav className="flex flex-col space-y-6 text-center">
+              <nav className="flex shrink-0 flex-col space-y-3 text-center">
                 {['サービス', '料金', '事例', 'FAQ'].map((item, i) => {
                   const hrefs = ['#services', '#pricing', '#cases', '#faq'];
                   return (
@@ -154,12 +176,12 @@ export default function Home() {
                   );
                 })}
               </nav>
-              <div className="mt-auto space-y-4">
+              <div className="mt-auto shrink-0 space-y-4">
                 <a href={LINE_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackLineClick('mobile_menu')} className="flex items-center justify-center w-full px-6 py-3 rounded-md bg-line text-white font-bold text-lg hover:bg-line-dark transition-colors">
                   <MessageCircle className="h-5 w-5 mr-2" /> LINEで匿名相談・名前不要
                 </a>
                 <Link href="/diagnosis" className="flex items-center justify-center w-full px-6 py-3 rounded-md border-2 border-slate-300 text-slate-700 font-bold text-base hover:bg-slate-50 transition-colors">
-                  <Camera className="h-5 w-5 mr-2" /> 写真3枚でAI診断を試す
+                  <Camera className="h-5 w-5 mr-2 shrink-0" /> 写真1枚からAI診断を試す
                 </Link>
               </div>
             </div>
@@ -176,35 +198,34 @@ export default function Home() {
             <div className="hero-copy space-y-6">
               {/* 季節バッジ */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 border border-cyan-100 shadow-sm backdrop-blur-md">
-                <AlertTriangle className="h-4 w-4 text-warning" />
-                <span className="text-primary text-xs md:text-sm font-bold tracking-wide">{getSeasonalMessage()}</span>
+                <Camera className="h-4 w-4 text-cta" />
+                <span className="text-primary text-xs md:text-sm font-medium tracking-wide">無料の写真診断</span>
               </div>
 
               {/* 見出し：AIを主役から降格し「雨漏りの次の一手」を約束 */}
               <h1 className="text-[1.72rem] md:text-5xl lg:text-[3.4rem] font-black text-white leading-[1.25] md:leading-[1.2] tracking-normal">
-                写真で、雨漏りの<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cta to-accent-light">危険度と次の一手</span>を整理。
+                雨漏りの不安を、<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cta to-accent-light">写真で相談。</span>
               </h1>
 
               {/* スマホは説明文なし(デモが語る)・md以上でのみ表示 */}
               <p className="hidden md:block text-slate-100 md:text-xl font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
-                AIと職人目線で、写真から分かる範囲を<strong className="text-white">一次判定</strong>。<br className="hidden md:block" />
-                費用の目安と確認すべき点を整理します。<br className="hidden md:block" />
-                <span className="text-slate-300 text-base">原因の断定には現地確認が必要です。</span>
+                危険度と修理費の目安を、写真から確認。<br />
+                結果はLINEで受け取れます。
               </p>
 
               {/* メインCTA（単一）：写真で雨漏りの危険度を見る */}
               <div className="flex flex-col gap-3 pt-2 items-center lg:items-start">
                 <Link
                   href="/diagnosis"
-                  className="relative inline-flex items-center justify-center h-14 md:h-16 px-6 md:px-10 bg-cta text-white hover:bg-cta-dark text-base md:text-xl font-black rounded-full shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 whitespace-nowrap w-full max-w-sm md:w-auto md:max-w-none"
+                  className="relative inline-flex items-center justify-center min-h-14 px-4 py-4 md:px-6 bg-cta text-white hover:bg-cta-dark text-base md:text-xl font-black rounded-full shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 whitespace-normal text-center w-full max-w-sm md:max-w-full"
                 >
                   <Camera className="h-5 w-5 md:h-6 md:w-6 mr-2 flex-shrink-0" />
-                  <span>写真で雨漏りの危険度を見る</span>
+                  <span>写真を選んで無料診断</span>
                 </Link>
                 <p className="text-slate-200 text-sm flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-accent" />
-                  無料・登録不要・写真3枚でOK
+                  無料・登録不要・写真1枚からOK
                 </p>
                 {/* 補助導線：お急ぎの方（LINE・匿名OK） */}
                 <a
@@ -215,7 +236,7 @@ export default function Home() {
                   className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white/90 border border-white/30 hover:border-white/70 hover:bg-white/5 rounded-full transition-colors"
                 >
                   <MessageCircle className="h-4 w-4" />
-                  お急ぎの方はLINEで相談（匿名OK）
+                  写真がない方はLINEで相談
                 </a>
               </div>
 
@@ -240,7 +261,8 @@ export default function Home() {
             </div>
 
             {/* AI診断アニメーションデモ(写真→スキャン→検出→結果が自動再生) */}
-            <div className="hero-visual">
+            <div className="hero-visual hidden md:block">
+              <Image src="/images/case2.jpg" alt="" fill priority sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 550px" className="object-cover object-[center_42%]" />
               <div className="hero-demo"><HeroDiagnosisDemo /></div>
             </div>
 
@@ -266,64 +288,6 @@ export default function Home() {
 
       {/* ═══════════ Stats Section ═══════════ */}
       <StatsSection />
-
-      {/* ═══════════ Pain Points（不安の言語化）セクション ═══════════ */}
-      <section className="py-20 bg-white">
-        <div className="container">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning/10 border border-warning/20 mb-4">
-              <AlertTriangle className="h-4 w-4 text-warning" />
-              <span className="text-warning text-sm font-bold">こんなお悩み、ありませんか？</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-black text-primary">
-              雨漏りの不安、<span className="text-cta">一人で抱えていませんか？</span>
-            </h2>
-          </div>
-
-          <div className="pain-grid grid mb-12">
-            {[
-              "修理費がいくらかかるか分からず不安",
-              "業者に頼んだら高額な見積もりを出されそう",
-              "火災保険が使えるかもしれないけど、調べ方が分からない",
-              "本当に必要な工事だけやってほしい（過剰工事は嫌）",
-              "放置していいのか、すぐ対応すべきなのか判断できない",
-              "どの業者に頼めばいいか分からない",
-            ].map((pain, i) => (
-              <div key={i} className="flex items-start gap-3 bg-slate-50 rounded-lg p-4 border border-slate-100">
-                <div className="flex-shrink-0 w-6 h-6 bg-warning/10 rounded-full flex items-center justify-center mt-0.5">
-                  <span className="text-warning text-sm font-bold">✓</span>
-                </div>
-                <p className="text-slate-700 font-medium text-sm leading-relaxed">{pain}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* 解決宣言 */}
-          <div className="bg-gradient-to-r from-primary to-primary-dark rounded-2xl p-8 md:p-12 text-white text-center max-w-4xl mx-auto">
-            <h3 className="text-2xl md:text-3xl font-black mb-4">
-              AI雨漏りドクターが、<br className="md:hidden" />次の一手まで整理します。
-            </h3>
-            <div className="grid md:grid-cols-3 gap-6 mt-8">
-              {[
-                { icon: <Camera className="h-6 w-6" />, title: "写真3枚で一次判定", desc: "費用の目安と確認点を整理" },
-                { icon: <Umbrella className="h-6 w-6" />, title: "保険の確認余地も整理", desc: "風災等の可能性を整理（保証なし）" },
-                { icon: <Shield className="h-6 w-6" />, title: "必要な工事だけ提案", desc: "過剰工事は一切しません" },
-              ].map((item, i) => (
-                <div key={i} className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-accent">
-                    {item.icon}
-                  </div>
-                  <h4 className="font-bold text-lg">{item.title}</h4>
-                  <p className="text-sm text-slate-300">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 中間CTA */}
-          <MidCTA text="まずは無料でAI診断" subtext="登録不要・最短3分で結果が届きます" />
-        </div>
-      </section>
 
       {/* ═══════════ Cases Section（実例：信頼を先に） ═══════════ */}
       <section id="cases" className="py-24 bg-slate-50">
@@ -405,7 +369,7 @@ export default function Home() {
           </div>
 
           {/* 中間CTA */}
-          <MidCTA text="あなたの雨漏りも診断してみませんか？" subtext="写真3枚で費用と保険適用の目安が分かります" />
+          <MidCTA text="写真を選んで無料診断" subtext="写真1枚から、費用の目安と確認すべき点を整理します" />
         </div>
       </section>
 
@@ -470,124 +434,28 @@ export default function Home() {
           </div>
 
           {/* 中間CTA */}
-          <MidCTA text="3分で修理費の目安が分かる" subtext="AI診断は完全無料。見積だけでもOKです。" />
+          <MidCTA text="写真から無料で相談する" subtext="AI診断は完全無料。見積だけでもOKです。" />
         </div>
       </section>
 
-      {/* ═══════════ Fire Insurance Section（火災保険「確認の余地」を整理・断定/0円訴求は排除） ═══════════ */}
-      <section className="py-20 bg-white">
+      <section className="photo-flow">
         <div className="container">
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 md:p-12 border border-green-100 max-w-5xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 border border-green-200 mb-4">
-                  <Umbrella className="h-4 w-4 text-green-700" />
-                  <span className="text-green-700 text-sm font-bold">保険の「確認の余地」</span>
-                </div>
-                <h2 className="text-2xl md:text-3xl font-black text-primary mb-4">
-                  火災保険を<span className="text-green-600">確認する余地</span>が<br />あるケースも。
-                </h2>
-                <p className="text-slate-600 leading-relaxed mb-4">
-                  台風・強風・雹（ひょう）・飛来物などの自然災害や突発的な事故が原因の場合、<strong className="text-primary">火災保険の「風災補償」</strong>などを確認する余地があります。
-                </p>
-                <p className="text-slate-600 leading-relaxed mb-6">
-                  写真から損傷の状態を整理し、<strong className="text-primary">加入中の保険会社へ確認するための整理資料</strong>の作成までサポートします。<strong className="text-primary">保険適用を保証するものではありません</strong>（適用可否は保険会社の判断になります）。
-                </p>
-              </div>
-              <div className="space-y-4">
-                <div className="bg-white rounded-xl p-5 shadow-sm border border-green-100">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <span className="text-green-700 font-bold text-lg">1</span>
-                    </div>
-                    <h4 className="font-bold text-primary">損傷の状態を整理</h4>
-                  </div>
-                  <p className="text-sm text-slate-600 pl-[52px]">写真から、風災など保険確認の余地がある損傷パターンかを整理します。</p>
-                </div>
-                <div className="bg-white rounded-xl p-5 shadow-sm border border-green-100">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <span className="text-green-700 font-bold text-lg">2</span>
-                    </div>
-                    <h4 className="font-bold text-primary">確認用の整理資料を作成</h4>
-                  </div>
-                  <p className="text-sm text-slate-600 pl-[52px]">現地確認後、保険会社へ相談・確認するための資料作成をサポートします。</p>
-                </div>
-                <div className="bg-white rounded-xl p-5 shadow-sm border border-green-100">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <span className="text-green-700 font-bold text-lg">3</span>
-                    </div>
-                    <h4 className="font-bold text-primary">適用可否は保険会社の判断</h4>
-                  </div>
-                  <p className="text-sm text-slate-600 pl-[52px]">適用されるかは保険会社が判断します。当社は保険適用を保証しません。</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <h2 className="text-primary mb-8">診断は、かんたん3ステップ。</h2>
+          <ol className="grid gap-5 md:grid-cols-3">
+            {[
+              { icon: Camera, title: '写真を選ぶ', text: '雨染みや気になる場所を1〜3枚。' },
+              { icon: FileText, title: '無料診断を頼む', text: '名前や住所の入力は任意です。' },
+              { icon: MessageCircle, title: 'LINEで結果を見る', text: '表示された4桁の合言葉を送信。' },
+            ].map((step,i)=><li key={step.title} className="flex items-start gap-4 border-t border-slate-200 pt-5"><step.icon className="h-6 w-6 shrink-0 text-cta"/><div><p className="text-xs text-slate-500">0{i+1}</p><h3 className="font-bold text-lg">{step.title}</h3><p className="text-sm text-slate-600">{step.text}</p></div></li>)}
+          </ol>
+          <p className="mt-6 text-sm text-slate-600">結果を見てから、必要に応じて現地調査をご相談いただけます。</p>
         </div>
       </section>
-
-      {/* ═══════════ Steps Section ═══════════ */}
-      <section className="py-24 bg-white">
-        <div className="container">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-black text-primary mb-4">AI診断から修理完了まで、<span className="text-cta">たった5ステップ</span></h2>
-            <p className="text-slate-600">まずはステップ1のAI診断から。あとは私たちにお任せください。</p>
-          </div>
-
-          <div className="relative">
-            <div className="hidden md:block absolute top-12 left-0 w-full h-1 bg-slate-100 -z-0"></div>
-            <div className="grid md:grid-cols-5 gap-8">
-              {[
-                { step: "01", title: "AI診断", desc: "写真3枚で概算。保険目安と費用レンジを即表示します。", time: "3分", active: true },
-                { step: "02", title: "日程確定", desc: "最短48hで現地訪問の日程を調整します。", time: "最短48h", active: false },
-                { step: "03", title: "現地診断", desc: "足場を組まずドローン／サーモで原因を特定。¥55,000・工事ご依頼で全額充当。", time: "即日〜", active: false },
-                { step: "04", title: "一次止水", desc: "原則72h以内を目指して応急処置を実施します。", time: "72h以内", active: false },
-                { step: "05", title: "本復旧", desc: "報告書を納品し、根本修繕を実施します。", time: "工事後", active: false },
-              ].map((item, i) => (
-                <div key={i} className="relative bg-white md:bg-transparent pt-4 md:pt-0">
-                  {item.active ? (
-                    <Link href="/diagnosis" className="block group">
-                      <div className="w-24 h-24 mx-auto bg-cta border-4 border-cta rounded-full flex items-center justify-center text-2xl font-black text-white shadow-lg mb-6 relative z-10 group-hover:scale-110 transition-transform">
-                        {item.step}
-                      </div>
-                      <div className="text-center px-2">
-                        <h3 className="text-lg font-bold text-cta mb-2">{item.title}</h3>
-                        <span className="inline-block mb-2 bg-cta/10 text-cta px-3 py-1 rounded-full text-xs font-bold">{item.time}</span>
-                        <p className="text-sm text-slate-600 leading-relaxed">{item.desc}</p>
-                        <p className="text-xs text-cta font-bold mt-2 flex items-center justify-center gap-1">
-                          ← 今ここから始められます <ChevronRight className="h-3 w-3" />
-                        </p>
-                      </div>
-                    </Link>
-                  ) : (
-                    <>
-                      <div className="w-24 h-24 mx-auto bg-white border-4 border-slate-200 rounded-full flex items-center justify-center text-2xl font-black text-slate-400 shadow-lg mb-6 relative z-10">
-                        {item.step}
-                      </div>
-                      <div className="text-center px-2">
-                        <h3 className="text-lg font-bold text-slate-400 mb-2">{item.title}</h3>
-                        <span className="inline-block mb-3 bg-slate-100 text-slate-400 px-3 py-1 rounded-full text-xs font-bold">{item.time}</span>
-                        <p className="text-sm text-slate-400 leading-relaxed">{item.desc}</p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 中間CTA */}
-          <MidCTA text="ステップ1のAI診断を今すぐ始める" subtext="AI診断後、自動で次のステップに進みます" />
-        </div>
-      </section>
-
-      {/* Cases（実例）は Pain Points の直後（Services の前）へ移動 */}
 
       {/* ═══════════ Tech Section ═══════════ */}
       <section className="py-24 bg-white">
-        <div className="container">
+        <details className="container service-details">
+          <summary>詳しい調査方法を見る</summary>
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-black text-primary mb-4">技術と安全への取り組み</h2>
             <p className="text-slate-600">必要なツールだけを選択。事実ベースの報告書で確実にサポートします。</p>
@@ -610,7 +478,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </div>
+        </details>
       </section>
 
       {/* Testimonials（お客様の声）は実証不可のため撤去。実証可能な声が確定したら、
@@ -661,78 +529,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════ LINE Add Friend ═══════════ */}
-      <section className="py-16 bg-slate-50">
-        <div className="container">
-          <div className="rounded-xl p-6 bg-gradient-to-br from-line to-line-dark text-white">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="flex-shrink-0">
-                <div className="w-40 h-40 bg-white rounded-lg p-3 flex items-center justify-center">
-                  <img src={LINE_QR_URL} alt="LINE公式アカウントQRコード" className="w-full h-full object-contain rounded" />
-                </div>
-              </div>
-              <div className="flex-1 text-center md:text-left">
-                <h3 className="text-2xl font-bold mb-2">LINE で診断結果を受け取る</h3>
-                <p className="mb-4 opacity-90">
-                  友だち追加すると、AI診断結果や予約確認をLINEで受け取れます。<br />
-                  24時間365日、自動応答でご質問にお答えします。
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
-                  <a href={LINE_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackLineClick('line_section')} className="px-6 py-3 bg-white text-line rounded-md font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center gap-2">
-                    <QrCode className="w-5 h-5" />
-                    友だち追加
-                  </a>
-                </div>
-              </div>
-            </div>
-            <div className="mt-6 pt-6 border-t border-white/20">
-              <p className="text-sm opacity-90 text-center md:text-left">
-                ✅ AI診断結果をLINEで即座に受信
-                <span className="mx-2">|</span>
-                ✅ 予約確認・リマインダー通知
-                <span className="mx-2">|</span>
-                ✅ 24時間自動応答
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════ Risk Warning（放置リスク） ═══════════ */}
-      <section className="py-16 bg-warning/5">
-        <div className="container">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-warning/10 border border-warning/20 mb-6">
-              <AlertTriangle className="h-5 w-5 text-warning" />
-              <span className="text-warning font-bold">放置すると、こうなります</span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-black text-primary mb-8">
-              雨漏りの放置は、<span className="text-warning">家の寿命を縮めます</span>
-            </h2>
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
-              {[
-                { period: "1ヶ月放置", risk: "カビ・ダニの発生", cost: "修理費 +30%", icon: <TrendingDown className="h-6 w-6" /> },
-                { period: "半年放置", risk: "木材の腐食・シロアリ", cost: "修理費 2〜3倍", icon: <TrendingDown className="h-6 w-6" /> },
-                { period: "1年以上放置", risk: "構造体の損傷", cost: "修理費 5倍以上", icon: <TrendingDown className="h-6 w-6" /> },
-              ].map((item, i) => (
-                <div key={i} className="bg-white rounded-xl p-6 border border-warning/20 shadow-sm">
-                  <div className="w-12 h-12 bg-warning/10 rounded-full flex items-center justify-center text-warning mx-auto mb-3">
-                    {item.icon}
-                  </div>
-                  <h3 className="font-bold text-primary text-lg mb-1">{item.period}</h3>
-                  <p className="text-slate-600 text-sm mb-2">{item.risk}</p>
-                  <p className="text-warning font-black text-lg">{item.cost}</p>
-                </div>
-              ))}
-            </div>
-            <p className="text-slate-600 mb-6">早期発見・早期対応が、修理費を最小限に抑える最善の方法です。</p>
-            <MidCTA text="今すぐ無料AI診断で確認する" subtext="3分で現状の緊急度が分かります" />
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA は料金の後ろ（FAQの直後・ページ最後尾）へ移動 */}
-
       {/* ═══════════ Pricing Section ═══════════ */}
       <section id="pricing" className="py-24 bg-slate-900 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('/images/pattern-carbon-fibre.png')] opacity-20"></div>
@@ -749,10 +545,10 @@ export default function Home() {
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-white text-cta px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-md">
                 まずはここから
               </div>
-              <h3 className="text-white font-bold text-2xl mb-2">AI 3分診断</h3>
+              <h3 className="text-white font-bold text-2xl mb-2">AI写真診断</h3>
               <div className="text-5xl font-black mt-2 mb-4 text-white">¥0</div>
               <ul className="space-y-2 text-sm text-white/90 mb-6 text-left max-w-xs mx-auto">
-                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 所要3分ほどで一次判定を表示</li>
+                <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 写真の一次判定をLINEで受け取り</li>
                 <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 火災保険の確認の余地を整理</li>
                 <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 概算費用レンジを提示</li>
                 <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-white flex-shrink-0" /> 登録不要・完全無料</li>
@@ -831,10 +627,10 @@ export default function Home() {
             <span className="text-sm font-bold text-white/80">「高すぎる見積もり」に、もう悩まない。</span>
           </div>
           <h2 className="text-3xl md:text-5xl font-black mb-6">
-            写真3枚でOK。<br />雨漏りの危険度と次の一手を整理します。
+            気になる雨漏り、<br />まずは写真で。
           </h2>
           <p className="text-xl md:text-2xl mb-8 opacity-90 font-medium">
-            スマホで撮って送るだけ。<br className="md:hidden" />最短3分で費用の目安と確認すべき点が分かります。
+            写真を選んで送るだけ。<br className="md:hidden" />診断結果はLINEで受け取れます。
           </p>
 
           {/* 社会的証明：実証できる数字のみ掲載。未確定の実績件数・評価は出さない。
@@ -855,9 +651,9 @@ export default function Home() {
             className="relative inline-flex items-center justify-center h-16 px-12 text-xl font-black bg-cta text-white hover:bg-cta-dark shadow-xl hover:shadow-2xl rounded-full transition-all transform hover:-translate-y-1"
           >
             <Camera className="h-6 w-6 mr-2" />
-            <span>写真で雨漏りの危険度を見る</span>
+            <span>写真を選んで無料診断</span>
           </Link>
-          <p className="mt-4 text-sm text-white/60">無料・登録不要・写真3枚でOK</p>
+          <p className="mt-4 text-sm text-white/60">無料・登録不要・写真1枚からOK</p>
 
           <div className="mt-6 flex justify-center">
             <a href={LINE_URL} target="_blank" rel="noopener noreferrer" onClick={() => trackLineClick('final_cta_aux')} className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white/90 border border-white/30 hover:border-white/70 hover:bg-white/5 rounded-full transition-colors">
@@ -951,30 +747,30 @@ export default function Home() {
       </footer>
 
       {/* ═══════════ Floating CTA Bar (Mobile) ═══════════ */}
-      <div className={`floating-cta-bar md:hidden ${showFloatingCTA ? 'visible' : ''}`}>
+      <div className={`floating-cta-bar md:hidden ${showFloatingCTA && !mobileMenuOpen ? 'visible' : ''}`}>
         <div className="flex gap-2">
           <a
             href={LINE_URL}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackLineClick('floating_mobile')}
-            className="flex-[6] flex items-center justify-center gap-1.5 h-12 bg-line text-white font-bold rounded-lg text-sm shadow-md"
+            className="flex-[4] flex items-center justify-center gap-1.5 min-h-12 px-2 py-2 bg-white text-primary border border-slate-300 font-medium rounded-lg text-xs"
           >
             <MessageCircle className="h-4 w-4" />
             LINEで匿名相談
           </a>
           <Link
             href="/diagnosis"
-            className="flex-[4] flex items-center justify-center gap-1 h-12 bg-slate-100 text-slate-700 font-bold rounded-lg text-xs shadow-md border border-slate-300"
+            className="flex-[6] flex items-center justify-center gap-1.5 min-h-12 px-2 py-2 bg-cta text-white font-bold rounded-lg text-sm"
           >
             <Camera className="h-3.5 w-3.5" />
-            写真でAI診断
+            無料で写真診断
           </Link>
         </div>
       </div>
 
       {/* ═══════════ Floating CTA (Desktop) ═══════════ */}
-      {showFloatingCTA && (
+      {showFloatingCTA && !mobileMenuOpen && (
         <div className="hidden md:block fixed bottom-8 right-8 z-50">
           <a
             href={LINE_URL}
@@ -998,7 +794,7 @@ export default function Home() {
 function StatsSection() {
   const items = [
     { val: "関西エリア", label: "対応（大阪・京都・兵庫ほか）" },
-    { val: "写真3枚", label: "一次判定に必要なもの" },
+    { val: "写真1〜3枚", label: "1枚から一次判定できます" },
     { val: "建設業許可", label: "取得済（株式会社ドローン工務店）" },
     { val: "現地確認", label: "原因の断定は現地で実施" },
   ];
@@ -1023,7 +819,7 @@ function StatsSection() {
    サイトの実ポリシーに基づくFAQ（断定回避・保証3区分・匿名可・関西分岐・火災保険の確認余地を反映）。 */
 function FAQSection() {
   const faqs = [
-    { q: "AI診断は本当に無料ですか？", a: "写真3枚での一次判定は無料・登録不要です。現地診断は¥55,000（税込）で、工事をご依頼いただく場合は工事代から全額差し引きます。" },
+    { q: "AI診断は本当に無料ですか？", a: "写真1枚からの一次判定は無料・登録不要です。異なる角度から3枚あると、より詳しく確認できます。現地診断は¥55,000（税込）で、工事をご依頼いただく場合は工事代から全額差し引きます。" },
     { q: "現地診断だけで、工事を頼まなくてもいいですか？", a: "はい。「工事は不要」という結論もそのまま報告します。診断レポートをお持ちになって他社で相見積もりを取っていただいて構いません。無料点検は工事の売り込みが前提になりがちなため、当社は診断を仕事としてお引き受けしています。" },
     { q: "AIで雨漏りの原因を断定してもらえますか？", a: "写真からの一次判定のため、原因の断定はできません。原因の特定・確定診断には現地確認が必要です。一次判定では、危険度の目安・費用レンジ・確認すべき点を整理します。" },
     { q: "火災保険は使えますか？", a: "台風・強風・雹（ひょう）・飛来物などの自然災害が原因の場合、火災保険の風災補償などを確認する余地があります。確認用の整理資料の作成までサポートしますが、適用可否は保険会社の判断であり、当社は保険適用を保証しません。" },

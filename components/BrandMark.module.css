@@ -1,0 +1,70 @@
+.brand {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: #24483f;
+  text-decoration: none;
+}
+
+.symbol {
+  display: block;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 36px;
+}
+
+.wordmark {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.name {
+  display: block;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: .055em;
+  line-height: 1.2;
+}
+
+.english {
+  display: block;
+  font-family: Arial, sans-serif;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: .19em;
+  line-height: 1;
+  color: #65786b;
+}
+
+.backLink {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #c7d1c4;
+  border-radius: 3px;
+  color: #435c4e;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: background-color .2s;
+}
+
+.backLink:hover { background: #e9eee3; }
+.brand:focus-visible,.backLink:focus-visible { outline: 2px solid #956133; outline-offset: 4px; }
+
+@media (min-width: 640px) {
+  .brand { gap: 12px; }
+  .symbol { width: 34px; height: 40px; }
+  .name { font-size: 18px; }
+  .english { font-size: 9px; }
+  .backLink { padding-inline: 14px; font-size: 13px; }
+}

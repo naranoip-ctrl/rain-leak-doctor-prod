@@ -57,8 +57,8 @@ html { scroll-behavior: smooth; scroll-padding-top: 100px; }
 .hero-editorial .hero-copy .text-accent { color: #35634f; }
 .hero-editorial .hero-copy [class*="border-white"] { border-color: #bdcbbc; }
 .hero-editorial .hero-copy > div:first-child { padding: 0 0 14px; background: none; border: 0; border-bottom: 1px solid var(--rule); border-radius: 0; }
-.hero-editorial .hero-visual { min-height: 610px; background: url('/images/case2.jpg') center 42% / cover; position: relative; }
-.hero-editorial .hero-demo { margin-top: 290px; margin-left: -28px; width: 280px; background: #fff; padding: 16px; border: 1px solid var(--rule); }
+.hero-editorial .hero-visual { min-height: 610px; background: #e7ebdf; position: relative; }
+.hero-editorial .hero-demo { position: relative; margin-top: 290px; margin-left: -28px; width: 280px; background: #fff; padding: 16px; border: 1px solid var(--rule); }
 /* Existing demo copy remains; the report becomes a quiet, static inset. */
 .hero-demo .hd-root { padding: 0; max-width: none; color: var(--ink); }
 .hero-demo .hd-root * { animation: none !important; transform: none !important; filter: none !important; box-shadow: none !important; }
@@ -126,6 +126,9 @@ html { scroll-behavior: smooth; scroll-padding-top: 100px; }
 .field-control { min-height: 54px; border: 1px solid #94a596; border-radius: 3px; color: #293f37; background: #fff; }
 .field-control:focus { border-color: #35634f; outline: 2px solid #35634f; outline-offset: 2px; }
 .field-control::placeholder { color: #617066; }
+.service-details summary { min-height: 56px; cursor: pointer; padding-block: 16px; border-block: 1px solid var(--rule); font-size: 18px; color: var(--ink); }
+.service-details[open] summary { margin-bottom: 40px; }
+.service-details summary:focus-visible { outline: 3px solid #956133; outline-offset: 4px; }
 .diagnosis-refresh header,.result-refresh header { background: #f8f7f2; }
 .diagnosis-refresh main { padding-block: 64px; }
 .diagnosis-refresh form { padding: 36px; border-top: 3px solid #35634f; }
@@ -175,13 +178,13 @@ html { scroll-behavior: smooth; scroll-padding-top: 100px; }
 @media (max-width: 767px) {
  .container { padding-inline: 22px; }
  .site-refresh > section { padding-block: 64px; }
- .site-refresh .hero-editorial { padding-top: 112px; padding-bottom: 36px; }
+ .site-refresh .hero-editorial { padding-top: 104px; padding-bottom: 28px; }
  .hero-editorial .hero-grid { grid-template-columns: 1fr; gap: 28px; }
  .hero-editorial .hero-copy { padding: 0; }
  .hero-editorial h1 { font-size: 1.95rem; }
  .hero-editorial > .hero-backdrop { display: none; }
  .hero-editorial .hero-visual { min-height: 530px; margin-inline: 0; }
- .hero-editorial .hero-demo { width: 250px; margin-top: 250px; margin-left: 14px; margin-bottom: 16px; }
+ .hero-editorial .hero-demo { width: min(250px, calc(100% - 28px)); margin-top: 250px; margin-left: 14px; margin-bottom: 16px; }
  .hero-editorial .hero-copy > p { display: block; font-size: 15px; }
  .site-refresh .trust-strip { padding-block: 24px; }
  .site-refresh .pain-grid,.site-refresh .case-grid,.site-refresh .tech-grid { grid-template-columns: 1fr; gap: 28px; }
@@ -193,7 +196,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 100px; }
  .representative-section img { height: 360px; }
  .representative-section .bg-slate-50 { padding: 32px 0 0; }
  .site-refresh .final-section > div > a { height: auto; min-height: 60px; padding: 16px; font-size: 16px; max-width: 100%; }
- .site-refresh { padding-bottom: 72px; }
+ .site-refresh { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
  .site-refresh .py-8 > a { padding-inline: 20px; font-size: 16px; }
  .diagnosis-refresh main,.result-refresh main { padding-block: 36px; }
  .diagnosis-refresh form { padding: 22px 18px; }
