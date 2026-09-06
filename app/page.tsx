@@ -920,6 +920,7 @@ export default function Home() {
             <div>
               <h3 className="text-lg font-bold mb-4">法的情報</h3>
               <ul className="space-y-2 text-sm">
+                <li><Link href="/blog" className="text-white/80 hover:text-white transition-colors">雨漏り・点検の読み物</Link></li>
                 <li><Link href="/privacy" className="text-white/80 hover:text-white transition-colors">プライバシーポリシー</Link></li>
                 <li><Link href="/terms" className="text-white/80 hover:text-white transition-colors">利用規約</Link></li>
                 {/* 特商法は loki-drone.com の正規ページへ統一（外部リンク） */}

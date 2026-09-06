@@ -309,3 +309,105 @@ html {
     padding-bottom: 72px;
   }
 }
+
+/* ─── ブログ本文（Markdown→HTML）の体裁 ───
+   @tailwindcss/typography を追加せず、必要な要素だけ最小スタイルを当てる。 */
+.prose-blog {
+  color: #334155; /* slate-700 */
+  line-height: 1.9;
+  font-size: 1rem;
+}
+.prose-blog > * + * {
+  margin-top: 1.25rem;
+}
+.prose-blog h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f4c81; /* primary */
+  margin-top: 2.5rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid #e2e8f0;
+  line-height: 1.4;
+}
+.prose-blog h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0a2540; /* primary-dark */
+  margin-top: 1.75rem;
+  margin-bottom: 0.25rem;
+}
+.prose-blog p {
+  margin-top: 1.1rem;
+}
+.prose-blog a {
+  color: #e55a2b; /* cta-dark */
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-blog strong {
+  color: #0f4c81;
+  font-weight: 700;
+}
+.prose-blog ul,
+.prose-blog ol {
+  padding-left: 1.4rem;
+  margin-top: 1.1rem;
+}
+.prose-blog ul {
+  list-style: disc;
+}
+.prose-blog ol {
+  list-style: decimal;
+}
+.prose-blog li {
+  margin-top: 0.4rem;
+}
+.prose-blog blockquote {
+  border-left: 4px solid #0f4c81;
+  background: #f1f5f9;
+  padding: 0.9rem 1.1rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+  color: #475569;
+  font-size: 0.95rem;
+}
+.prose-blog blockquote p {
+  margin-top: 0.5rem;
+}
+.prose-blog blockquote p:first-child {
+  margin-top: 0;
+}
+.prose-blog table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  display: block;
+  overflow-x: auto;
+}
+.prose-blog th,
+.prose-blog td {
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.8rem;
+  text-align: left;
+}
+.prose-blog th {
+  background: #f8fafc;
+  font-weight: 700;
+  color: #0f4c81;
+}
+.prose-blog code {
+  background: #f1f5f9;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+}
+.prose-blog img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+}
+.prose-blog hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 2rem 0;
+}
