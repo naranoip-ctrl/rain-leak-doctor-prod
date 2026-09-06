@@ -164,9 +164,9 @@ export default function ResultPage() {
       <main className="container mx-auto px-4 py-10 max-w-4xl">
         {/* 合言葉カード */}
         <div className="bg-gradient-to-br from-primary to-primary-dark text-white rounded-xl shadow-lg p-6 md:p-8 mb-8 border border-cyan-100/20">
-          <h2 className="text-2xl md:text-3xl font-black mb-4 text-center">
+          <h1 className="text-2xl md:text-3xl font-black mb-4 text-center">
             {isStillProcessing ? 'AIが解析中です' : '診断が完了しました！'}
-          </h2>
+          </h1>
           <p className="text-center mb-6">
             詳細なPDFレポートを受け取るには、以下の合言葉をLINE公式アカウントに送信してください。
           </p>

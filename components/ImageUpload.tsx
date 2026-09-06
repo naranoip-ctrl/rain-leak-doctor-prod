@@ -99,7 +99,7 @@ export function ImageUpload({
             accept="image/*"
             multiple
             onChange={handleImageChange}
-            className="hidden"
+            className="sr-only"
             disabled={compressing}
           />
         </label>
@@ -121,7 +121,7 @@ export function ImageUpload({
               <button
                 type="button"
                 onClick={() => removeImage(index)}
-                className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-red-700 shadow"
+                className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-11 h-11 flex items-center justify-center hover:bg-red-700 shadow"
                 disabled={compressing}
               >
                 ×

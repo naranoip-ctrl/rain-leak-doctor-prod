@@ -69,7 +69,7 @@ export default async function BlogPost({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
+    <div className="editorial-page min-h-screen bg-slate-50 font-sans">
       <BlogHeader />
 
       <script

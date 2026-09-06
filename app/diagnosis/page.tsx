@@ -209,9 +209,9 @@ export default function DiagnosisPage() {
         <main className="container mx-auto px-4 py-10 max-w-lg">
           {/* 合言葉カード */}
           <div className="bg-gradient-to-br from-primary to-primary-dark text-white rounded-2xl shadow-xl p-8 mb-6 border border-cyan-100/20">
-            <h2 className="text-2xl font-bold mb-2 text-center">
+            <h1 className="text-2xl font-bold mb-2 text-center">
               受付が完了しました！
-            </h2>
+            </h1>
             <p className="text-center text-cyan-100 mb-6 text-sm">
               あなたの合言葉（4桁番号）
             </p>
@@ -368,7 +368,7 @@ export default function DiagnosisPage() {
 
       <main className="container mx-auto px-4 py-10 max-w-2xl">
         <div className="mb-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-white/80 px-4 py-2 text-sm font-bold text-primary shadow-sm mb-4">
+          <div className="sr-only">
             AI PHOTO CHECK
           </div>
           <h1 className="text-3xl md:text-4xl font-black text-primary mb-3 leading-tight">AI雨漏り診断</h1>

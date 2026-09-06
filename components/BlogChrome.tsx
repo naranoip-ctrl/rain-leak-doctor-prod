@@ -8,7 +8,7 @@ import { TrackedLineLink } from '@/components/TrackedLineLink';
  */
 export function BlogHeader() {
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-slate-200">
+    <header className="public-header sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-slate-200">
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-dark text-white">
@@ -35,7 +35,7 @@ export function BlogHeader() {
 
 export function BlogFooter() {
   return (
-    <footer className="bg-primary-dark text-white mt-16">
+    <footer className="public-footer bg-primary-dark text-white mt-16">
       <div className="container py-10">
         <div className="grid gap-8 md:grid-cols-3">
           <div>

@@ -79,7 +79,7 @@ export default function Home() {
     if (target) {
       const headerHeight = isScrolled ? 64 : 80;
       const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
-      window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+      window.scrollTo({ top: targetPosition, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
       setMobileMenuOpen(false);
     }
   };
@@ -168,16 +168,12 @@ export default function Home() {
       )}
 
       {/* ═══════════ Hero Section ═══════════ */}
-      <section className="relative pt-32 pb-20 lg:pt-44 lg:pb-28 overflow-hidden bg-primary">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute inset-0 bg-[url('/images/pattern-cubes.png')] opacity-[0.08]"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_22%,rgba(73,212,208,0.26),transparent_28rem),linear-gradient(135deg,#14384d_0%,#0f2f40_55%,#0a2431_100%)]"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/0 to-primary/20"></div>
-        </div>
+      <section className="hero-editorial relative">
+        <div className="hero-backdrop" aria-hidden="true" />
 
         <div className="container relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6 text-center lg:text-left">
+          <div className="hero-grid">
+            <div className="hero-copy space-y-6">
               {/* 季節バッジ */}
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 border border-cyan-100 shadow-sm backdrop-blur-md">
                 <AlertTriangle className="h-4 w-4 text-warning" />
@@ -244,8 +240,8 @@ export default function Home() {
             </div>
 
             {/* AI診断アニメーションデモ(写真→スキャン→検出→結果が自動再生) */}
-            <div className="relative flex justify-center lg:justify-end">
-              <HeroDiagnosisDemo />
+            <div className="hero-visual">
+              <div className="hero-demo"><HeroDiagnosisDemo /></div>
             </div>
 
             {/* スマホ専用: カードの下に信頼チップを1行で(左カラムではlg以上のみ表示) */}
@@ -284,7 +280,7 @@ export default function Home() {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto mb-12">
+          <div className="pain-grid grid mb-12">
             {[
               "修理費がいくらかかるか分からず不安",
               "業者に頼んだら高額な見積もりを出されそう",
@@ -339,7 +335,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="case-grid grid">
             {/* Case 1 */}
             <div className="bg-white rounded-xl overflow-hidden shadow-lg group cursor-pointer border border-slate-100">
               <div className="relative h-64 overflow-hidden">
@@ -426,7 +422,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="promise-grid grid">
             {[
               {
                 icon: (
@@ -596,7 +592,7 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-black text-primary mb-4">技術と安全への取り組み</h2>
             <p className="text-slate-600">必要なツールだけを選択。事実ベースの報告書で確実にサポートします。</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="tech-grid grid">
             {[
               { img: TECH1_IMG, Icon: Thermometer, title: "赤外線サーモグラフィ", desc: "温度差で水の侵入経路を可視化。壁を壊さずに原因を特定します。" },
               { img: TECH2_IMG, Icon: Clock, title: "散水試験", desc: "実際に水をかけて漏水を再現。確実な原因特定が可能です。" },
@@ -621,7 +617,7 @@ export default function Home() {
           掲載許諾の取れた実名/イニシャルで再掲する（TODO実績数値と統一）。 */}
 
       {/* ═══════════ Representative Message（代表者メッセージ） ═══════════ */}
-      <section className="py-24 bg-white">
+      <section className="representative-section py-24 bg-white">
         <div className="container">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -825,7 +821,7 @@ export default function Home() {
       <FAQSection />
 
       {/* ═══════════ Final CTA（単一・ページ最後尾） ═══════════ */}
-      <section className="py-24 bg-gradient-to-br from-primary-dark to-primary text-white text-center relative overflow-hidden">
+      <section className="final-section py-24 text-center relative">
         <div className="absolute inset-0">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-cta/10 rounded-full blur-[120px]" />
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-[120px]" />
@@ -1008,7 +1004,7 @@ function StatsSection() {
   ];
 
   return (
-    <section className="relative -mt-10 z-20 container px-4">
+    <section className="trust-strip relative z-20 container px-4">
       <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-8 md:p-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-slate-100">
           {items.map((item, i) => (
