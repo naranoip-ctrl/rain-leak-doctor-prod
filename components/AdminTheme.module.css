@@ -1,0 +1,33 @@
+.theme { min-height: 100vh; color: #293f37; background: #f8f7f2; overflow-wrap: anywhere; }
+.theme :global(.text-slate-900) { color: #24483f; }
+.theme :global(.text-slate-400),.theme :global(.text-slate-500) { color: #637164; }
+.theme :global(.bg-slate-50),.theme :global(.bg-slate-100) { background-color: #f0f2eb; }
+.theme :global(.border-slate-100),.theme :global(.border-slate-200) { border-color: #d4dcd2; }
+.theme :global(.rounded-lg),.theme :global(.rounded-xl),.theme :global(.rounded-2xl) { border-radius: 3px; }
+.theme :global(.shadow-lg),.theme :global(.shadow-xl) { box-shadow: none; }
+.theme :is(h1,h2) { letter-spacing: .01em; line-height: 1.5; font-weight: 500; }
+.theme :is(input,select,textarea) { min-height: 46px; font-size: 16px; }
+.theme :is(button,a) { min-height: 44px; }
+.theme button { min-width: 44px; }
+.theme :is(button,a,input,select,textarea):focus-visible { outline: 2px solid #956133; outline-offset: 3px; }
+.theme :is(button,a) > svg { flex-shrink: 0; }
+.theme pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.theme [role="switch"] { flex-shrink: 0; }
+.content { width: 100%; max-width: 1440px; margin-inline: auto; }
+.sidebar { background: #f8f7f2; border-color: #d4dcd2; }
+.sidebarHeading { min-height: 96px; padding: 16px; border-bottom: 1px solid #d4dcd2; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.adminLabel { display: block; margin-top: 6px; color: #637164; font-size: 10px; letter-spacing: .12em; }
+.mobileHeader { min-height: 72px; position: sticky; top: 0; z-index: 30; background: #f8f7f2; border-bottom: 1px solid #d4dcd2; padding: 10px 16px; gap: 12px; }
+.login { min-height: 100dvh; display: grid; place-items: center; padding: 32px 20px; background: #f8f7f2; }
+.loginIntro { margin-bottom: 24px; text-align: center; }
+.loginIntro h1 { margin-top: 24px; font-size: 24px; color: #24483f; }
+.loginIntro p { margin-top: 6px; font-size: 13px; color: #637164; }
+.loginCard { padding: 24px 20px; background: #fff; border: 1px solid #d4dcd2; border-top: 3px solid #35634f; border-radius: 3px; }
+.theme .passwordToggle { position: absolute; top: 0; right: 0; height: 100%; display: grid; place-items: center; min-width: 46px; color: #637164; }
+.backLink { display: inline-flex; align-items: center; justify-content: center; font-size: 13px; color: #435c4e; }
+@media (max-width: 639px) {
+  .theme h1 { font-size: 24px; }
+  .theme :global(.p-5),.theme :global(.p-6) { padding: 16px; }
+  .theme :global(.gap-6) { gap: 20px; }
+}
+@media (min-width: 640px) { .loginCard { padding: 32px; } }

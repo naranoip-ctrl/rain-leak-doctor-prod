@@ -10,7 +10,7 @@ interface BadgeProps {
 }
 
 const badgeVariants = {
-  default: 'bg-[#0F4C81] text-white',
+  default: 'bg-[#24483f] text-white',
   secondary: 'bg-slate-100 text-slate-700',
   outline: 'border border-slate-300 text-slate-700 bg-transparent',
   destructive: 'bg-red-500 text-white',
@@ -18,7 +18,7 @@ const badgeVariants = {
 
 export function Badge({ children, variant = 'default', className = '' }: BadgeProps) {
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${badgeVariants[variant]} ${className}`}>
+    <span className={`inline-flex max-w-full items-center gap-1 px-2.5 py-1 rounded-sm text-xs font-medium ${badgeVariants[variant]} ${className}`}>
       {children}
     </span>
   );
@@ -43,11 +43,14 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 }
 
 export function Textarea({ label, className = '', ...props }: TextareaProps) {
+  const generatedId = React.useId();
+  const id = props.id || generatedId;
   return (
     <div className="w-full">
-      {label && <Label className="mb-2">{label}</Label>}
+      {label && <Label htmlFor={id} className="mb-2">{label}</Label>}
       <textarea
-        className={`w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81] resize-y ${className}`}
+        id={id}
+        className={`w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#24483f]/30 focus:border-[#24483f] resize-y ${className}`}
         {...props}
       />
     </div>
@@ -69,7 +72,7 @@ export function Select({ value, onValueChange, children, id, className = '' }: S
       id={id}
       value={value}
       onChange={(e) => onValueChange(e.target.value)}
-      className={`w-full px-4 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81] text-sm ${className}`}
+      className={`w-full px-4 py-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-[#24483f]/30 focus:border-[#24483f] text-sm ${className}`}
     >
       {children}
     </select>
@@ -83,27 +86,29 @@ export function SelectOption({ value, children }: { value: string; children: Rea
 /* ─── Switch ─── */
 interface SwitchProps {
   id?: string;
+  label?: string;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
 }
 
-export function Switch({ id, checked, onCheckedChange }: SwitchProps) {
+export function Switch({ id, label, checked, onCheckedChange }: SwitchProps) {
   return (
     <button
       id={id}
       type="button"
       role="switch"
+      aria-label={label}
       aria-checked={checked}
       onClick={() => onCheckedChange(!checked)}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#0F4C81]/30 ${
-        checked ? 'bg-[#0F4C81]' : 'bg-slate-300'
-      }`}
+      className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-[#24483f]/30"
     >
+      <span className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? 'bg-[#24483f]' : 'bg-slate-300'}`}>
       <span
         className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
           checked ? 'translate-x-6' : 'translate-x-1'
         }`}
       />
+      </span>
     </button>
   );
 }
@@ -127,7 +132,7 @@ export function Tabs({ defaultValue, children, className = '' }: { defaultValue:
 
 export function TabsList({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit">
+    <div role="group" aria-label="一覧の切り替え" className="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-lg w-full sm:w-fit">
       {children}
     </div>
   );
@@ -138,9 +143,11 @@ export function TabsTrigger({ value, children }: { value: string; children: Reac
   const isActive = activeTab === value;
   return (
     <button
+      type="button"
+      aria-pressed={isActive}
       onClick={() => setActiveTab(value)}
-      className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-        isActive ? 'bg-white text-[#0F4C81] shadow-sm' : 'text-slate-600 hover:text-slate-900'
+      className={`flex-1 sm:flex-none min-h-11 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+        isActive ? 'bg-white text-[#24483f] shadow-sm' : 'text-slate-600 hover:text-slate-900'
       }`}
     >
       {children}
@@ -181,7 +188,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
-      <div className="fixed bottom-4 right-4 z-[100] space-y-2">
+      <div aria-live="polite" className="fixed bottom-4 left-4 right-4 sm:left-auto sm:w-full sm:max-w-sm z-[100] space-y-2">
         {toasts.map((t) => (
           <div
             key={t.id}

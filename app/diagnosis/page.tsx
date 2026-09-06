@@ -2,23 +2,19 @@
  * app/diagnosis/page.tsx
  * 診断フォームページ
  * 
- * 【修正版】
- * - 画像はフロントエンドで圧縮してからアップロード
- * - 送信後、即座に4桁番号を表示（1-2秒以内）
- * - 「AIが解析中」のローディングアニメーション表示（30秒後に完了メッセージに切替）
- * - PDFダウンロードボタンは不要（LINEで自動送信）
- * - LINE誘導の案内を表示
+ * 写真選択を先に表示し、詳しい状況と連絡先は任意入力にする。
+ * 受付後は合言葉を案内し、診断APIの状態を確認する。
  */
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PageHeader } from '@/components/PageHeader';
-import { ArrowRight, Check, Copy, MessageCircle } from 'lucide-react';
+import { DiagnosisReceipt } from '@/components/DiagnosisReceipt';
+import { ArrowRight, Check, CircleAlert } from 'lucide-react';
 import styles from './Diagnosis.module.css';
 import { ImageUpload } from '@/components/ImageUpload';
-import { trackFormStart, trackFormSubmit, trackLineClick, trackInspectionRequest } from '@/lib/analytics';
+import { trackFormStart, trackFormSubmit, trackInspectionRequest } from '@/lib/analytics';
 import { useScrollReveal } from '@/components/useScrollReveal';
 
 type DiagnosisStep = 'form' | 'uploading' | 'result';
@@ -40,7 +36,6 @@ const PREFECTURES = [
 const THIRD_PLACE_QUOTE_URL = 'https://third-place-ai.jp/';
 
 export default function DiagnosisPage() {
-  const router = useRouter();
   const [step, setStep] = useState<DiagnosisStep>('form');
 
   // フォーム入力
@@ -68,10 +63,8 @@ export default function DiagnosisPage() {
   // エラー・ローディング
   const [error, setError] = useState('');
   const [uploadProgress, setUploadProgress] = useState('');
-  const [copied, setCopied] = useState(false);
 
-  // 解析完了タイマー
-  const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [analysisStatus, setAnalysisStatus] = useState('processing');
 
   useScrollReveal('.diagnosis-refresh header, .diagnosis-refresh main > *');
 
@@ -83,15 +76,28 @@ export default function DiagnosisPage() {
     trackFormStart();
   };
 
-  // 結果画面に遷移してから30秒後にローディングを完了メッセージに切り替え
+  // Report the actual asynchronous state; elapsed time is not proof of completion.
   useEffect(() => {
-    if (step === 'result' && !analysisComplete) {
-      const timer = setTimeout(() => {
-        setAnalysisComplete(true);
-      }, 30000); // 30秒
-      return () => clearTimeout(timer);
+    if (step !== 'result' || !sessionId) return;
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout>;
+    async function checkStatus() {
+      try {
+        const response = await fetch(`/api/diagnosis/status/${sessionId}`, { signal: controller.signal });
+        if (!response.ok) throw new Error('Status unavailable');
+        const data = await response.json();
+        if (controller.signal.aborted) return;
+        setAnalysisStatus(data.status === 'completed' && !data.hasPdf ? 'pdf_failed' : data.status || 'unknown');
+        if (['completed', 'pdf_failed', 'error'].includes(data.status)) return;
+      } catch {
+        if (controller.signal.aborted) return;
+        setAnalysisStatus('unknown');
+      }
+      timer = setTimeout(checkStatus, 5000);
     }
-  }, [step, analysisComplete]);
+    checkStatus();
+    return () => { controller.abort(); clearTimeout(timer); };
+  }, [step, sessionId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,7 +168,7 @@ export default function DiagnosisPage() {
       // 3. 即座に結果画面を表示
       setSecretCode(diagResult.secretCode);
       setSessionId(diagResult.sessionId);
-      setAnalysisComplete(false); // タイマーリセット
+      setAnalysisStatus('processing');
       setStep('result');
 
       // 計測: 診断送信成功（form_submit）。UTM/gclid は trackEvent 側で自動付与。
@@ -184,14 +190,6 @@ export default function DiagnosisPage() {
     }
   };
 
-  const copySecretCode = () => {
-    navigator.clipboard.writeText(secretCode).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }).catch((err) => {
-      console.error('コピーに失敗:', err);
-    });
-  };
 
   // ============================================================
   // 結果画面（4桁番号表示 + AI解析中アニメーション + LINE誘導）
@@ -202,29 +200,16 @@ export default function DiagnosisPage() {
         <PageHeader />
         <main className={`container max-w-lg ${styles.main}`}>
           <div className={styles.intro}>
-            <div className={styles.accepted}><Check size={24} aria-hidden="true" /></div>
-            <h1 className={styles.resultHeading}>写真を受け付けました</h1>
-            <p className={styles.description}>あとは、この番号をLINEで送るだけ。</p>
+            <div className={styles.accepted}>{analysisStatus === 'error' ? <CircleAlert size={24} aria-hidden="true" /> : <Check size={24} aria-hidden="true" />}</div>
+            <h1 className={styles.resultHeading}>{analysisStatus === 'error' ? '診断を完了できませんでした' : '写真を受け付けました'}</h1>
+            <p className={styles.description}>{analysisStatus === 'error' ? '写真を選び直して、もう一度お試しください。' : 'あとは、この番号をLINEで送るだけ。'}</p>
           </div>
-          <div className={styles.resultCard}>
-            <p className={styles.stepLabel}>1. 合言葉をコピー</p>
-            <p className={styles.secretCode}>{secretCode}</p>
-            <button type="button" onClick={copySecretCode} className={styles.copyButton}>
-              {copied ? <Check size={17} aria-hidden="true" /> : <Copy size={17} aria-hidden="true" />}
-              <span aria-live="polite">{copied ? 'コピーしました' : '4桁の番号をコピー'}</span>
-            </button>
-            <div className={styles.lineStep}>
-              <p className={styles.stepLabel}>2. LINEで番号を送る</p>
-              <a href="https://lin.ee/LTMUhxy" target="_blank" rel="noopener noreferrer" onClick={() => trackLineClick('diagnosis_result')} className={styles.lineButton}>
-                <MessageCircle size={21} aria-hidden="true" /> LINEを開く <ArrowRight size={18} aria-hidden="true" />
-              </a>
-              <p className={styles.delivery}>番号を送ると、診断レポートが届きます。</p>
-            </div>
-          </div>
-          <p role="status" className={styles.note}>{analysisComplete ? 'LINEで診断結果をご確認ください。' : 'AIが写真を確認しています（目安15〜30秒）。'}</p>
+          {analysisStatus === 'error' ? <button type="button" className={styles.submit} onClick={() => setStep('form')}>写真を選び直す</button> : <DiagnosisReceipt code={secretCode} source="diagnosis_result" pdfFailed={analysisStatus === 'pdf_failed'} />}
+          <p role="status" className={styles.note}>{analysisStatus === 'completed' ? '診断結果の準備ができました。LINEで番号を送ってください。' : analysisStatus === 'pdf_failed' ? '診断の概要は、下のリンクから確認できます。' : analysisStatus === 'processing' ? 'AIが写真を確認しています。' : analysisStatus === 'error' ? '診断は無料でやり直せます。' : '診断の準備状況を確認しています。'}</p>
+          {sessionId && <Link href={`/result/${sessionId}`} className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4">診断状況・結果を見る</Link>}
           <details className={styles.help}>
             <summary>結果が届かないとき</summary>
-            <p>「生成中」と届いたら、少し待ってから番号をもう一度送ってください。合言葉は24時間有効です。レポートはLINEで受け取れます。</p>
+            <p>「生成中」と届いたら、少し待ってから番号をもう一度送ってください。合言葉は受付から24時間有効です。レポートはLINEで受け取れます。</p>
           </details>
         </main>
       </div>
@@ -236,8 +221,10 @@ export default function DiagnosisPage() {
   // ============================================================
   if (step === 'uploading') {
     return (
-      <div className="diagnosis-refresh min-h-screen flex items-center justify-center">
-        <div className="text-center p-8">
+      <div className="diagnosis-refresh min-h-screen">
+        <PageHeader />
+        <main className="container flex min-h-[60vh] items-center justify-center">
+        <div className="text-center p-8" role="status">
           <div className="relative mx-auto mb-6" style={{ width: 80, height: 80 }}>
             <div className="animate-spin rounded-full h-20 w-20 border-4 border-cyan-100"></div>
             <div className="animate-spin rounded-full h-20 w-20 border-4 border-accent-dark border-t-transparent absolute top-0 left-0"></div>
@@ -245,6 +232,7 @@ export default function DiagnosisPage() {
           <p className="text-lg font-bold text-primary mb-2">{uploadProgress}</p>
           <p className="text-sm text-slate-500">しばらくお待ちください</p>
         </div>
+        </main>
       </div>
     );
   }

@@ -99,16 +99,16 @@ export default function AdminSettings() {
                 value={notificationEmail}
                 onChange={(e) => setNotificationEmail(e.target.value)}
                 placeholder="admin@example.com"
-                className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81] text-sm"
+                className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#24483f]/30 focus:border-[#24483f] text-sm"
               />
             </div>
 
-            <div className="flex items-center justify-between py-3 border-b border-slate-100">
+            <div className="flex items-center justify-between gap-4 py-3 border-b border-slate-100">
               <div>
                 <Label>メール通知</Label>
                 <p className="text-sm text-slate-500">メールでの通知を有効にする</p>
               </div>
-              <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
+              <Switch label="メール通知" checked={emailNotifications} onCheckedChange={setEmailNotifications} />
             </div>
           </div>
         </div>
@@ -126,26 +126,26 @@ export default function AdminSettings() {
           </div>
 
           <div className="space-y-1">
-            <div className="flex items-center justify-between py-3 border-b border-slate-100">
+            <div className="flex items-center justify-between gap-4 py-3 border-b border-slate-100">
               <div>
                 <Label>新規お問い合わせ</Label>
                 <p className="text-sm text-slate-500">お問い合わせフォームからの送信時</p>
               </div>
-              <Switch checked={newContactAlert} onCheckedChange={setNewContactAlert} />
+              <Switch label="新規お問い合わせの通知" checked={newContactAlert} onCheckedChange={setNewContactAlert} />
             </div>
-            <div className="flex items-center justify-between py-3 border-b border-slate-100">
+            <div className="flex items-center justify-between gap-4 py-3 border-b border-slate-100">
               <div>
                 <Label>新規AI診断</Label>
                 <p className="text-sm text-slate-500">AI診断が完了した時</p>
               </div>
-              <Switch checked={newDiagnosisAlert} onCheckedChange={setNewDiagnosisAlert} />
+              <Switch label="新規AI診断の通知" checked={newDiagnosisAlert} onCheckedChange={setNewDiagnosisAlert} />
             </div>
-            <div className="flex items-center justify-between py-3">
+            <div className="flex items-center justify-between gap-4 py-3">
               <div>
                 <Label>新規予約</Label>
                 <p className="text-sm text-slate-500">現地調査の予約が入った時</p>
               </div>
-              <Switch checked={newAppointmentAlert} onCheckedChange={setNewAppointmentAlert} />
+              <Switch label="新規予約の通知" checked={newAppointmentAlert} onCheckedChange={setNewAppointmentAlert} />
             </div>
           </div>
         </div>
@@ -164,12 +164,12 @@ export default function AdminSettings() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between py-3">
+          <div className="flex items-center justify-between gap-4 py-3">
             <div>
               <Label>LINE通知</Label>
               <p className="text-sm text-slate-500">LINEでの管理者通知を有効にする</p>
             </div>
-            <Switch checked={lineNotifications} onCheckedChange={setLineNotifications} />
+            <Switch label="LINE通知" checked={lineNotifications} onCheckedChange={setLineNotifications} />
           </div>
         </div>
 

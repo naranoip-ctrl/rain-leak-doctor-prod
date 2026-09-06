@@ -124,7 +124,7 @@ export default function CustomerDetailPage() {
       {/* ヘッダー */}
       <div className="flex items-center gap-4 mb-8">
         <Link href="/admin/customers">
-          <button className="p-2 rounded-lg hover:bg-slate-100">
+          <button aria-label="顧客一覧に戻る" className="p-2 rounded-lg hover:bg-slate-100">
             <ArrowLeft className="h-5 w-5 text-slate-600" />
           </button>
         </Link>
@@ -228,7 +228,7 @@ export default function CustomerDetailPage() {
                   placeholder="例：見積もり送付、現地訪問など"
                   value={nextAction}
                   onChange={(e) => setNextAction(e.target.value)}
-                  className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81] text-sm"
+                  className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#24483f]/30 focus:border-[#24483f] text-sm"
                 />
               </div>
               <div>
@@ -238,7 +238,7 @@ export default function CustomerDetailPage() {
                   type="date"
                   value={nextActionDate}
                   onChange={(e) => setNextActionDate(e.target.value)}
-                  className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81] text-sm"
+                  className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#24483f]/30 focus:border-[#24483f] text-sm"
                 />
               </div>
               <Button variant="primary" className="w-full" onClick={handleUpdateFollowUp} disabled={saving}>
@@ -297,14 +297,14 @@ export default function CustomerDetailPage() {
                       )}
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-1">
                         <h4 className="font-semibold text-slate-900">{item.title}</h4>
                         <span className="text-xs text-slate-400">
                           {new Date(item.createdAt).toLocaleString('ja-JP')}
                         </span>
                       </div>
                       <p className="text-sm text-slate-500">{item.description}</p>
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
                         {item.status && (
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${STATUS_COLORS[item.status] || ''}`}>
                             {STATUS_LABELS[item.status] || item.status}

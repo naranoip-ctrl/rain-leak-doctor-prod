@@ -123,7 +123,7 @@ export default function CustomerManagement() {
           <h1 className="text-2xl md:text-3xl font-bold text-slate-900">顧客管理</h1>
           <p className="text-slate-500 mt-1">顧客の問い合わせ・診断・予約履歴を統合管理</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Button
             variant="outline"
             size="sm"
@@ -152,7 +152,7 @@ export default function CustomerManagement() {
               <p className="font-semibold">{syncResult.success ? '同期完了' : '同期エラー'}</p>
               <p className="text-sm mt-1">{syncResult.message}</p>
               {syncResult.success && (
-                <div className="flex gap-4 mt-2 text-sm">
+                <div className="flex flex-wrap gap-4 mt-2 text-sm">
                   <span>新規作成: <strong>{syncResult.created}</strong>件</span>
                   <span>更新: <strong>{syncResult.updated}</strong>件</span>
                   <span>スキップ: <strong>{syncResult.skipped}</strong>件</span>
@@ -173,6 +173,7 @@ export default function CustomerManagement() {
               )}
             </div>
             <button
+              aria-label="同期結果を閉じる"
               onClick={() => setSyncResult(null)}
               className="text-slate-400 hover:text-slate-600"
             >
@@ -184,14 +185,16 @@ export default function CustomerManagement() {
 
       {/* 検索バー */}
       <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6">
+        <label htmlFor="customer-search" className="block text-sm font-medium text-slate-700 mb-2">顧客を検索</label>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             type="text"
-            placeholder="名前、メールアドレス、電話番号で検索..."
+            id="customer-search"
+            placeholder="名前・メール・電話番号"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81] text-sm"
+            className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#24483f]/30 focus:border-[#24483f] text-sm"
           />
         </div>
       </div>
@@ -200,9 +203,9 @@ export default function CustomerManagement() {
       <div className="space-y-3">
         {filteredCustomers.length > 0 ? filteredCustomers.map((customer) => (
           <div key={customer.id} className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex flex-wrap items-center gap-3 mb-2">
                   <h3 className="text-lg font-semibold text-slate-900">{customer.name || '名前未登録'}</h3>
                   {customer.lineUserId && (
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
