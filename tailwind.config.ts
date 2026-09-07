@@ -10,24 +10,24 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#12364A',
-          dark: '#0A2431',
-          light: '#2E6477',
+          DEFAULT: '#24483F',
+          dark: '#18372F',
+          light: '#42665A',
         },
         accent: {
-          DEFAULT: '#49D4D0',
-          dark: '#0F9F9A',
-          light: '#8BE7E3',
+          DEFAULT: '#CFDCC5',
+          dark: '#35634F',
+          light: '#E6ECDC',
         },
         cta: {
-          DEFAULT: '#0F9F9A',
-          dark: '#0A817E',
-          light: '#49D4D0',
+          DEFAULT: '#35634F',
+          dark: '#284D3E',
+          light: '#CFDCC5',
         },
         warning: {
-          DEFAULT: '#C96B2C',
-          dark: '#A5521E',
-          light: '#F3A35E',
+          DEFAULT: '#95532C',
+          dark: '#78401F',
+          light: '#E8C9A6',
         },
         line: {
           DEFAULT: '#06C755',
@@ -35,7 +35,9 @@ const config: Config = {
         },
       },
       fontFamily: {
+        serif: ['var(--font-editorial)', 'Yu Mincho', 'serif'],
         sans: [
+          'var(--font-sans)',
           'system-ui',
           '-apple-system',
           'BlinkMacSystemFont',
@@ -48,8 +50,8 @@ const config: Config = {
       },
       keyframes: {
         'pulse-cta': {
-          '0%, 100%': { transform: 'scale(1)', boxShadow: '0 0 20px rgba(255, 107, 53, 0.4)' },
-          '50%': { transform: 'scale(1.03)', boxShadow: '0 0 35px rgba(255, 107, 53, 0.6)' },
+          '0%, 100%': { transform: 'scale(1)', boxShadow: 'none' },
+          '50%': { transform: 'scale(1.03)', boxShadow: 'none' },
         },
         'float': {
           '0%, 100%': { transform: 'translateY(0)' },

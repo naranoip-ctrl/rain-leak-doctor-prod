@@ -1,0 +1,40 @@
+.main.main { max-width: 576px; padding-block: 28px 36px; }
+.intro { margin-bottom: 22px; }
+.heading.heading { margin: 0 0 12px; font-size: 28px; line-height: 1.5; letter-spacing: .01em; color: #24483f; }
+.description.description { color: #59695f; font-size: 14px; line-height: 1.7; }
+.badges { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 14px; color: #35634f; font-size: 12px; }
+.badges span { display: inline-flex; align-items: center; gap: 4px; }
+.form.form { padding: 18px; border-top: 1px solid #d4dcd2; }
+.submit { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 56px; margin-top: 20px; padding: 14px 10px; background: #35634f; color: #fff; font-size: 15px; font-weight: 700; line-height: 1.6; border-radius: 3px; }
+.submit svg { flex-shrink: 0; }
+.submit:hover { background: #24483f; }
+.submit:disabled { background: #e7ece4; color: #66745f; cursor: not-allowed; }
+.delivery.delivery { margin-top: 10px; font-size: 12px; line-height: 1.7; color: #657166; text-align: center; }
+.optional { margin-top: 20px; border-top: 1px solid #d4dcd2; }
+.optional summary { min-height: 52px; padding-top: 16px; color: #435c4e; font-size: 13px; cursor: pointer; }
+.optional summary span { display: inline-block; margin-left: 8px; color: #6b7669; font-size: 11px; }
+.optional summary:focus-visible,.help summary:focus-visible { outline: 2px solid #956133; outline-offset: 3px; }
+.note.note { margin-top: 18px; color: #687469; font-size: 12px; line-height: 1.8; }
+.policyLinks { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 6px; font-size: 11px; color: #687469; }
+.policyLinks a { display: inline-flex; align-items: center; text-decoration: underline; text-underline-offset: 3px; }
+.accepted { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px; border: 1px solid #b7c7b0; border-radius: 50%; color: #35634f; background: #e9efe3; }
+.resultHeading.resultHeading { font-size: 24px; line-height: 1.5; letter-spacing: 0; margin-bottom: 10px; color: #24483f; }
+.resultCard { padding: 22px 18px; background: #fff; border: 1px solid #d4dcd2; text-align: center; }
+.stepLabel.stepLabel { font-size: 13px; font-weight: 500; line-height: 1.5; color: #435c4e; }
+.secretCode.secretCode { margin: 14px 0 18px; font-size: 48px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: .12em; line-height: 1; color: #24483f; white-space: nowrap; }
+.copyButton { display: inline-flex; justify-content: center; align-items: center; gap: 8px; min-height: 44px; padding: 10px 14px; border: 1px solid #b9c6b3; border-radius: 3px; color: #435c4e; font-size: 13px; }
+.copyButton:hover { background: #f0f3eb; }
+.lineStep { margin-top: 24px; padding-top: 22px; border-top: 1px solid #d4dcd2; }
+.lineButton { display: flex; justify-content: center; align-items: center; gap: 10px; min-height: 54px; margin-top: 14px; padding: 12px; border-radius: 3px; background: #06c755; color: #133b24; font-size: 16px; font-weight: 700; }
+.lineButton:hover { background: #05b34d; }
+.lineButton svg { flex-shrink: 0; }
+.help { margin-top: 8px; font-size: 12px; color: #687469; }
+.help summary { min-height: 44px; padding-block: 12px; cursor: pointer; }
+.help p { padding: 10px 0; }
+@media (min-width: 640px) {
+  .main.main { padding-block: 42px; }
+  .heading.heading { font-size: 34px; }
+  .form.form,.resultCard { padding: 28px; }
+  .submit { font-size: 17px; }
+  .secretCode.secretCode { font-size: 60px; }
+}

@@ -30,7 +30,7 @@ export default function BlogIndex() {
   const posts = getAllPosts();
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
+    <div className="editorial-page min-h-screen bg-slate-50 font-sans">
       <BlogHeader />
 
       <section className="bg-primary text-white py-16">
@@ -49,7 +49,7 @@ export default function BlogIndex() {
         {posts.length === 0 ? (
           <p className="text-center text-slate-500 py-20">記事を準備中です。</p>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="post-grid">
             {posts.map((post) => (
               <Link
                 key={post.slug}

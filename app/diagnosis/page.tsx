@@ -2,20 +2,19 @@
  * app/diagnosis/page.tsx
  * 診断フォームページ
  * 
- * 【修正版】
- * - 画像はフロントエンドで圧縮してからアップロード
- * - 送信後、即座に4桁番号を表示（1-2秒以内）
- * - 「AIが解析中」のローディングアニメーション表示（30秒後に完了メッセージに切替）
- * - PDFダウンロードボタンは不要（LINEで自動送信）
- * - LINE誘導の案内を表示
+ * 写真選択を先に表示し、詳しい状況と連絡先は任意入力にする。
+ * 受付後は合言葉を案内し、診断APIの状態を確認する。
  */
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { PageHeader } from '@/components/PageHeader';
+import { DiagnosisReceipt } from '@/components/DiagnosisReceipt';
+import { ArrowRight, Check, CircleAlert } from 'lucide-react';
+import styles from './Diagnosis.module.css';
 import { ImageUpload } from '@/components/ImageUpload';
-import { trackFormStart, trackFormSubmit, trackLineClick, trackInspectionRequest } from '@/lib/analytics';
+import { trackFormStart, trackFormSubmit, trackInspectionRequest } from '@/lib/analytics';
 import { useScrollReveal } from '@/components/useScrollReveal';
 
 type DiagnosisStep = 'form' | 'uploading' | 'result';
@@ -37,7 +36,6 @@ const PREFECTURES = [
 const THIRD_PLACE_QUOTE_URL = 'https://third-place-ai.jp/';
 
 export default function DiagnosisPage() {
-  const router = useRouter();
   const [step, setStep] = useState<DiagnosisStep>('form');
 
   // フォーム入力
@@ -53,6 +51,7 @@ export default function DiagnosisPage() {
   const [customerAddress, setCustomerAddress] = useState('');
   const [customerBuildingAge, setCustomerBuildingAge] = useState('');
   const [images, setImages] = useState<File[]>([]);
+  const [isProcessingImages, setIsProcessingImages] = useState(false);
 
   // 関西判定（現地点検案内 / 関西外はオンライン完結）
   const isKansai = KANSAI_PREFECTURES.includes(prefecture);
@@ -64,10 +63,8 @@ export default function DiagnosisPage() {
   // エラー・ローディング
   const [error, setError] = useState('');
   const [uploadProgress, setUploadProgress] = useState('');
-  const [copied, setCopied] = useState(false);
 
-  // 解析完了タイマー
-  const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [analysisStatus, setAnalysisStatus] = useState('processing');
 
   useScrollReveal('.diagnosis-refresh header, .diagnosis-refresh main > *');
 
@@ -79,18 +76,32 @@ export default function DiagnosisPage() {
     trackFormStart();
   };
 
-  // 結果画面に遷移してから30秒後にローディングを完了メッセージに切り替え
+  // Report the actual asynchronous state; elapsed time is not proof of completion.
   useEffect(() => {
-    if (step === 'result' && !analysisComplete) {
-      const timer = setTimeout(() => {
-        setAnalysisComplete(true);
-      }, 30000); // 30秒
-      return () => clearTimeout(timer);
+    if (step !== 'result' || !sessionId) return;
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout>;
+    async function checkStatus() {
+      try {
+        const response = await fetch(`/api/diagnosis/status/${sessionId}`, { signal: controller.signal });
+        if (!response.ok) throw new Error('Status unavailable');
+        const data = await response.json();
+        if (controller.signal.aborted) return;
+        setAnalysisStatus(data.status === 'completed' && !data.hasPdf ? 'pdf_failed' : data.status || 'unknown');
+        if (['completed', 'pdf_failed', 'error'].includes(data.status)) return;
+      } catch {
+        if (controller.signal.aborted) return;
+        setAnalysisStatus('unknown');
+      }
+      timer = setTimeout(checkStatus, 5000);
     }
-  }, [step, analysisComplete]);
+    checkStatus();
+    return () => { controller.abort(); clearTimeout(timer); };
+  }, [step, sessionId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isProcessingImages) return;
     setError('');
 
     // バリデーション（写真1枚以上で送信可・最大3枚。連絡先・属性は任意・匿名可）
@@ -157,7 +168,7 @@ export default function DiagnosisPage() {
       // 3. 即座に結果画面を表示
       setSecretCode(diagResult.secretCode);
       setSessionId(diagResult.sessionId);
-      setAnalysisComplete(false); // タイマーリセット
+      setAnalysisStatus('processing');
       setStep('result');
 
       // 計測: 診断送信成功（form_submit）。UTM/gclid は trackEvent 側で自動付与。
@@ -179,14 +190,6 @@ export default function DiagnosisPage() {
     }
   };
 
-  const copySecretCode = () => {
-    navigator.clipboard.writeText(secretCode).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }).catch((err) => {
-      console.error('コピーに失敗:', err);
-    });
-  };
 
   // ============================================================
   // 結果画面（4桁番号表示 + AI解析中アニメーション + LINE誘導）
@@ -194,138 +197,20 @@ export default function DiagnosisPage() {
   if (step === 'result') {
     return (
       <div className="diagnosis-refresh min-h-screen">
-        {/* ヘッダー */}
-        <header className="bg-white/90 backdrop-blur-md border-b border-cyan-100 shadow-sm">
-          <div className="container mx-auto px-4 py-4">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent-dark rounded-lg flex items-center justify-center shadow-lg shadow-cyan-900/10">
-                <span className="text-white font-bold text-xl">雨</span>
-              </div>
-              <span className="text-2xl font-black text-primary">雨漏りドクター</span>
-            </Link>
+        <PageHeader />
+        <main className={`container max-w-lg ${styles.main}`}>
+          <div className={styles.intro}>
+            <div className={styles.accepted}>{analysisStatus === 'error' ? <CircleAlert size={24} aria-hidden="true" /> : <Check size={24} aria-hidden="true" />}</div>
+            <h1 className={styles.resultHeading}>{analysisStatus === 'error' ? '診断を完了できませんでした' : '写真を受け付けました'}</h1>
+            <p className={styles.description}>{analysisStatus === 'error' ? '写真を選び直して、もう一度お試しください。' : 'あとは、この番号をLINEで送るだけ。'}</p>
           </div>
-        </header>
-
-        <main className="container mx-auto px-4 py-10 max-w-lg">
-          {/* 合言葉カード */}
-          <div className="bg-gradient-to-br from-primary to-primary-dark text-white rounded-2xl shadow-xl p-8 mb-6 border border-cyan-100/20">
-            <h2 className="text-2xl font-bold mb-2 text-center">
-              受付が完了しました！
-            </h2>
-            <p className="text-center text-cyan-100 mb-6 text-sm">
-              あなたの合言葉（4桁番号）
-            </p>
-            <div className="bg-white text-slate-900 rounded-xl p-6 text-center">
-              <p className="text-6xl font-black tracking-[0.18em] sm:tracking-[0.3em] mb-4 text-primary">
-                {secretCode}
-              </p>
-              <button
-                onClick={copySecretCode}
-                className="bg-cta text-white px-6 py-2 rounded-lg hover:bg-cta-dark transition-colors text-sm font-bold"
-              >
-                {copied ? '✓ コピーしました！' : '合言葉をコピー'}
-              </button>
-            </div>
-          </div>
-
-          {/* AI解析ステータス（30秒後に完了メッセージに切替） */}
-          {!analysisComplete ? (
-            <div className="form-panel p-6 mb-6">
-              <div className="flex items-center justify-center mb-4">
-                <div className="relative">
-                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-cyan-100"></div>
-                  <div className="animate-spin rounded-full h-16 w-16 border-4 border-accent-dark border-t-transparent absolute top-0 left-0"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xl">🔍</span>
-                  </div>
-                </div>
-              </div>
-              <h3 className="text-lg font-bold text-center text-primary mb-2">
-                現在AIが解析しています
-              </h3>
-              <p className="text-sm text-slate-600 text-center leading-relaxed">
-                写真の解析とPDFレポートの生成には<br />
-                約15〜30秒かかります。
-              </p>
-              <div className="mt-4 flex justify-center space-x-1">
-                <div className="w-2 h-2 bg-accent-dark rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-accent-dark rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-accent-dark rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-              </div>
-            </div>
-          ) : (
-            <div className="form-panel p-6 mb-6 border-2 border-emerald-200">
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg className="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-              </div>
-              <h3 className="text-lg font-bold text-center text-green-700 mb-2">
-                AI解析が完了しました！
-              </h3>
-              <p className="text-sm text-slate-600 text-center leading-relaxed">
-                PDFレポートの準備ができました。<br />
-                LINEで合言葉「<strong className="text-green-700">{secretCode}</strong>」を送信して<br />
-                診断結果を受け取ってください。
-              </p>
-            </div>
-          )}
-
-          {/* LINE誘導カード */}
-          <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-6 mb-6">
-            <h3 className="text-lg font-bold text-green-800 mb-3 text-center">
-              📱 LINEで結果を受け取る
-            </h3>
-            <div className="space-y-3 text-sm text-slate-700">
-              <div className="flex items-start space-x-3">
-                <span className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs font-bold">1</span>
-                <p>下のボタンからLINE公式アカウントを開いてください</p>
-              </div>
-              <div className="flex items-start space-x-3">
-                <span className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs font-bold">2</span>
-                <p>
-                  4桁の合言葉「<strong className="text-green-700">{secretCode}</strong>」をメッセージで送信してください
-                </p>
-              </div>
-              <div className="flex items-start space-x-3">
-                <span className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs font-bold">3</span>
-                <p>詳細なPDFレポートが自動で届きます</p>
-              </div>
-            </div>
-            <div className="mt-5 text-center">
-              <a
-                href="https://lin.ee/LTMUhxy"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackLineClick('diagnosis_result')}
-                className="inline-flex items-center justify-center bg-[#06C755] text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#05b34d] transition-colors shadow-lg w-full"
-              >
-                <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
-                </svg>
-                LINEで結果を受け取る
-              </a>
-            </div>
-          </div>
-
-          {/* 注意事項 */}
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900">
-            <p className="font-bold mb-1">⚠️ ご注意</p>
-            <ul className="list-disc list-inside space-y-1 text-xs">
-              <li>合言葉の有効期限は24時間です</li>
-              <li>AI解析が完了する前にLINEで合言葉を送信した場合、「生成中」のメッセージが届きます。少し待ってから再送信してください</li>
-              <li>PDFレポートはLINEでのみ受け取れます</li>
-            </ul>
-          </div>
-
-          {/* ホームに戻る */}
-          <div className="mt-6 text-center">
-            <Link href="/" className="text-primary underline hover:text-accent-dark text-sm font-bold">
-              ← ホームに戻る
-            </Link>
-          </div>
+          {analysisStatus === 'error' ? <button type="button" className={styles.submit} onClick={() => setStep('form')}>写真を選び直す</button> : <DiagnosisReceipt code={secretCode} source="diagnosis_result" pdfFailed={analysisStatus === 'pdf_failed'} />}
+          <p role="status" className={styles.note}>{analysisStatus === 'completed' ? '診断結果の準備ができました。LINEで番号を送ってください。' : analysisStatus === 'pdf_failed' ? '診断の概要は、下のリンクから確認できます。' : analysisStatus === 'processing' ? 'AIが写真を確認しています。' : analysisStatus === 'error' ? '診断は無料でやり直せます。' : '診断の準備状況を確認しています。'}</p>
+          {sessionId && <Link href={`/result/${sessionId}`} className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4">診断状況・結果を見る</Link>}
+          <details className={styles.help}>
+            <summary>結果が届かないとき</summary>
+            <p>「生成中」と届いたら、少し待ってから番号をもう一度送ってください。合言葉は受付から24時間有効です。レポートはLINEで受け取れます。</p>
+          </details>
         </main>
       </div>
     );
@@ -336,8 +221,10 @@ export default function DiagnosisPage() {
   // ============================================================
   if (step === 'uploading') {
     return (
-      <div className="diagnosis-refresh min-h-screen flex items-center justify-center">
-        <div className="text-center p-8">
+      <div className="diagnosis-refresh min-h-screen">
+        <PageHeader />
+        <main className="container flex min-h-[60vh] items-center justify-center">
+        <div className="text-center p-8" role="status">
           <div className="relative mx-auto mb-6" style={{ width: 80, height: 80 }}>
             <div className="animate-spin rounded-full h-20 w-20 border-4 border-cyan-100"></div>
             <div className="animate-spin rounded-full h-20 w-20 border-4 border-accent-dark border-t-transparent absolute top-0 left-0"></div>
@@ -345,6 +232,7 @@ export default function DiagnosisPage() {
           <p className="text-lg font-bold text-primary mb-2">{uploadProgress}</p>
           <p className="text-sm text-slate-500">しばらくお待ちください</p>
         </div>
+        </main>
       </div>
     );
   }
@@ -354,238 +242,234 @@ export default function DiagnosisPage() {
   // ============================================================
   return (
     <div className="diagnosis-refresh min-h-screen">
-      {/* ヘッダー */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-cyan-100 shadow-sm sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent-dark rounded-lg flex items-center justify-center shadow-lg shadow-cyan-900/10">
-              <span className="text-white font-bold text-xl">雨</span>
-            </div>
-            <span className="text-2xl font-black text-primary">雨漏りドクター</span>
-          </Link>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-10 max-w-2xl">
-        <div className="mb-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-white/80 px-4 py-2 text-sm font-bold text-primary shadow-sm mb-4">
-            AI PHOTO CHECK
+      <PageHeader />
+      <main className={`container max-w-xl ${styles.main}`}>
+        <div className={styles.intro}>
+          <h1 className={styles.heading}>雨漏りの不安を、<br />写真で相談。</h1>
+          <p className={styles.description}>写真1枚から。<br className="sm:hidden" />結果はLINEで受け取れます。</p>
+          <div className={styles.badges}>
+            <span><Check size={14} aria-hidden="true" /> 診断0円</span>
+            <span><Check size={14} aria-hidden="true" /> 名前入力不要</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-primary mb-3 leading-tight">AI雨漏り診断</h1>
-          <p className="text-slate-600 leading-relaxed text-base md:text-lg">
-          写真をアップロードするだけで、AIが雨漏りの状況を一次判定します。1枚でもOK（3枚あるとより正確）。原因の断定には現地確認が必要です。
-          </p>
         </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6 font-bold">
-            {error}
-          </div>
-        )}
+        {error && <p role="alert" className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 mb-4">{error}</p>}
 
-        <form onSubmit={handleSubmit} onFocus={handleFirstInteraction} className="form-panel p-5 md:p-7 space-y-7">
-          {/* ① 雨漏りの状況（任意） */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              気になっている症状・状況（任意）
-            </label>
-            <textarea
-              value={leakSituation}
-              onChange={(e) => setLeakSituation(e.target.value)}
-              rows={3}
-              className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
-              placeholder="例：先週の大雨のあと、2階の天井にシミが出てきた"
-            />
-          </div>
-
-          {/* ② 写真（必須） */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              写真（1〜3枚）<span className="text-red-500">*</span>
-            </label>
-            <p className="text-xs text-slate-500 mb-3">一次判定に使う写真です。雨漏りの跡・気になる箇所を撮ってアップロードしてください。1枚でも判定できます（3枚あるとより正確です）。</p>
-            <ImageUpload
-              maxImages={3}
-              images={images}
-              onImagesChange={setImages}
-            />
-          </div>
-
-          {/* ③ 物件所在地（都道府県・任意）＋関西分岐 */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              物件の所在地（都道府県・任意）
-            </label>
-            <select
-              value={prefecture}
-              onChange={(e) => setPrefecture(e.target.value)}
-              className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control bg-white"
-            >
-              <option value="">選択してください</option>
-              {PREFECTURES.map((p) => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-            </select>
-            {prefecture && (
-              isKansai ? (
-                <p className="mt-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                  {prefecture}は現地点検の対応エリアです。一次判定のあと、ご希望に応じて現地点検をご案内します。
-                </p>
-              ) : (
-                <p className="mt-2 text-sm text-primary bg-cyan-50 border border-cyan-200 rounded-lg px-3 py-2">
-                  関西エリア外のため、まずは写真からのオンライン一次判定で対応します（現地点検は対象外の場合があります）。
-                </p>
-              )
-            )}
-          </div>
-
-          {/* ④ 他社見積の有無（「高い気がする」→ third-place 導線） */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              他社の見積もりはありますか？（任意）
-            </label>
-            <div className="space-y-2">
-              {[
-                { value: '高い気がする', label: '見積もりがある（高い気がする）' },
-                { value: '適正か不明', label: '見積もりがある（適正か分からない）' },
-                { value: 'ない', label: 'まだ見積もりはない' },
-              ].map((opt) => (
-                <label key={opt.value} className="flex items-center gap-3 px-4 py-3 border border-cyan-200 rounded-lg cursor-pointer hover:bg-cyan-50 bg-white/80 transition-colors">
-                  <input
-                    type="radio"
-                    name="hasQuote"
-                    value={opt.value}
-                    checked={hasQuote === opt.value}
-                    onChange={(e) => setHasQuote(e.target.value)}
-                    className="h-4 w-4 text-accent-dark"
-                  />
-                  <span className="text-sm text-slate-700">{opt.label}</span>
-                </label>
-              ))}
-            </div>
-            {hasQuote === '高い気がする' && (
-              <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-900">
-                <p className="font-bold mb-1">見積もりが適正か、先に確認できます</p>
-                <p className="mb-3">他社の見積書を一次チェックし、必要工事と任意工事の分け方などを整理できます。当社施工を前提としない確認です。</p>
-                <a
-                  href={THIRD_PLACE_QUOTE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center bg-amber-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-amber-700 transition-colors"
-                >
-                  見積もりチェックを見る
-                </a>
-              </div>
-            )}
-          </div>
-
-          {/* ⑤ 希望 */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              ご希望（任意）
-            </label>
-            <div className="space-y-2">
-              {[
-                { value: '無料一次判定', label: 'まずは無料の一次判定だけ' },
-                { value: '現地点検', label: '現地点検を希望（関西エリア）' },
-                { value: '見積確認', label: '他社見積の確認をしたい' },
-              ].map((opt) => (
-                <label key={opt.value} className="flex items-center gap-3 px-4 py-3 border border-cyan-200 rounded-lg cursor-pointer hover:bg-cyan-50 bg-white/80 transition-colors">
-                  <input
-                    type="radio"
-                    name="requestType"
-                    value={opt.value}
-                    checked={requestType === opt.value}
-                    onChange={(e) => setRequestType(e.target.value)}
-                    className="h-4 w-4 text-accent-dark"
-                  />
-                  <span className="text-sm text-slate-700">{opt.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* ⑥ 連絡先（任意・匿名可） */}
-          <div className="border-t border-cyan-100 pt-6">
-            <p className="text-sm font-medium text-slate-700 mb-1">連絡先（任意・匿名でもOK）</p>
-            <p className="text-xs text-slate-500 mb-4">
-              結果はこのあと表示する4桁の合言葉でLINEから受け取れます。連絡先の入力は任意です。
-            </p>
-            <div className="space-y-4">
-              <input
-                type="text"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
-                placeholder="お名前（任意）"
-              />
-              <input
-                type="tel"
-                value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
-                className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
-                placeholder="電話番号（任意）"
-              />
-              <input
-                type="email"
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
-                placeholder="メールアドレス（任意）"
-              />
-              <select
-                value={customerBuildingAge}
-                onChange={(e) => setCustomerBuildingAge(e.target.value)}
-                className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control bg-white"
-              >
-                <option value="">築年数（任意）</option>
-                <option value="5年未満">5年未満</option>
-                <option value="5〜10年">5〜10年</option>
-                <option value="10〜20年">10〜20年</option>
-                <option value="20〜30年">20〜30年</option>
-                <option value="30年以上">30年以上</option>
-                <option value="不明">不明</option>
-              </select>
-              <input
-                type="text"
-                value={customerAddress}
-                onChange={(e) => setCustomerAddress(e.target.value)}
-                className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
-                placeholder="住所（任意・現地点検をご希望の場合）"
-              />
-            </div>
-          </div>
-
-          {/* 送信ボタン */}
+        <form onSubmit={handleSubmit} onFocus={handleFirstInteraction} onChangeCapture={handleFirstInteraction} className={`form-panel ${styles.form}`}>
+          <ImageUpload maxImages={3} images={images} onImagesChange={setImages} onBusyChange={setIsProcessingImages} />
           <button
             type="submit"
-            disabled={images.length < 1}
-            className={`w-full py-4 rounded-lg font-bold text-lg transition-colors ${
-              images.length >= 1
-                ? 'bg-cta text-white hover:bg-cta-dark'
-                : 'bg-slate-200 text-slate-500 cursor-not-allowed'
-            }`}
+            disabled={images.length < 1 || isProcessingImages}
+            className={styles.submit}
           >
-            写真で一次判定を受ける
+            <span>{isProcessingImages ? '写真を準備しています…' : images.length > 0 ? 'この写真で無料診断を頼む' : '写真を選ぶと診断できます'}</span>
+            {images.length > 0 && !isProcessingImages && <ArrowRight size={19} aria-hidden="true" />}
           </button>
-          {images.length < 1 && (
-            <p className="text-xs text-slate-500 text-center -mt-3">
-              写真を1枚以上アップロードすると送信できます
-            </p>
-          )}
+          <p role={isProcessingImages ? 'status' : undefined} className={styles.delivery}>
+            {isProcessingImages ? '準備ができるまで、そのままお待ちください。' : '診断は無料。結果はLINEでお届けします。'}
+          </p>
+          <details className={styles.optional} onInvalid={(event) => { event.currentTarget.open = true; }}>
+            <summary>状況・連絡先も伝える<span>任意</span></summary>
+            <div className="space-y-6 pt-5">
+                {/* ① 雨漏りの状況（任意） */}
+                <div>
+                  <label htmlFor="leak-situation" className="block text-sm font-medium text-slate-700 mb-2">
+                    気になっている症状・状況（任意）
+                  </label>
+                  <textarea
+                    id="leak-situation"
+                    value={leakSituation}
+                    onChange={(e) => setLeakSituation(e.target.value)}
+                    rows={3}
+                    className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
+                    placeholder="例：先週の大雨のあと、2階の天井にシミが出てきた"
+                  />
+                </div>
+
+                {/* ③ 物件所在地（都道府県・任意）＋関西分岐 */}
+                <div>
+                  <label htmlFor="prefecture" className="block text-sm font-medium text-slate-700 mb-2">
+                    物件の所在地（都道府県・任意）
+                  </label>
+                  <select
+                    id="prefecture"
+                    value={prefecture}
+                    onChange={(e) => setPrefecture(e.target.value)}
+                    className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control bg-white"
+                  >
+                    <option value="">選択してください</option>
+                    {PREFECTURES.map((p) => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                  {prefecture && (
+                    isKansai ? (
+                      <p className="mt-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                        {prefecture}は現地点検の対応エリアです。一次判定のあと、ご希望に応じて現地点検をご案内します。
+                      </p>
+                    ) : (
+                      <p className="mt-2 text-sm text-primary bg-cyan-50 border border-cyan-200 rounded-lg px-3 py-2">
+                        関西エリア外のため、まずは写真からのオンライン一次判定で対応します（現地点検は対象外の場合があります）。
+                      </p>
+                    )
+                  )}
+                </div>
+
+                {/* ④ 他社見積の有無（「高い気がする」→ third-place 導線） */}
+                <div>
+                  <p id="has-quote-label" className="block text-sm font-medium text-slate-700 mb-2">
+                    他社の見積もりはありますか？（任意）
+                  </p>
+                  <div role="radiogroup" aria-labelledby="has-quote-label" className="space-y-2">
+                    {[
+                      { value: '高い気がする', label: '見積もりがある（高い気がする）' },
+                      { value: '適正か不明', label: '見積もりがある（適正か分からない）' },
+                      { value: 'ない', label: 'まだ見積もりはない' },
+                    ].map((opt) => (
+                      <label key={opt.value} className="flex items-center gap-3 px-4 py-3 border border-cyan-200 rounded-lg cursor-pointer hover:bg-cyan-50 bg-white/80 transition-colors">
+                        <input
+                          type="radio"
+                          name="hasQuote"
+                          value={opt.value}
+                          checked={hasQuote === opt.value}
+                          onChange={(e) => setHasQuote(e.target.value)}
+                          className="h-4 w-4 shrink-0 text-accent-dark"
+                        />
+                        <span className="text-sm text-slate-700">{opt.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  {hasQuote === '高い気がする' && (
+                    <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-900">
+                      <p className="font-bold mb-1">見積もりが適正か、先に確認できます</p>
+                      <p className="mb-3">他社の見積書を一次チェックし、必要工事と任意工事の分け方などを整理できます。当社施工を前提としない確認です。</p>
+                      <a
+                        href={THIRD_PLACE_QUOTE_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center bg-amber-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-amber-700 transition-colors"
+                      >
+                        見積もりチェックを見る
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                {/* ⑤ 希望 */}
+                <div>
+                  <p id="request-type-label" className="block text-sm font-medium text-slate-700 mb-2">
+                    ご希望（任意）
+                  </p>
+                  <div role="radiogroup" aria-labelledby="request-type-label" className="space-y-2">
+                    {[
+                      { value: '無料一次判定', label: 'まずは無料の一次判定だけ' },
+                      { value: '現地点検', label: '現地点検を希望（関西エリア）' },
+                      { value: '見積確認', label: '他社見積の確認をしたい' },
+                    ].map((opt) => (
+                      <label key={opt.value} className="flex items-center gap-3 px-4 py-3 border border-cyan-200 rounded-lg cursor-pointer hover:bg-cyan-50 bg-white/80 transition-colors">
+                        <input
+                          type="radio"
+                          name="requestType"
+                          value={opt.value}
+                          checked={requestType === opt.value}
+                          onChange={(e) => setRequestType(e.target.value)}
+                          className="h-4 w-4 shrink-0 text-accent-dark"
+                        />
+                        <span className="text-sm text-slate-700">{opt.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ⑥ 連絡先（任意・匿名可） */}
+                <div className="border-t border-cyan-100 pt-6">
+                  <p className="text-sm font-medium text-slate-700 mb-1">連絡先（任意・匿名でもOK）</p>
+                  <p className="text-xs text-slate-500 mb-4">
+                    結果はこのあと表示する4桁の合言葉でLINEから受け取れます。連絡先の入力は任意です。
+                  </p>
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="customer-name" className="block text-sm text-slate-700 mb-2">お名前（任意）</label>
+                      <input
+                        id="customer-name"
+                        autoComplete="name"
+                        type="text"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
+                        placeholder="お名前（任意）"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="customer-phone" className="block text-sm text-slate-700 mb-2">電話番号（任意）</label>
+                      <input
+                        id="customer-phone"
+                        autoComplete="tel"
+                        type="tel"
+                        value={customerPhone}
+                        onChange={(e) => setCustomerPhone(e.target.value)}
+                        className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
+                        placeholder="電話番号（任意）"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="customer-email" className="block text-sm text-slate-700 mb-2">メールアドレス（任意）</label>
+                      <input
+                        id="customer-email"
+                        autoComplete="email"
+                        type="email"
+                        value={customerEmail}
+                        onChange={(e) => setCustomerEmail(e.target.value)}
+                        className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
+                        placeholder="メールアドレス（任意）"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="building-age" className="block text-sm text-slate-700 mb-2">築年数（任意）</label>
+                      <select
+                        id="building-age"
+                        value={customerBuildingAge}
+                        onChange={(e) => setCustomerBuildingAge(e.target.value)}
+                        className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control bg-white"
+                      >
+                        <option value="">築年数（任意）</option>
+                        <option value="5年未満">5年未満</option>
+                        <option value="5〜10年">5〜10年</option>
+                        <option value="10〜20年">10〜20年</option>
+                        <option value="20〜30年">20〜30年</option>
+                        <option value="30年以上">30年以上</option>
+                        <option value="不明">不明</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="customer-address" className="block text-sm text-slate-700 mb-2">住所（任意・現地点検をご希望の場合）</label>
+                      <input
+                        id="customer-address"
+                        autoComplete="street-address"
+                        type="text"
+                        value={customerAddress}
+                        onChange={(e) => setCustomerAddress(e.target.value)}
+                        className="w-full px-4 py-3 border border-cyan-200 rounded-lg field-control"
+                        placeholder="住所（任意・現地点検をご希望の場合）"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+
+            </div>
+            <button type="submit" disabled={images.length < 1 || isProcessingImages} className={styles.submit}>
+              {isProcessingImages ? '写真を準備しています…' : 'この内容で無料診断を頼む'}
+            </button>
+          </details>
         </form>
 
-        {/* 注意事項 */}
-        <div className="mt-8 bg-white/70 rounded-lg p-4 text-sm text-slate-600">
-          <p className="font-bold mb-2">ご利用にあたって</p>
-          <ul className="list-disc list-inside space-y-1">
-            <li>診断結果はAIによる参考情報です。正確な診断は現地調査が必要です。</li>
-            <li>アップロードされた画像は診断目的のみに使用されます。</li>
-            <li>診断結果のPDFレポートはLINE公式アカウントから受け取れます。</li>
-          </ul>
+        <p className={styles.note}>写真からの一次判定です。原因の確定には現地確認が必要です。</p>
+        <div className={styles.policyLinks}>
+          <Link href="/privacy">プライバシー</Link>
+          <Link href="/terms">利用規約</Link>
         </div>
       </main>
     </div>
   );
 }
-

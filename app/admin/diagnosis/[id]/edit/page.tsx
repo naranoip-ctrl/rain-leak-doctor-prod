@@ -122,10 +122,10 @@ export default function DiagnosisEditPage() {
   return (
     <div>
       {/* ヘッダー */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
           <Link href="/admin">
-            <button className="p-2 rounded-lg hover:bg-slate-100">
+            <button aria-label="ダッシュボードに戻る" className="p-2 rounded-lg hover:bg-slate-100">
               <ArrowLeft className="h-5 w-5 text-slate-600" />
             </button>
           </Link>
@@ -164,7 +164,7 @@ export default function DiagnosisEditPage() {
                 <img
                   src={url}
                   alt={`診断画像 ${idx + 1}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain bg-slate-50"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23f1f5f9" width="100" height="100"/><text x="50" y="55" text-anchor="middle" fill="%2394a3b8" font-size="12">画像なし</text></svg>';
                   }}
@@ -218,15 +218,15 @@ export default function DiagnosisEditPage() {
               </div>
               <div>
                 <span className="text-slate-500">合言葉コード:</span>
-                <span className="ml-2 font-bold text-[#0F4C81]">{diagnosis.claimCode}</span>
+                <span className="ml-2 font-bold text-[#24483f]">{diagnosis.claimCode}</span>
               </div>
             </div>
           </div>
 
           {/* 管理ステータス */}
           <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <h3 className="font-bold text-slate-900 mb-4">管理ステータス</h3>
-            <Select value={adminStatus} onValueChange={setAdminStatus} className="w-full">
+            <label htmlFor="admin-status" className="block font-bold text-slate-900 mb-4">管理ステータス</label>
+            <Select id="admin-status" value={adminStatus} onValueChange={setAdminStatus} className="w-full">
               <SelectOption value="未対応">未対応</SelectOption>
               <SelectOption value="連絡済み">連絡済み</SelectOption>
               <SelectOption value="対応中">対応中</SelectOption>
@@ -263,7 +263,7 @@ export default function DiagnosisEditPage() {
                   type="text"
                   value={repairLocation}
                   onChange={(e) => setRepairLocation(e.target.value)}
-                  className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81] text-sm"
+                  className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#24483f]/30 focus:border-[#24483f] text-sm"
                 />
               </div>
 
@@ -286,7 +286,7 @@ export default function DiagnosisEditPage() {
                     type="number"
                     value={estimatedCostMin}
                     onChange={(e) => setEstimatedCostMin(parseInt(e.target.value) || 0)}
-                    className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81] text-sm"
+                    className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#24483f]/30 focus:border-[#24483f] text-sm"
                   />
                 </div>
                 <div>
@@ -296,7 +296,7 @@ export default function DiagnosisEditPage() {
                     type="number"
                     value={estimatedCostMax}
                     onChange={(e) => setEstimatedCostMax(parseInt(e.target.value) || 0)}
-                    className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81] text-sm"
+                    className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#24483f]/30 focus:border-[#24483f] text-sm"
                   />
                 </div>
               </div>
@@ -343,7 +343,7 @@ export default function DiagnosisEditPage() {
                     max={10}
                     value={severityScore}
                     onChange={(e) => setSeverityScore(parseInt(e.target.value) || 0)}
-                    className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81] text-sm"
+                    className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#24483f]/30 focus:border-[#24483f] text-sm"
                   />
                 </div>
                 <div>
@@ -353,7 +353,7 @@ export default function DiagnosisEditPage() {
                     type="number"
                     value={firstAidCost}
                     onChange={(e) => setFirstAidCost(parseInt(e.target.value) || 0)}
-                    className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81] text-sm"
+                    className="mt-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#24483f]/30 focus:border-[#24483f] text-sm"
                   />
                 </div>
               </div>
@@ -375,7 +375,7 @@ export default function DiagnosisEditPage() {
                 <div className="space-y-4">
                   {editHistory.map((entry) => (
                     <div key={entry.id} className="p-4 bg-slate-50 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                         <span className="font-medium text-slate-900">{entry.editedByName}</span>
                         <span className="text-xs text-slate-400">
                           {new Date(entry.createdAt).toLocaleString('ja-JP')}

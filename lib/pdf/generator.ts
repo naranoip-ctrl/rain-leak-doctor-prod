@@ -1,4 +1,4 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, PDFName, PDFString, rgb, type PDFFont, type PDFPage, type RGB } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 
 interface PDFData {
@@ -63,62 +63,43 @@ async function loadJapaneseBoldFont(): Promise<ArrayBuffer> {
   return cachedBoldFont;
 }
 
-/**
- * テキストを指定幅で折り返す
- */
-function wrapText(text: string, font: any, fontSize: number, maxWidth: number): string[] {
+/** Wrap Japanese, multiline text and unbroken IDs without truncating them. */
+function wrapText(text: string, font: PDFFont, fontSize: number, maxWidth: number): string[] {
   const lines: string[] = [];
-  const paragraphs = text.split('\n');
-
-  for (const paragraph of paragraphs) {
-    if (paragraph.trim() === '') {
+  for (const paragraph of String(text ?? '').replace(/\r\n?/g, '\n').split('\n')) {
+    if (!paragraph) {
       lines.push('');
       continue;
     }
-
-    let currentLine = '';
-    for (const char of paragraph) {
-      const testLine = currentLine + char;
-      const width = font.widthOfTextAtSize(testLine, fontSize);
-      if (width > maxWidth && currentLine.length > 0) {
-        lines.push(currentLine);
-        currentLine = char;
+    let line = '';
+    for (const character of paragraph) {
+      if (line && font.widthOfTextAtSize(line + character, fontSize) > maxWidth) {
+        lines.push(line);
+        line = character;
       } else {
-        currentLine = testLine;
+        line += character;
       }
     }
-    if (currentLine) {
-      lines.push(currentLine);
-    }
+    if (line) lines.push(line);
   }
-
   return lines;
 }
 
-// カラーパレット
-// 読みやすさ重視で本文系を濃くした（細い線でも視認性を確保）
 const COLORS = {
-  primary: rgb(0.082, 0.306, 0.557),
-  primaryLight: rgb(0.145, 0.388, 0.922),
-  accent: rgb(0.925, 0.384, 0.141),
-  success: rgb(0.133, 0.616, 0.376),
-  warning: rgb(0.918, 0.702, 0.078),
-  danger: rgb(0.863, 0.204, 0.204),
-  black: rgb(0.05, 0.05, 0.05),
-  darkGray: rgb(0.12, 0.12, 0.12),
-  gray: rgb(0.30, 0.30, 0.30),
-  lightGray: rgb(0.65, 0.65, 0.65),
-  bgGray: rgb(0.95, 0.95, 0.95),
+  primary: rgb(0.141, 0.282, 0.247),
+  green: rgb(0.208, 0.388, 0.310),
+  ink: rgb(0.180, 0.239, 0.208),
+  muted: rgb(0.349, 0.412, 0.373),
+  line: rgb(0.812, 0.847, 0.800),
+  paper: rgb(0.984, 0.976, 0.949),
+  softGreen: rgb(0.914, 0.937, 0.890),
   white: rgb(1, 1, 1),
-  headerBg: rgb(0.082, 0.306, 0.557),
-  sectionBg: rgb(0.941, 0.953, 0.973),
+  warning: rgb(0.565, 0.365, 0.157),
+  danger: rgb(0.671, 0.247, 0.204),
 };
 
-// フッター領域の高さ（この領域にはコンテンツを配置しない）
-const FOOTER_RESERVED = 65;
-
-function getSeverityColor(score: number) {
-  if (score <= 3) return COLORS.success;
+function getSeverityColor(score: number): RGB {
+  if (score <= 3) return COLORS.green;
   if (score <= 6) return COLORS.warning;
   return COLORS.danger;
 }
@@ -141,384 +122,253 @@ function getInsuranceLabel(likelihood: string): string {
 }
 
 /**
- * コンパクトなセクションヘッダーを描画
- */
-function drawMiniHeader(
-  page: any, text: string, x: number, y: number,
-  boldFont: any, width: number
-): number {
-  page.drawRectangle({
-    x, y: y - 18,
-    width, height: 20,
-    color: COLORS.primary,
-  });
-  page.drawText(text, {
-    x: x + 8, y: y - 13, size: 9, font: boldFont, color: COLORS.white,
-  });
-  return y - 28;
-}
-
-/**
- * テキストを描画して使用したY座標を返す（行間を広げた版）
- */
-function drawCompactText(
-  page: any, text: string, x: number, y: number,
-  font: any, fontSize: number, color: any, maxWidth: number
-): number {
-  const lines = wrapText(text, font, fontSize, maxWidth);
-  let currentY = y;
-  const lineHeight = fontSize + 5; // 行間を広げた（元: fontSize + 2）
-  for (const line of lines) {
-    if (line === '') {
-      currentY -= fontSize * 0.6; // 空行の余白も広げた（元: 0.4）
-      continue;
-    }
-    page.drawText(line, {
-      x, y: currentY - fontSize,
-      size: fontSize, font, color,
-    });
-    currentY -= lineHeight;
-  }
-  return currentY;
-}
-
-/**
- * 新しいページを追加してY座標を返すヘルパー
- */
-function addNewPage(pdfDoc: any, pageWidth: number, pageHeight: number, boldFont: any, font: any, margin: number): { page: any; y: number } {
-  const page = pdfDoc.addPage([pageWidth, pageHeight]);
-  // ミニヘッダー
-  page.drawRectangle({ x: 0, y: pageHeight - 30, width: pageWidth, height: 30, color: COLORS.headerBg });
-  page.drawText('AI雨漏り診断レポート ─ 詳細', {
-    x: margin, y: pageHeight - 22, size: 9, font: boldFont, color: COLORS.white,
-  });
-  page.drawRectangle({ x: 0, y: pageHeight - 32, width: pageWidth, height: 2, color: COLORS.accent });
-  return { page, y: pageHeight - 50 };
-}
-
-/**
- * 残りスペースをチェックし、足りなければ新ページを追加
- */
-function ensureSpace(
-  currentPage: any, currentY: number, neededHeight: number,
-  pdfDoc: any, pageWidth: number, pageHeight: number, boldFont: any, font: any, margin: number
-): { page: any; y: number } {
-  if (currentY - neededHeight < FOOTER_RESERVED) {
-    return addNewPage(pdfDoc, pageWidth, pageHeight, boldFont, font, margin);
-  }
-  return { page: currentPage, y: currentY };
-}
-
-/**
- * PDFレポートを生成（レイアウト改善版）
+ * A5 portrait keeps the body readable when the report is opened from LINE.
+ * Normal reports use about three pages. Long input flows onto additional pages;
+ * it is never shortened or painted over the footer to meet a page-count target.
  */
 export async function generatePDF(data: PDFData): Promise<Buffer> {
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
-
   const [fontBytes, boldFontBytes] = await Promise.all([
     loadJapaneseFont(),
     loadJapaneseBoldFont(),
   ]);
-  // 静的TTF（Regular/Bold別ファイル）。サブセッター不要のフル埋め込み。
-  // BIZ UDPGothic Regular/Bold 合計約9MBの埋め込みになる。
+  // Keep the existing Japanese fonts and full embedding behavior.
   const font = await pdfDoc.embedFont(fontBytes);
   const boldFont = await pdfDoc.embedFont(boldFontBytes);
 
-  const pageWidth = 595.28;
-  const pageHeight = 841.89;
-  const margin = 35;
+  const pageWidth = 419.53;
+  const pageHeight = 595.28;
+  const margin = 28;
   const contentWidth = pageWidth - margin * 2;
+  const contentBottom = 72;
+  const continuationTop = pageHeight - 74;
+  const pageCapacity = continuationTop - contentBottom;
   const isNotApplicable = data.insuranceLikelihood === 'none';
   const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+  let page: PDFPage = pdfDoc.addPage([pageWidth, pageHeight]);
+  let y = 0;
 
-  // ============================
-  // ページ1
-  // ============================
-  let page = pdfDoc.addPage([pageWidth, pageHeight]);
-  let y = pageHeight;
-
-  // --- ヘッダー ---
-  page.drawRectangle({ x: 0, y: pageHeight - 60, width: pageWidth, height: 60, color: COLORS.headerBg });
-  const titleText = 'AI雨漏り診断レポート';
-  const titleWidth = boldFont.widthOfTextAtSize(titleText, 18);
-  page.drawText(titleText, {
-    x: (pageWidth - titleWidth) / 2, y: pageHeight - 28, size: 18, font: boldFont, color: COLORS.white,
-  });
-  const subTitle = '株式会社ドローン工務店 ─ 雨漏りドクター';
-  const subTitleWidth = font.widthOfTextAtSize(subTitle, 9);
-  page.drawText(subTitle, {
-    x: (pageWidth - subTitleWidth) / 2, y: pageHeight - 45, size: 9, font, color: rgb(0.8, 0.85, 0.95),
-  });
-  page.drawRectangle({ x: 0, y: pageHeight - 63, width: pageWidth, height: 3, color: COLORS.accent });
-  y = pageHeight - 80; // 余白を広げた（元: -75）
-
-  // --- 診断情報バー ---
-  page.drawRectangle({ x: margin, y: y - 28, width: contentWidth, height: 28, color: COLORS.bgGray });
-  page.drawText(`診断ID: ${data.diagnosisId}`, {
-    x: margin + 8, y: y - 20, size: 8, font, color: COLORS.gray,
-  });
-  page.drawText(`発行日: ${today}`, {
-    x: margin + 200, y: y - 20, size: 8, font, color: COLORS.gray,
-  });
-  page.drawText(`${data.customerName} 様`, {
-    x: margin + 380, y: y - 20, size: 9, font: boldFont, color: COLORS.darkGray,
-  });
-  y -= 44; // 余白を広げた（元: -40）
-
-  // --- 重症度 + 費用 横並び ---
-  const scoreColor = getSeverityColor(data.severityScore);
-  const severityLabel = getSeverityLabel(data.severityScore);
-  const leftColW = contentWidth * 0.45;
-  const rightColW = contentWidth * 0.52;
-  const rightColX = margin + leftColW + contentWidth * 0.03;
-
-  // 左: 重症度
-  page.drawRectangle({
-    x: margin, y: y - 85, width: leftColW, height: 85,
-    color: COLORS.white, borderColor: COLORS.lightGray, borderWidth: 0.5,
-  });
-  page.drawText('重症度', { x: margin + 10, y: y - 16, size: 9, font: boldFont, color: COLORS.darkGray });
-  page.drawText(`${data.severityScore}`, {
-    x: margin + 10, y: y - 58, size: 36, font: boldFont, color: scoreColor,
-  });
-  page.drawText('/ 10', { x: margin + 48, y: y - 48, size: 12, font, color: COLORS.gray });
-  page.drawText(severityLabel, { x: margin + 85, y: y - 53, size: 12, font: boldFont, color: scoreColor });
-
-  // ゲージバー
-  const gaugeX = margin + 10;
-  const gaugeY = y - 78;
-  const gaugeW = leftColW - 20;
-  page.drawRectangle({ x: gaugeX, y: gaugeY, width: gaugeW, height: 10, color: COLORS.bgGray });
-  const fillW = (data.severityScore / 10) * gaugeW;
-  if (fillW > 0) {
-    page.drawRectangle({ x: gaugeX, y: gaugeY, width: fillW, height: 10, color: scoreColor });
-  }
-
-  if (!isNotApplicable) {
-    // 右: 費用サマリー
-    page.drawRectangle({
-      x: rightColX, y: y - 85, width: rightColW, height: 85,
-      color: COLORS.white, borderColor: COLORS.lightGray, borderWidth: 0.5,
+  function newPage(first = false) {
+    if (!first) page = pdfDoc.addPage([pageWidth, pageHeight]);
+    page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: COLORS.paper });
+    page.drawRectangle({ x: 0, y: pageHeight - 5, width: pageWidth, height: 5, color: COLORS.primary });
+    page.drawText(first ? 'AI雨漏り診断レポート' : 'AI雨漏り診断レポート ─ 詳細', {
+      x: margin, y: pageHeight - (first ? 47 : 36), size: first ? 21 : 13,
+      font: boldFont, color: COLORS.primary,
     });
-    page.drawText('費用サマリー', { x: rightColX + 10, y: y - 16, size: 9, font: boldFont, color: COLORS.darkGray });
-    page.drawText(`応急処置: ¥${data.firstAidCost.toLocaleString()}〜`, {
-      x: rightColX + 10, y: y - 36, size: 9, font, color: COLORS.darkGray,
-    });
-    page.drawText(`本格修繕: ¥${data.estimatedCostMin.toLocaleString()} 〜 ¥${data.estimatedCostMax.toLocaleString()}`, {
-      x: rightColX + 10, y: y - 52, size: 9, font, color: COLORS.darkGray,
-    });
-    const insLabel = getInsuranceLabel(data.insuranceLikelihood);
-    page.drawText(`火災保険: ${insLabel}`, {
-      x: rightColX + 10, y: y - 68, size: 9, font, color: COLORS.darkGray,
-    });
-  } else {
-    // 該当なしの場合
-    page.drawRectangle({
-      x: rightColX, y: y - 85, width: rightColW, height: 85,
-      color: COLORS.white, borderColor: COLORS.lightGray, borderWidth: 0.5,
-    });
-    page.drawText('診断結果', { x: rightColX + 10, y: y - 16, size: 9, font: boldFont, color: COLORS.darkGray });
-    page.drawText('建物の損傷は確認されませんでした。', {
-      x: rightColX + 10, y: y - 40, size: 9, font, color: COLORS.success,
-    });
-    page.drawText('定期的な点検をおすすめします。', {
-      x: rightColX + 10, y: y - 58, size: 9, font, color: COLORS.gray,
-    });
-  }
-  y -= 100; // 余白を広げた（元: -92）
-
-  // --- 損傷概要 ---
-  if (!isNotApplicable) {
-    ({ page, y } = ensureSpace(page, y, 80, pdfDoc, pageWidth, pageHeight, boldFont, font, margin));
-    y = drawMiniHeader(page, '損傷概要', margin, y, boldFont, contentWidth);
-    y -= 4; // 余白を広げた（元: -2 なし）
-    page.drawText(`損傷箇所: ${data.damageLocations}`, {
-      x: margin + 8, y: y - 2, size: 9, font: boldFont, color: COLORS.darkGray,
-    });
-    y -= 18; // 余白を広げた（元: -14）
-    y = drawCompactText(page, data.damageDescription, margin + 8, y, font, 9, COLORS.darkGray, contentWidth - 16);
-    y -= 10; // 余白を広げた（元: -6）
-
-    // 推奨プラン
-    page.drawRectangle({
-      x: margin, y: y - 24, width: contentWidth, height: 24,
-      color: rgb(0.93, 0.97, 0.93), borderColor: COLORS.success, borderWidth: 0.5,
-    });
-    page.drawText(`推奨プラン: ${data.recommendedPlan}`, {
-      x: margin + 8, y: y - 16, size: 9, font: boldFont, color: COLORS.success,
-    });
-    y -= 38; // 余白を広げた（元: -32）
-  }
-
-  // --- 写真セクション ---
-  if (data.imageUrls && data.imageUrls.length > 0) {
-    ({ page, y } = ensureSpace(page, y, 140, pdfDoc, pageWidth, pageHeight, boldFont, font, margin));
-    y = drawMiniHeader(page, '診断写真', margin, y, boldFont, contentWidth);
-    y -= 4; // 余白を広げた
-
-    const maxImages = Math.min(data.imageUrls.length, 3);
-    const imageWidth = (contentWidth - 16) / 3;
-    const imageHeight = 100;
-
-    for (let i = 0; i < maxImages; i++) {
-      try {
-        const imgResponse = await fetch(data.imageUrls[i]);
-        if (!imgResponse.ok) continue;
-        const imgBuffer = await imgResponse.arrayBuffer();
-        const imgBytes = new Uint8Array(imgBuffer);
-
-        let image;
-        const url = data.imageUrls[i].toLowerCase();
-        if (url.includes('.png')) {
-          image = await pdfDoc.embedPng(imgBytes);
-        } else {
-          image = await pdfDoc.embedJpg(imgBytes);
-        }
-
-        const x = margin + i * (imageWidth + 8);
-        page.drawRectangle({
-          x: x - 1, y: y - imageHeight - 1,
-          width: imageWidth + 2, height: imageHeight + 2,
-          borderColor: COLORS.lightGray, borderWidth: 0.5, color: COLORS.white,
-        });
-
-        const scaled = image.scaleToFit(imageWidth, imageHeight);
-        const offsetX = x + (imageWidth - scaled.width) / 2;
-        const offsetY = (y - imageHeight) + (imageHeight - scaled.height) / 2;
-        page.drawImage(image, {
-          x: offsetX, y: offsetY, width: scaled.width, height: scaled.height,
-        });
-      } catch (error) {
-        console.error(`Error loading image ${i}:`, error);
-      }
-    }
-    y -= imageHeight + 16; // 余白を広げた（元: +10）
-  }
-
-  // --- 写真別所見（コンパクト） ---
-  if (!isNotApplicable && data.imageFindings && data.imageFindings !== '該当なし') {
-    ({ page, y } = ensureSpace(page, y, 60, pdfDoc, pageWidth, pageHeight, boldFont, font, margin));
-    y = drawMiniHeader(page, '写真別所見', margin, y, boldFont, contentWidth);
-    y -= 4;
-    y = drawCompactText(page, data.imageFindings, margin + 8, y, font, 8, COLORS.darkGray, contentWidth - 16);
-    y -= 14; // 余白を広げた（元: -8）
-  }
-
-  // --- 推定原因（コンパクト） ---
-  if (!isNotApplicable && data.estimatedCause && data.estimatedCause !== '該当なし') {
-    ({ page, y } = ensureSpace(page, y, 60, pdfDoc, pageWidth, pageHeight, boldFont, font, margin));
-    y = drawMiniHeader(page, '推定原因', margin, y, boldFont, contentWidth);
-    y -= 4;
-    y = drawCompactText(page, data.estimatedCause, margin + 8, y, font, 8, COLORS.darkGray, contentWidth - 16);
-    y -= 14;
-  }
-
-  // --- 修繕工法比較（コンパクト） ---
-  if (!isNotApplicable && data.repairComparison && data.repairComparison !== '該当なし') {
-    ({ page, y } = ensureSpace(page, y, 60, pdfDoc, pageWidth, pageHeight, boldFont, font, margin));
-    y = drawMiniHeader(page, '修繕工法の比較', margin, y, boldFont, contentWidth);
-    y -= 4;
-    y = drawCompactText(page, data.repairComparison, margin + 8, y, font, 8, COLORS.darkGray, contentWidth - 16);
-    y -= 14;
-  }
-
-  // --- 放置リスク ---
-  if (!isNotApplicable && data.neglectRisk && data.neglectRisk !== '該当なし') {
-    ({ page, y } = ensureSpace(page, y, 80, pdfDoc, pageWidth, pageHeight, boldFont, font, margin));
-    y = drawMiniHeader(page, '放置した場合のリスク', margin, y, boldFont, contentWidth);
-    y -= 4;
-    // 警告ボックス
-    page.drawRectangle({
-      x: margin, y: y - 22, width: contentWidth, height: 22,
-      color: rgb(1, 0.95, 0.93), borderColor: COLORS.danger, borderWidth: 0.5,
-    });
-    page.drawText('修繕を先延ばしにすると、被害が拡大し費用が増加します', {
-      x: margin + 8, y: y - 15, size: 8, font: boldFont, color: COLORS.danger,
-    });
-    y -= 32; // 余白を広げた（元: -28）
-    y = drawCompactText(page, data.neglectRisk, margin + 8, y, font, 8, COLORS.darkGray, contentWidth - 16);
-    y -= 14;
-  }
-
-  // --- 火災保険 ---
-  if (!isNotApplicable && data.insuranceTips && data.insuranceTips !== '該当なし') {
-    ({ page, y } = ensureSpace(page, y, 80, pdfDoc, pageWidth, pageHeight, boldFont, font, margin));
-    y = drawMiniHeader(page, '火災保険申請のポイント', margin, y, boldFont, contentWidth);
-    y -= 4;
-    page.drawRectangle({
-      x: margin, y: y - 22, width: contentWidth, height: 22,
-      color: rgb(0.93, 0.95, 1), borderColor: COLORS.primaryLight, borderWidth: 0.5,
-    });
-    page.drawText('風災・雪災・雹災による被害は火災保険が適用できる場合があります', {
-      x: margin + 8, y: y - 15, size: 8, font: boldFont, color: COLORS.primary,
-    });
-    y -= 32;
-    y = drawCompactText(page, data.insuranceTips, margin + 8, y, font, 8, COLORS.darkGray, contentWidth - 16);
-    y -= 14;
-  }
-
-  // --- 建物状態評価 ---
-  if (!isNotApplicable && data.detailedAnalysis && data.detailedAnalysis !== '該当なし') {
-    ({ page, y } = ensureSpace(page, y, 60, pdfDoc, pageWidth, pageHeight, boldFont, font, margin));
-    y = drawMiniHeader(page, '建物の状態評価', margin, y, boldFont, contentWidth);
-    y -= 4;
-    y = drawCompactText(page, data.detailedAnalysis, margin + 8, y, font, 8, COLORS.darkGray, contentWidth - 16);
-    y -= 14;
-  }
-
-  // --- CTAセクション ---
-  // CTAに必要な高さ: 65px + 余白
-  const ctaHeight = 65;
-  ({ page, y } = ensureSpace(page, y, ctaHeight + 20, pdfDoc, pageWidth, pageHeight, boldFont, font, margin));
-  y -= 12; // CTA前の余白
-  page.drawRectangle({
-    x: margin, y: y - ctaHeight, width: contentWidth, height: ctaHeight,
-    color: COLORS.accent,
-  });
-  page.drawText('無料現地調査のご予約はLINEから', {
-    x: margin + 10, y: y - 20, size: 12, font: boldFont, color: COLORS.white,
-  });
-  page.drawText('LINE: https://lin.ee/LTMUhxy', {
-    x: margin + 10, y: y - 38, size: 10, font, color: COLORS.white,
-  });
-  page.drawText('お電話でもお気軽にご相談ください', {
-    x: margin + 10, y: y - 55, size: 8, font, color: rgb(1, 0.9, 0.85),
-  });
-
-  // ============================
-  // フッター（全ページ共通）- 位置を調整して被りを解消
-  // ============================
-  const pages = pdfDoc.getPages();
-  for (let i = 0; i < pages.length; i++) {
-    const p = pages[i];
-    // 区切り線
-    p.drawLine({
-      start: { x: margin, y: 40 },
-      end: { x: pageWidth - margin, y: 40 },
-      thickness: 0.5,
-      color: COLORS.lightGray,
-    });
-    // 会社名（区切り線の下に十分な間隔）
-    p.drawText('株式会社ドローン工務店 ─ 雨漏りドクター', {
-      x: margin, y: 28, size: 7, font, color: COLORS.gray,
-    });
-    // ページ番号
-    const pageNum = `${i + 1} / ${pages.length}`;
-    const pnw = font.widthOfTextAtSize(pageNum, 7);
-    p.drawText(pageNum, {
-      x: pageWidth - margin - pnw, y: 28, size: 7, font, color: COLORS.gray,
-    });
-    // 免責事項（最終ページのみ、会社名の下に十分な間隔）
-    if (i === pages.length - 1) {
-      const disclaimer = '※本レポートはAIによる画像分析に基づく参考情報です。正確な診断には現地調査が必要です。';
-      const dw = font.widthOfTextAtSize(disclaimer, 6);
-      p.drawText(disclaimer, {
-        x: (pageWidth - dw) / 2, y: 14, size: 6, font, color: COLORS.lightGray,
+    if (first) {
+      page.drawText('株式会社ドローン工務店 ─ 雨漏りドクター', {
+        x: margin, y: pageHeight - 66, size: 9, font, color: COLORS.muted,
       });
     }
+    const ruleY = pageHeight - (first ? 80 : 54);
+    page.drawLine({ start: { x: margin, y: ruleY }, end: { x: pageWidth - margin, y: ruleY }, thickness: 0.7, color: COLORS.line });
+    y = first ? pageHeight - 97 : continuationTop;
   }
 
-  const pdfBytes = await pdfDoc.save();
-  return Buffer.from(pdfBytes);
+  function ensureSpace(height: number, continuationTitle?: string) {
+    if (y - Math.min(height, pageCapacity) >= contentBottom) return;
+    newPage();
+    if (continuationTitle) heading(continuationTitle);
+  }
+
+  function heading(title: string) {
+    ensureSpace(55);
+    page.drawRectangle({ x: margin, y: y - 17, width: 3, height: 17, color: COLORS.green });
+    page.drawText(title, { x: margin + 11, y: y - 14, size: 14, font: boldFont, color: COLORS.primary });
+    y -= 29;
+  }
+
+  function paragraph(text: string, options: {
+    size?: number; leading?: number; bold?: boolean; color?: RGB; continuationTitle?: string;
+  } = {}) {
+    const size = options.size ?? 11.5;
+    const leading = options.leading ?? 18;
+    const face = options.bold ? boldFont : font;
+    const lines = wrapText(text, face, size, contentWidth);
+    for (const line of lines) {
+      const advance = line ? leading : leading * 0.55;
+      ensureSpace(advance, options.continuationTitle);
+      if (line) page.drawText(line, { x: margin, y: y - size, size, font: face, color: options.color ?? COLORS.ink });
+      y -= advance;
+    }
+  }
+
+  function section(title: string, text: string, notice?: string) {
+    const textHeight = wrapText(text, font, 11.5, contentWidth).length * 18;
+    const noticeHeight = notice ? wrapText(notice, boldFont, 10.5, contentWidth).length * 16 + 8 : 0;
+    // Keep short sections together; longer explanations use the remaining page.
+    const required = 29 + textHeight + noticeHeight + 15;
+    ensureSpace(required <= pageCapacity / 2 ? required : 65);
+    heading(title);
+    if (notice) {
+      paragraph(notice, { size: 10.5, leading: 16, bold: true, color: COLORS.warning, continuationTitle: title });
+      y -= 8;
+    }
+    paragraph(text, { continuationTitle: title });
+    y -= 15;
+  }
+
+  function recommendation() {
+    const text = `推奨プラン: ${data.recommendedPlan}`;
+    const lines = wrapText(text, boldFont, 12, contentWidth - 24);
+    let offset = 0;
+    while (offset < lines.length) {
+      ensureSpace(43);
+      const fit = Math.max(1, Math.floor((y - contentBottom - 22) / 18));
+      const chunk = lines.slice(offset, offset + fit);
+      const height = chunk.length * 18 + 22;
+      page.drawRectangle({ x: margin, y: y - height, width: contentWidth, height, color: COLORS.softGreen });
+      chunk.forEach((line, index) => page.drawText(line, { x: margin + 12, y: y - 12 - 12 - index * 18, size: 12, font: boldFont, color: COLORS.primary }));
+      y -= height + 18;
+      offset += chunk.length;
+    }
+  }
+
+  newPage(true);
+
+  // Each identifier occupies its own line, so a full UUID never overlaps the date.
+  paragraph(`${data.customerName} 様`, { size: 12, leading: 18, bold: true, color: COLORS.primary });
+  y -= 4;
+  paragraph(`発行日: ${today}`, { size: 9.5, leading: 15, color: COLORS.muted });
+  paragraph(`診断ID: ${data.diagnosisId}`, { size: 9, leading: 14, color: COLORS.muted });
+  y -= 17;
+
+  // Severity and the cost table form one summary rather than a series of cards.
+  const scoreWidth = 101;
+  const tableX = margin + scoreWidth + 18;
+  const tableWidth = contentWidth - scoreWidth - 18;
+  const costRows = isNotApplicable ? [
+    { text: '建物の損傷は確認されませんでした。', size: 11, leading: 17, bold: false },
+    { text: '定期的な点検をおすすめします。', size: 10.5, leading: 16, bold: false },
+  ] : [
+    { text: `応急処置: ¥${data.firstAidCost.toLocaleString()}〜`, size: 11, leading: 17, bold: false },
+    { text: `本格修繕: ¥${data.estimatedCostMin.toLocaleString()} 〜 ¥${data.estimatedCostMax.toLocaleString()}`, size: 12, leading: 19, bold: true },
+    { text: `火災保険: ${getInsuranceLabel(data.insuranceLikelihood)}`, size: 10.5, leading: 16, bold: false },
+  ];
+  const rows = costRows.map((row) => ({ ...row, lines: wrapText(row.text, row.bold ? boldFont : font, row.size, tableWidth) }));
+  const metricsHeight = Math.max(119, 29 + rows.reduce((height, row) => height + row.lines.length * row.leading + 9, 0));
+  ensureSpace(metricsHeight + 19);
+  page.drawRectangle({ x: margin, y: y - metricsHeight, width: scoreWidth, height: metricsHeight, color: COLORS.softGreen });
+  page.drawText('重症度', { x: margin + 12, y: y - 20, size: 10, font: boldFont, color: COLORS.primary });
+  const severityText = String(data.severityScore);
+  const severitySize = Math.min(40, 47 / Math.max(boldFont.widthOfTextAtSize(severityText, 1), 1));
+  page.drawText(severityText, { x: margin + 12, y: y - 65, size: severitySize, font: boldFont, color: getSeverityColor(data.severityScore) });
+  page.drawText('/ 10', { x: margin + 65, y: y - 59, size: 10, font, color: COLORS.muted });
+  page.drawText(getSeverityLabel(data.severityScore), { x: margin + 12, y: y - 86, size: 11, font: boldFont, color: getSeverityColor(data.severityScore) });
+  const gaugeWidth = scoreWidth - 24;
+  page.drawRectangle({ x: margin + 12, y: y - 104, width: gaugeWidth, height: 4, color: COLORS.white });
+  const fill = Math.max(0, Math.min(1, data.severityScore / 10));
+  if (fill > 0) page.drawRectangle({ x: margin + 12, y: y - 104, width: gaugeWidth * fill, height: 4, color: getSeverityColor(data.severityScore) });
+  page.drawText(isNotApplicable ? '診断結果' : '費用サマリー', { x: tableX, y: y - 12, size: 11, font: boldFont, color: COLORS.primary });
+  let tableY = y - 30;
+  rows.forEach((row, index) => {
+    row.lines.forEach((line) => {
+      page.drawText(line, { x: tableX, y: tableY - row.size, size: row.size, font: row.bold ? boldFont : font, color: row.bold ? COLORS.primary : COLORS.ink });
+      tableY -= row.leading;
+    });
+    if (index < rows.length - 1) page.drawLine({ start: { x: tableX, y: tableY - 3 }, end: { x: pageWidth - margin, y: tableY - 3 }, thickness: 0.5, color: COLORS.line });
+    tableY -= 9;
+  });
+  y -= metricsHeight + 20;
+
+  if (!isNotApplicable) {
+    heading('損傷概要');
+    paragraph(`損傷箇所: ${data.damageLocations}`, { size: 10.5, leading: 17, bold: true, continuationTitle: '損傷概要' });
+    y -= 6;
+    paragraph(data.damageDescription, { size: 12, leading: 19, continuationTitle: '損傷概要' });
+    y -= 13;
+    recommendation();
+  }
+
+  // Give the submitted photos their own page at a useful size on a phone.
+  const photoUrls = (data.imageUrls || []).slice(0, 3);
+  if (photoUrls.length) {
+    newPage();
+    heading('診断写真');
+    const columns = photoUrls.length === 1 ? 1 : 2;
+    const gap = 12;
+    const imageWidth = (contentWidth - gap * (columns - 1)) / columns;
+    const imageHeight = columns === 1 ? 202 : 176;
+    for (let row = 0; row < photoUrls.length; row += columns) {
+      ensureSpace(imageHeight + 16, '診断写真');
+      for (let column = 0; column < columns && row + column < photoUrls.length; column++) {
+        const index = row + column;
+        const x = margin + column * (imageWidth + gap);
+        page.drawRectangle({ x, y: y - imageHeight, width: imageWidth, height: imageHeight, color: COLORS.white, borderColor: COLORS.line, borderWidth: 0.6 });
+        try {
+          const response = await fetch(photoUrls[index]);
+          if (!response.ok) continue;
+          const bytes = new Uint8Array(await response.arrayBuffer());
+          // Detect the image data as well as supporting URL/data-URI sources.
+          const png = bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+          const image = png ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes);
+          const scaled = image.scaleToFit(imageWidth - 8, imageHeight - 8);
+          page.drawImage(image, { x: x + (imageWidth - scaled.width) / 2, y: y - imageHeight + (imageHeight - scaled.height) / 2, width: scaled.width, height: scaled.height });
+        } catch (error) {
+          console.error(`Error loading image ${index}:`, error);
+        }
+      }
+      y -= imageHeight + 16;
+    }
+  }
+
+  const present = (value?: string) => !!value && value !== '該当なし';
+  const evidencePageCount = pdfDoc.getPageCount();
+  if (!isNotApplicable && present(data.imageFindings)) section('写真別所見', data.imageFindings!);
+  if (!isNotApplicable && present(data.estimatedCause)) section('推定原因', data.estimatedCause!);
+
+  // Start the remaining details on a fresh page only while still on the evidence
+  // page. If long findings or causes already flowed onward, continue there.
+  const hasFurtherDetails = !isNotApplicable && [data.repairComparison, data.neglectRisk, data.insuranceTips, data.detailedAnalysis].some(present);
+  if (hasFurtherDetails && pdfDoc.getPageCount() === evidencePageCount) newPage();
+  if (!isNotApplicable && present(data.repairComparison)) section('修繕工法の比較', data.repairComparison!);
+  if (!isNotApplicable && present(data.neglectRisk)) {
+    section('放置した場合のリスク', data.neglectRisk!, '修繕を先延ばしにすると、被害が拡大し費用が増加します');
+  }
+  if (!isNotApplicable && present(data.insuranceTips)) {
+    section('火災保険申請のポイント', data.insuranceTips!, '風災・雪災・雹災による被害は火災保険が適用できる場合があります');
+  }
+  if (!isNotApplicable && present(data.detailedAnalysis)) section('建物の状態評価', data.detailedAnalysis!);
+
+  const ctaLines = [
+    { text: '現地診断のご相談はLINEから', size: 12.5, leading: 20, bold: true },
+    { text: '現地診断（報告書付き）55,000円（税込）', size: 11, leading: 19, bold: false },
+    { text: 'LINE: https://lin.ee/LTMUhxy', size: 11, leading: 19, bold: false },
+    { text: 'お電話でもお気軽にご相談ください', size: 10, leading: 17, bold: false },
+  ].map((run) => ({ ...run, lines: wrapText(run.text, run.bold ? boldFont : font, run.size, contentWidth - 28) }));
+  const ctaHeight = 26 + ctaLines.reduce((height, run) => height + run.lines.length * run.leading, 0);
+  ensureSpace(ctaHeight + 12);
+  y -= 5;
+  page.drawRectangle({ x: margin, y: y - ctaHeight, width: contentWidth, height: ctaHeight, color: COLORS.primary });
+  let ctaY = y - 13;
+  ctaLines.forEach((run) => run.lines.forEach((line) => {
+    page.drawText(line, { x: margin + 14, y: ctaY - run.size, size: run.size, font: run.bold ? boldFont : font, color: COLORS.white });
+    ctaY -= run.leading;
+  }));
+  const lineLink = pdfDoc.context.register(pdfDoc.context.obj({
+    Type: PDFName.of('Annot'),
+    Subtype: PDFName.of('Link'),
+    Rect: [margin, y - ctaHeight, pageWidth - margin, y],
+    Border: [0, 0, 0],
+    A: { S: PDFName.of('URI'), URI: PDFString.of('https://lin.ee/LTMUhxy') },
+  }));
+  page.node.addAnnot(lineLink);
+
+  const pages = pdfDoc.getPages();
+  pages.forEach((reportPage, index) => {
+    reportPage.drawLine({ start: { x: margin, y: 60 }, end: { x: pageWidth - margin, y: 60 }, thickness: 0.6, color: COLORS.line });
+    reportPage.drawText('株式会社ドローン工務店 ─ 雨漏りドクター', { x: margin, y: 44, size: 7.5, font, color: COLORS.muted });
+    const pageNumber = `${index + 1} / ${pages.length}`;
+    reportPage.drawText(pageNumber, { x: pageWidth - margin - font.widthOfTextAtSize(pageNumber, 8), y: 44, size: 8, font, color: COLORS.muted });
+    if (index === pages.length - 1) {
+      const disclaimer = '※本レポートはAIによる画像分析に基づく参考情報です。正確な診断には現地調査が必要です。';
+      wrapText(disclaimer, font, 7.5, contentWidth).forEach((line, lineIndex) => {
+        reportPage.drawText(line, { x: margin, y: 26 - lineIndex * 10, size: 7.5, font, color: COLORS.muted });
+      });
+    }
+  });
+
+  return Buffer.from(await pdfDoc.save());
 }

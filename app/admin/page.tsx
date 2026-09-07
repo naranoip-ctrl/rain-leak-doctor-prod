@@ -83,7 +83,7 @@ export default function AdminDashboard() {
           <div key={i} className="bg-white rounded-xl border border-slate-200 p-5">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-slate-500">{card.label}</span>
-              <card.icon className={`h-5 w-5 ${card.color}`} />
+              <card.icon className={`h-5 w-5 shrink-0 ${card.color}`} />
             </div>
             <div className="text-2xl font-bold text-slate-900">{card.value}</div>
             <p className="text-xs text-slate-400 mt-1">{card.sub}</p>
@@ -107,7 +107,7 @@ export default function AdminDashboard() {
             <div className="divide-y divide-slate-100">
               {contacts.length > 0 ? contacts.map((contact) => (
                 <div key={contact.id} className="p-5">
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-2">
                     <div>
                       <h4 className="font-semibold text-slate-900">{contact.name}</h4>
                       <p className="text-sm text-slate-500">{contact.email} / {contact.phone}</p>
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
             <div className="divide-y divide-slate-100">
               {diagnoses.length > 0 ? diagnoses.map((diagnosis) => (
                 <div key={diagnosis.id} className="p-5">
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-2">
                     <div>
                       <h4 className="font-semibold text-slate-900">
                         {diagnosis.insuranceLikelihood === 'high' && '🔴 '}
@@ -184,7 +184,7 @@ export default function AdminDashboard() {
                 const sc = statusConfig[appt.status] || statusConfig.pending;
                 return (
                   <div key={appt.id} className="p-5">
-                    <div className="flex items-start justify-between mb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-2">
                       <div>
                         <h4 className="font-semibold text-slate-900">{appt.name}</h4>
                         <p className="text-sm text-slate-500">{appt.email} / {appt.phone}</p>
@@ -199,16 +199,16 @@ export default function AdminDashboard() {
                         </span>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm text-slate-600">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-600">
                       <div><span className="font-semibold">希望日:</span> {appt.preferredDate}</div>
                       <div><span className="font-semibold">希望時間:</span> {appt.preferredTime}</div>
                       {appt.address && (
-                        <div className="col-span-2">
+                        <div className="sm:col-span-2">
                           <span className="font-semibold">住所:</span> {appt.address}
                         </div>
                       )}
                       {appt.diagnosisSessionId && (
-                        <div className="col-span-2">
+                        <div className="sm:col-span-2">
                           <span className="font-semibold">AI診断ID:</span> {appt.diagnosisSessionId}
                         </div>
                       )}

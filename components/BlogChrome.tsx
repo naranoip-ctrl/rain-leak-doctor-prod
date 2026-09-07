@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { BrandMark } from '@/components/BrandMark';
 import { TrackedLineLink } from '@/components/TrackedLineLink';
 
 /**
@@ -8,17 +9,9 @@ import { TrackedLineLink } from '@/components/TrackedLineLink';
  */
 export function BlogHeader() {
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-slate-200">
-      <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-dark text-white">
-            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5">
-              <path d="M20 4L3 18h5v14h24V18h5L20 4z" fill="none" stroke="white" strokeWidth="2.5" strokeLinejoin="round" />
-              <path d="M20 14c-5 0-9 3.5-9 8h3c0-1.5 1-3 3-3s3 1.5 3 3v6" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <span className="font-bold text-lg text-primary">雨漏りドクター</span>
-        </Link>
+    <header className="public-header sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-slate-200">
+      <div className="container flex min-h-[72px] items-center justify-between gap-3 py-3">
+        <BrandMark />
         <nav className="hidden md:flex items-center gap-6 text-sm font-bold text-slate-600">
           <Link href="/#services" className="hover:text-primary transition-colors">雨漏り点検</Link>
           <Link href="/#pricing" className="hover:text-primary transition-colors">料金</Link>
@@ -26,7 +19,7 @@ export function BlogHeader() {
         </nav>
         <TrackedLineLink
           location="blog_header"
-          className="inline-flex items-center px-4 py-2 rounded-md text-sm font-bold bg-line text-white hover:bg-line-dark shadow-sm transition-all"
+          className="inline-flex shrink-0 items-center justify-center gap-0 whitespace-nowrap px-3 py-2 rounded-sm text-xs sm:text-sm font-medium bg-line text-white hover:bg-line-dark transition-colors"
         />
       </div>
     </header>
@@ -35,7 +28,7 @@ export function BlogHeader() {
 
 export function BlogFooter() {
   return (
-    <footer className="bg-primary-dark text-white mt-16">
+    <footer className="public-footer bg-primary-dark text-white mt-16">
       <div className="container py-10">
         <div className="grid gap-8 md:grid-cols-3">
           <div>

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { BrandMark } from '@/components/BrandMark';
+import styles from '@/components/AdminTheme.module.css';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -78,30 +80,18 @@ export default function AdminLoginPage() {
     }
   };
 
-  // SSR中は最小限のHTMLを返す
+  // 認証初期化中も共通のブランドを表示。
   if (!mounted) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 64, height: 64, borderRadius: 16, background: 'linear-gradient(135deg, #0F4C81, #0A2540)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: 24, margin: '0 auto 16px' }}>
-            AI
-          </div>
-          <p style={{ color: '#64748b', fontSize: 14 }}>読み込み中...</p>
-        </div>
-      </div>
-    );
+    return <div className={styles.login}><div className="text-center"><BrandMark /><p role="status" className="mt-6 text-sm text-slate-500">読み込み中...</p></div></div>;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+    <div className={styles.login}>
       <div className="w-full max-w-md">
-        {/* ロゴ */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0F4C81] to-[#0A2540] flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 shadow-lg">
-            AI
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900">管理画面ログイン</h1>
-          <p className="text-slate-500 mt-2">AI雨漏りドクター 管理システム</p>
+        <div className={styles.loginIntro}>
+          <BrandMark />
+          <h1>管理画面にログイン</h1>
+          <p>お問い合わせ・診断の管理</p>
         </div>
 
         {/* 設定エラー表示 */}
@@ -120,11 +110,11 @@ export default function AdminLoginPage() {
         )}
 
         {/* ログインフォーム */}
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+        <div className={styles.loginCard}>
           <form onSubmit={handleLogin} className="space-y-5">
             {/* エラーメッセージ */}
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+              <div role="alert" className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                 <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                 </svg>
@@ -143,12 +133,13 @@ export default function AdminLoginPage() {
                 </svg>
                 <input
                   id="email"
+                  autoComplete="username"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@example.com"
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81] text-sm transition-colors"
+                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#24483f]/30 focus:border-[#24483f] text-sm transition-colors"
                 />
               </div>
             </div>
@@ -164,17 +155,20 @@ export default function AdminLoginPage() {
                 </svg>
                 <input
                   id="password"
+                  autoComplete="current-password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81] text-sm transition-colors"
+                  className="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#24483f]/30 focus:border-[#24483f] text-sm transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  aria-label={showPassword ? 'パスワードを隠す' : 'パスワードを表示'}
+                  aria-pressed={showPassword}
+                  className={styles.passwordToggle}
                 >
                   {showPassword ? (
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
@@ -194,7 +188,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-[#0F4C81] to-[#0A2540] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#35634f] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -223,7 +217,7 @@ export default function AdminLoginPage() {
 
         {/* ホームに戻るリンク */}
         <div className="text-center mt-6">
-          <a href="/" className="text-sm text-slate-500 hover:text-[#0F4C81] transition-colors">
+          <a href="/" className={styles.backLink}>
             &larr; ホームページに戻る
           </a>
         </div>

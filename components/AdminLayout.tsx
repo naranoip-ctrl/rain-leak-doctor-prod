@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AuthGuard } from '@/components/AuthGuard';
+import { BrandMark } from '@/components/BrandMark';
+import styles from './AdminTheme.module.css';
 
 const navItems = [
   { href: '/admin', label: 'ダッシュボード', iconPath: 'M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z' },
@@ -13,18 +15,15 @@ const navItems = [
 
 function NavIcon({ d, isActive }: { d: string; isActive: boolean }) {
   return (
-    <svg className={`h-5 w-5 ${isActive ? 'text-[#0F4C81]' : 'text-slate-400'}`} fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+    <svg className={`h-5 w-5 ${isActive ? 'text-[#24483f]' : 'text-slate-400'}`} fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d={d} />
     </svg>
   );
 }
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
   const router = useRouter();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-
   const handleLogout = async () => {
     setLoggingOut(true);
     try {
@@ -39,9 +38,53 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
+  return <AuthGuard><AdminFrame onLogout={handleLogout} loggingOut={loggingOut}>{children}</AdminFrame></AuthGuard>;
+}
+
+/** Presentation shell; authentication and mutations stay in AdminLayout. */
+export function AdminFrame({ children, onLogout, loggingOut = false, activePath }: {
+  children: React.ReactNode;
+  onLogout?: () => void;
+  loggingOut?: boolean;
+  activePath?: string;
+}) {
+  const currentPath = usePathname();
+  const pathname = activePath ?? currentPath;
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const closeOnDesktop = () => { if (desktop.matches) setSidebarOpen(false); };
+    desktop.addEventListener('change', closeOnDesktop);
+    closeOnDesktop();
+    const controls = sidebarRef.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled])');
+    controls?.[0]?.focus();
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSidebarOpen(false);
+      if (event.key !== 'Tab' || !controls?.length) return;
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      desktop.removeEventListener('change', closeOnDesktop);
+      document.removeEventListener('keydown', handleKey);
+      menuButtonRef.current?.focus({ preventScroll: true });
+    };
+  }, [sidebarOpen]);
+
+
+
   return (
-    <AuthGuard>
-      <div className="min-h-screen bg-slate-50 flex">
+    <div className={`min-h-screen flex ${styles.theme}`}>
         {/* モバイルオーバーレイ */}
         {sidebarOpen && (
           <div
@@ -51,20 +94,17 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         )}
 
         {/* サイドバー */}
-        <aside className={`
-          fixed lg:sticky top-0 left-0 z-50 h-screen w-64 bg-white border-r border-slate-200
-          flex flex-col transition-transform duration-300
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        <aside ref={sidebarRef} id="admin-menu" aria-label="管理メニュー" role={sidebarOpen ? 'dialog' : undefined} aria-modal={sidebarOpen || undefined} className={`
+          fixed lg:sticky top-0 left-0 z-50 h-dvh w-[min(288px,calc(100vw-24px))] lg:w-64 shrink-0 border-r overflow-y-auto
+          flex flex-col transition-transform duration-300 ${styles.sidebar}
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full invisible lg:visible lg:translate-x-0'}
         `}>
           {/* ロゴ */}
-          <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200">
-            <Link href="/admin" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0F4C81] to-[#0A2540] flex items-center justify-center text-white font-bold text-xs">
-                AI
-              </div>
-              <span className="font-bold text-[#0F4C81]">管理画面</span>
-            </Link>
+          <div className={styles.sidebarHeading}>
+            <div><BrandMark href="/admin" /><span className={styles.adminLabel}>管理画面</span></div>
             <button
+              type="button"
+              aria-label="管理メニューを閉じる"
               className="lg:hidden p-1 rounded hover:bg-slate-100"
               onClick={() => setSidebarOpen(false)}
             >
@@ -83,10 +123,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={isActive ? 'page' : undefined}
                   className={`
                     flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                     ${isActive
-                      ? 'bg-[#0F4C81]/10 text-[#0F4C81]'
+                      ? 'bg-[#24483f]/10 text-[#24483f]'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                     }
                   `}
@@ -111,8 +152,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               ホームに戻る
             </Link>
             <button
-              onClick={handleLogout}
-              disabled={loggingOut}
+              onClick={onLogout}
+              disabled={loggingOut || !onLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
             >
               <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
@@ -126,8 +167,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         {/* メインコンテンツ */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* モバイルヘッダー */}
-          <header className="lg:hidden h-16 bg-white border-b border-slate-200 flex items-center px-4">
+          <header className={`lg:hidden flex items-center ${styles.mobileHeader}`}>
             <button
+              ref={menuButtonRef}
+              type="button"
+              aria-label="管理メニューを開く"
+              aria-expanded={sidebarOpen}
+              aria-controls="admin-menu"
               className="p-2 rounded-lg hover:bg-slate-100"
               onClick={() => setSidebarOpen(true)}
             >
@@ -135,15 +181,14 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
               </svg>
             </button>
-            <span className="ml-3 font-bold text-[#0F4C81]">管理画面</span>
+            <BrandMark href="/admin" />
           </header>
 
           {/* ページコンテンツ */}
-          <main className="flex-1 p-4 md:p-6 lg:p-8">
+          <main className={`flex-1 p-4 md:p-6 lg:p-8 ${styles.content}`}>
             {children}
           </main>
         </div>
-      </div>
-    </AuthGuard>
+    </div>
   );
 }
