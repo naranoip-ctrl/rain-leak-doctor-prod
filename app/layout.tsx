@@ -8,6 +8,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  verification: { google: '5HgzHM3n5Jpy9NlwxZL5BwYA7sGbO_iE9Ym5GhDoKIs' },
   title: 'AI雨漏りドクター | 写真で雨漏りの危険度と次の一手を整理',
   description: '関西エリア対応。写真からAIと職人目線で雨漏りの危険度を一次判定し、次の一手（現地確認の要否・費用の目安）を整理します。原因の断定には現地確認が必要です。',
   keywords: '雨漏り,雨漏り診断,一次判定,関西,大阪,京都,兵庫,サーモグラフィ,屋根修理',
