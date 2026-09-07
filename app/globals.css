@@ -339,6 +339,9 @@ html { scroll-behavior: smooth; scroll-padding-top: 100px; }
 @media (min-width: 768px) { .case-grid > div:first-child > div:first-child > img { height: 380px; } }
 
 .public-header .bg-line { color: #133b24; }
+.home-faq > summary { list-style: none; }
+.home-faq > summary::-webkit-details-marker { display: none; }
+.home-faq > summary:focus-visible { outline: 2px solid #24483f; outline-offset: -3px; }
 :where(.site-refresh,.diagnosis-refresh,.result-refresh,.editorial-page,.legal-page,.public-header,.public-footer) button { min-width: 44px; }
 :where(.site-refresh,.diagnosis-refresh,.result-refresh,.editorial-page,.legal-page,.public-header,.public-footer) nav a { min-width: 44px; }
 :where(.diagnosis-refresh,.result-refresh) a.underline { display: inline-flex; align-items: center; }

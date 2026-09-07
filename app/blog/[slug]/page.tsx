@@ -2,14 +2,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CalendarDays, Clock, ChevronRight, Camera, ArrowRight } from 'lucide-react';
-import { getAllPosts, getPostBySlug } from '@/lib/blog';
+import { getAllPosts, getPostBySlug, getPostImageUrl, getPostModifiedDate } from '@/lib/blog';
+import { COMPANY_URL, DEFAULT_OG_IMAGE, ORGANIZATION_ID, SITE_NAME, SITE_URL } from '@/lib/site';
 import { BlogHeader, BlogFooter } from '@/components/BlogChrome';
 import { TrackedLineLink } from '@/components/TrackedLineLink';
 
 export const dynamic = 'force-static';
 export const dynamicParams = false;
-
-const SITE_URL = 'https://aiamamori.com';
 
 // draft:true は getAllPosts で除外済み＝下書きは静的生成・sitemap・一覧いずれにも出ない。
 export function generateStaticParams() {
@@ -26,6 +25,9 @@ export async function generateMetadata({
   if (!post || post.draft) return { title: '記事が見つかりません | 雨漏りドクター' };
 
   const url = `${SITE_URL}/blog/${post.slug}`;
+  const image = post.cover
+    ? { url: getPostImageUrl(post.cover), alt: post.title }
+    : { ...DEFAULT_OG_IMAGE, url: getPostImageUrl() };
   return {
     title: `${post.title} | 雨漏りドクター`,
     description: post.description,
@@ -35,8 +37,17 @@ export async function generateMetadata({
       description: post.description,
       type: 'article',
       url,
+      siteName: SITE_NAME,
+      locale: 'ja_JP',
       publishedTime: post.date,
-      images: post.cover ? [{ url: post.cover }] : undefined,
+      modifiedTime: getPostModifiedDate(post),
+      images: [image],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.description,
+      images: [image],
     },
   };
 }
@@ -50,23 +61,45 @@ export default async function BlogPost({
   const post = getPostBySlug(slug);
   if (!post || post.draft) notFound();
 
+  const url = `${SITE_URL}/blog/${post.slug}`;
+  const modifiedDate = getPostModifiedDate(post);
+  const otherPosts = getAllPosts().filter((candidate) => candidate.slug !== post.slug);
+  const relatedPosts = [
+    ...otherPosts.filter((candidate) => candidate.category === post.category),
+    ...otherPosts.filter((candidate) => candidate.category !== post.category),
+  ].slice(0, 2);
+
   // 構造化データ（BlogPosting）。検索での見え方を助ける。
-  const jsonLd = {
+  const jsonLd = [{
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.description,
     datePublished: post.date,
-    dateModified: post.date,
-    author: { '@type': 'Organization', name: post.author },
+    dateModified: modifiedDate,
+    author: {
+      '@type': 'Organization',
+      '@id': ORGANIZATION_ID,
+      name: post.author,
+      url: COMPANY_URL,
+    },
     publisher: {
       '@type': 'Organization',
+      '@id': ORGANIZATION_ID,
       name: '株式会社ドローン工務店',
-      url: SITE_URL,
+      url: COMPANY_URL,
     },
-    mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/blog/${post.slug}` },
-    ...(post.cover ? { image: `${SITE_URL}${post.cover}` } : {}),
-  };
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    image: getPostImageUrl(post.cover),
+  }, {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'トップ', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'お役立ち情報', item: `${SITE_URL}/blog` },
+      { '@type': 'ListItem', position: 3, name: post.title, item: url },
+    ],
+  }];
 
   return (
     <div className="editorial-page min-h-screen bg-slate-50 font-sans">
@@ -74,7 +107,7 @@ export default async function BlogPost({
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
 
       <article className="container max-w-3xl py-10 md:py-14">
@@ -92,9 +125,17 @@ export default async function BlogPost({
         </span>
         <h1 className="text-2xl md:text-4xl font-black text-primary leading-tight">{post.title}</h1>
 
-        <div className="flex items-center gap-4 text-sm text-slate-400 mt-4 mb-8 pb-8 border-b border-slate-200">
-          <span className="flex items-center gap-1"><CalendarDays className="h-4 w-4" />{post.date}</span>
-          <span className="flex items-center gap-1"><Clock className="h-4 w-4" />約{post.readingMinutes}分で読めます</span>
+        <div className="mt-4 mb-8 pb-6 border-b border-slate-200 text-xs sm:text-sm text-slate-500">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span className="inline-flex items-center gap-1"><CalendarDays className="h-4 w-4" aria-hidden="true" />公開 <time dateTime={post.date}>{post.date}</time></span>
+            {post.updated && post.updated !== post.date && (
+              <span>更新 <time dateTime={modifiedDate}>{modifiedDate}</time></span>
+            )}
+            <span className="inline-flex items-center gap-1"><Clock className="h-4 w-4" aria-hidden="true" />約{post.readingMinutes}分で読めます</span>
+          </div>
+          <p className="mt-3">
+            著者：<a href="https://loki-drone.com/company/" className="text-primary underline underline-offset-4 hover:text-cta">{post.author}</a>
+          </p>
         </div>
 
         {/* 本文（Markdown→HTML）。出所は当社リポジトリのみ＝信頼済み入力。 */}
@@ -123,6 +164,24 @@ export default async function BlogPost({
             />
           </div>
         </div>
+
+        {relatedPosts.length > 0 && (
+          <section className="mt-10" aria-labelledby="related-posts-heading">
+            <h2 id="related-posts-heading" className="text-lg font-bold text-primary">あわせて読む</h2>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {relatedPosts.map((relatedPost) => (
+                <Link
+                  key={relatedPost.slug}
+                  href={`/blog/${relatedPost.slug}`}
+                  className="group rounded-xl border border-slate-200 bg-white p-4 hover:border-primary/40 transition-colors"
+                >
+                  <span className="text-xs text-slate-500">{relatedPost.category}</span>
+                  <h3 className="mt-1 text-sm font-bold leading-relaxed text-primary group-hover:text-cta">{relatedPost.title}</h3>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         <div className="mt-8 text-center">
           <Link href="/blog" className="inline-flex items-center gap-1 text-sm font-bold text-primary hover:text-cta transition-colors">

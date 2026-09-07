@@ -3,18 +3,24 @@ import Script from 'next/script';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { Analytics } from '@vercel/analytics/next';
 import { AttributionTracker } from '@/components/AttributionTracker';
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/lib/site';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://aiamamori.com'),
+  metadataBase: new URL(SITE_URL),
   title: 'AI雨漏りドクター | 写真で雨漏りの危険度と次の一手を整理',
   description: '関西エリア対応。写真からAIと職人目線で雨漏りの危険度を一次判定し、次の一手（現地確認の要否・費用の目安）を整理します。原因の断定には現地確認が必要です。',
   keywords: '雨漏り,雨漏り診断,一次判定,関西,大阪,京都,兵庫,サーモグラフィ,屋根修理',
+  icons: { icon: '/favicon.svg' },
   openGraph: {
     title: 'AI雨漏りドクター | 写真で雨漏りの危険度と次の一手を整理',
     description: '写真からAIと職人目線で雨漏りの危険度を一次判定。原因の断定には現地確認が必要です。',
     type: 'website',
+    siteName: SITE_NAME,
+    locale: 'ja_JP',
+    images: [DEFAULT_OG_IMAGE],
   },
+  twitter: { card: 'summary_large_image', images: [DEFAULT_OG_IMAGE.url] },
 };
 
 export default function RootLayout({

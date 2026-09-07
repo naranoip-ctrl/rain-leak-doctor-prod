@@ -19,6 +19,7 @@ import path from 'node:path';
 import matter from 'gray-matter';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
+import { DEFAULT_OG_IMAGE, SITE_URL } from '@/lib/site';
 
 const BLOG_DIR = path.join(process.cwd(), 'content', 'blog');
 
@@ -29,6 +30,7 @@ export interface PostMeta {
   title: string;
   description: string;
   date: string; // YYYY-MM-DD
+  updated?: string; // 任意。フロントマターでは "YYYY-MM-DD" の文字列で指定。
   category: PostCategory | string;
   tags: string[];
   cover?: string;
@@ -97,6 +99,31 @@ function toStringArray(value: unknown): string[] {
   return [];
 }
 
+/** 厳密な日付文字列だけを採用。2月30日など、Dateが補正する日付も除外する。 */
+function toValidDate(value: unknown): string | undefined {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value
+    ? value
+    : undefined;
+}
+
+/** 画面・OG・構造化データ・サイトマップで同じ更新日を使用する。 */
+export function getPostModifiedDate(post: Pick<PostMeta, 'date' | 'updated'>): string {
+  return post.updated ?? post.date;
+}
+
+/** coverの絶対／相対URLを統一し、未設定・無効な値は共通画像へ戻す。 */
+export function getPostImageUrl(cover?: string): string {
+  const fallback = new URL(DEFAULT_OG_IMAGE.url, SITE_URL).href;
+  try {
+    const image = new URL(cover?.trim() || fallback, SITE_URL);
+    return image.protocol === 'https:' || image.protocol === 'http:' ? image.href : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 /** 1記事を読み込みメタ＋HTMLを返す。存在しない slug は null。 */
 export function getPostBySlug(slug: string): Post | null {
   const safeSlug = slug.replace(/[^a-zA-Z0-9_-]/g, '');
@@ -115,6 +142,7 @@ export function getPostBySlug(slug: string): Post | null {
     title: String(data.title ?? safeSlug),
     description: String(data.description ?? ''),
     date: String(data.date ?? ''),
+    updated: toValidDate(data.updated),
     category: (data.category as string) ?? 'お役立ち',
     tags: toStringArray(data.tags),
     cover: data.cover ? String(data.cover) : undefined,
