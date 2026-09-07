@@ -18,7 +18,9 @@ export const BUSINESS_INFO = {
   consultationTelephone: '0120-410-654',
   license: '大阪府知事許可（般-6）161998号',
   access: '大阪メトロ谷町線「関目高殿駅」より徒歩圏内',
+  businessHours: '平日 9:00〜18:00',
 } as const;
+export const PRIMARY_CITIES = ['大阪市', '守口市', '門真市', '東大阪市', '吹田市', '豊中市'] as const;
 export const ONSITE_AREAS = ['大阪府', '京都府', '兵庫県', '奈良県', '滋賀県', '和歌山県'] as const;
 export const DEFAULT_OG_IMAGE = {
   url: '/images/case2.jpg',
@@ -35,6 +37,13 @@ export const organization = {
   logo: `${SITE_URL}/images/droco-icon.jpg`,
   telephone: '+81-6-6927-1065',
   hasMap: GOOGLE_MAPS_URL,
+  // 2026-09-07に会長が通常営業時間・主力エリアを確認。現地診断の対応府県とは区別。
+  openingHoursSpecification: [{
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    opens: '09:00', closes: '18:00',
+  }],
+  areaServed: PRIMARY_CITIES.map((name) => ({ '@type': 'City', name })),
   address: {
     '@type': 'PostalAddress',
     postalCode: BUSINESS_INFO.postalCode,

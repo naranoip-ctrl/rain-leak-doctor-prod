@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { PageHeader } from '@/components/PageHeader';
 import { JsonLd } from '@/components/JsonLd';
 import { TrackedCallLink } from '@/components/TrackedCallLink';
-import { BUSINESS_INFO, COMPANY_PROFILE_URL, DEFAULT_OG_IMAGE, GOOGLE_MAPS_URL, ONSITE_AREAS, ORGANIZATION_ID, SITE_NAME, SITE_URL, organization, onsiteDiagnosisService } from '@/lib/site';
+import { BUSINESS_INFO, COMPANY_PROFILE_URL, DEFAULT_OG_IMAGE, GOOGLE_MAPS_URL, ONSITE_AREAS, ORGANIZATION_ID, PRIMARY_CITIES, SITE_NAME, SITE_URL, organization, onsiteDiagnosisService } from '@/lib/site';
 
 const title = '運営会社・対応エリア | AI雨漏りドクター';
 const description = 'AI雨漏りドクターは大阪市旭区の株式会社ドローン工務店が運営。会社所在地・電話窓口と、大阪・京都・兵庫・奈良・滋賀・和歌山での現地診断のご案内です。';
@@ -37,6 +37,7 @@ export default function CompanyPage() {
             <div><dt className="font-medium text-slate-500">会社名</dt><dd className="mt-1">{BUSINESS_INFO.name}</dd></div>
             <div><dt className="font-medium text-slate-500">代表者</dt><dd className="mt-1">代表取締役 {BUSINESS_INFO.representative}</dd></div>
             <div><dt className="font-medium text-slate-500">所在地</dt><dd className="mt-1">〒{BUSINESS_INFO.postalCode}<br />{BUSINESS_INFO.address}</dd></div>
+            <div><dt className="font-medium text-slate-500">通常営業時間</dt><dd className="mt-1">{BUSINESS_INFO.businessHours}</dd></div>
             <div><dt className="font-medium text-slate-500">雨漏り相談窓口</dt><dd><TrackedCallLink phone={BUSINESS_INFO.consultationTelephone} location="company_consultation" className="inline-flex min-h-11 items-center text-lg font-medium text-primary underline underline-offset-4">{BUSINESS_INFO.consultationTelephone}</TrackedCallLink></dd></div>
             <div><dt className="font-medium text-slate-500">会社代表電話</dt><dd><TrackedCallLink phone={BUSINESS_INFO.telephone} location="company_office" className="inline-flex min-h-11 items-center text-primary underline underline-offset-4">{BUSINESS_INFO.telephone}</TrackedCallLink></dd></div>
             <div><dt className="font-medium text-slate-500">建設業許可</dt><dd className="mt-1">{BUSINESS_INFO.license}</dd></div>
@@ -52,6 +53,7 @@ export default function CompanyPage() {
         <section aria-labelledby="service-area-heading" className="mt-8 bg-white border border-slate-200 rounded-lg p-5 md:p-8">
           <h2 id="service-area-heading" className="text-xl font-bold text-primary">現地診断の対応エリア</h2>
           <p className="mt-4 text-slate-700 leading-relaxed">{ONSITE_AREAS.join('・')}</p>
+          <p className="mt-3 text-sm text-slate-700 leading-relaxed">主な現場エリア：{PRIMARY_CITIES.join('・')}</p>
           <p className="mt-3 text-sm text-slate-600 leading-relaxed">建物や場所に応じて対応内容をご相談いただけます。関西エリア外の方は、写真からのオンライン一次判定をご利用いただけます。</p>
           <Link href="/#pricing" className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4">現地診断の料金・条件を見る</Link>
         </section>
