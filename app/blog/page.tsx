@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CalendarDays, Clock, ArrowRight, Tag } from 'lucide-react';
-import { getAllPosts } from '@/lib/blog';
+import { getAllPosts, getPostImageUrl } from '@/lib/blog';
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/lib/site';
 import { BlogHeader, BlogFooter } from '@/components/BlogChrome';
 
 export const metadata: Metadata = {
@@ -13,6 +14,16 @@ export const metadata: Metadata = {
     title: 'お役立ち情報｜雨漏り・12条点検の基礎知識',
     description: '雨漏りと12条点検の基礎知識をまとめています。',
     type: 'website',
+    url: `${SITE_URL}/blog`,
+    siteName: SITE_NAME,
+    locale: 'ja_JP',
+    images: [{ ...DEFAULT_OG_IMAGE, url: getPostImageUrl() }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'お役立ち情報｜雨漏り・12条点検の基礎知識',
+    description: '雨漏りと12条点検の基礎知識をまとめています。',
+    images: [{ ...DEFAULT_OG_IMAGE, url: getPostImageUrl() }],
   },
 };
 
@@ -58,7 +69,7 @@ export default function BlogIndex() {
               >
                 {post.cover && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={post.cover} alt={post.title} className="w-full h-44 object-cover" />
+                  <img src={getPostImageUrl(post.cover)} alt={post.title} className="w-full h-44 object-cover" />
                 )}
                 <div className="flex flex-col flex-1 p-6">
                   <div className="flex items-center gap-2 mb-3">

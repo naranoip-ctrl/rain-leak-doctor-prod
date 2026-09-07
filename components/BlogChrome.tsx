@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { BrandMark } from '@/components/BrandMark';
 import { TrackedLineLink } from '@/components/TrackedLineLink';
+import { TrackedCallLink } from '@/components/TrackedCallLink';
+import { BUSINESS_INFO } from '@/lib/site';
 
 /**
  * ブログ配下（/blog, /blog/[slug]）共通のヘッダ／フッタ。
@@ -48,15 +50,17 @@ export function BlogFooter() {
           <div>
             <h3 className="text-sm font-bold mb-3">運営</h3>
             <ul className="space-y-2 text-sm text-white/80">
-              <li>株式会社ドローン工務店</li>
-              <li>〒535-0031 大阪府大阪市旭区高殿2-12-6</li>
+              <li>{BUSINESS_INFO.name}</li>
+              <li>〒{BUSINESS_INFO.postalCode} {BUSINESS_INFO.address}</li>
+              <li><TrackedCallLink phone={BUSINESS_INFO.consultationTelephone} location="blog_footer" className="inline-flex min-h-11 items-center hover:text-white">{BUSINESS_INFO.consultationTelephone}</TrackedCallLink></li>
+              <li><Link href="/company" className="inline-flex min-h-11 items-center hover:text-white underline underline-offset-4">運営会社・対応エリア</Link></li>
               <li>大阪府知事許可（般-6）161998号</li>
               <li><a href="https://loki-drone.com/company/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">会社概要</a></li>
             </ul>
             <ul className="space-y-2 text-sm text-white/80 mt-4 pt-4 border-t border-white/10">
               <li><Link href="/privacy" className="hover:text-white transition-colors">プライバシーポリシー</Link></li>
               <li><Link href="/terms" className="hover:text-white transition-colors">利用規約</Link></li>
-              <li><Link href="/tokushoho" className="hover:text-white transition-colors">特定商取引法に基づく表記</Link></li>
+              <li><a href="https://loki-drone.com/tokushoho/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">特定商取引法に基づく表記</a></li>
             </ul>
           </div>
         </div>

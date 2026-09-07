@@ -1,5 +1,14 @@
 
+import type { Metadata } from 'next';
 import { PageHeader } from '@/components/PageHeader';
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/lib/site';
+
+const title = '特定商取引法に基づく表記 | AI雨漏りドクター';
+const description = 'AI雨漏りドクターの事業者情報、サービスの対価、お支払い方法、提供時期などについてご案内します。';
+export const metadata: Metadata = {
+  title, description, alternates: { canonical: '/terms' },
+  openGraph: { title, description, url: `${SITE_URL}/terms`, siteName: SITE_NAME, locale: 'ja_JP', type: 'website', images: [DEFAULT_OG_IMAGE] },
+};
 
 export default function Terms() {
   return (

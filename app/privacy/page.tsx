@@ -1,5 +1,14 @@
 
+import type { Metadata } from 'next';
 import { PageHeader } from '@/components/PageHeader';
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/lib/site';
+
+const title = 'プライバシーポリシー | AI雨漏りドクター';
+const description = 'AI雨漏りドクターの個人情報の取り扱い、利用目的、画像解析、お問い合わせ窓口についてご案内します。';
+export const metadata: Metadata = {
+  title, description, alternates: { canonical: '/privacy' },
+  openGraph: { title, description, url: `${SITE_URL}/privacy`, siteName: SITE_NAME, locale: 'ja_JP', type: 'website', images: [DEFAULT_OG_IMAGE] },
+};
 
 export default function PrivacyPolicy() {
   return (
