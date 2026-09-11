@@ -27,6 +27,12 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
   },
+  // PDF用の同梱フォント（lib/pdf/fonts）をサーバーレス関数のバンドルに含める。
+  // import されないファイルは output file tracing に拾われないため明示する。
+  outputFileTracingIncludes: {
+    '/api/diagnosis': ['./lib/pdf/fonts/**/*'],
+    '/api/diagnosis/process': ['./lib/pdf/fonts/**/*'],
+  },
 };
 
 module.exports = nextConfig;
