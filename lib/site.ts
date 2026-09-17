@@ -35,6 +35,8 @@ export const organization = {
   name: BUSINESS_INFO.name,
   url: COMPANY_URL,
   logo: `${SITE_URL}/images/droco-icon.jpg`,
+  // 2026-09-14: 運営者の同一性を機械可読に(見積チェックAI側のOrganizationと相互に指す)
+  sameAs: [`${SITE_URL}/`, COMPANY_PROFILE_URL, 'https://third-place-ai.jp/'],
   telephone: '+81-6-6927-1065',
   hasMap: GOOGLE_MAPS_URL,
   // 2026-09-07に会長が通常営業時間・主力エリアを確認。現地診断の対応府県とは区別。
