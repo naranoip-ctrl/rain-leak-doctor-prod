@@ -6,7 +6,7 @@ category: "雨漏り"
 tags: ["雨漏り", "修理費用", "相場", "写真診断", "応急処置"]
 cover: "/images/blog/amamori-shuuri-hiyou-souba.png"
 author: "株式会社ドローン工務店"
-draft: false
+draft: true
 ---
 
 雨漏りの修理費用は「数万円から数百万円」と幅で語られることが多く、自分の家がどこに入るのかが分かりません。そこで、当社の写真AI診断に届いた写真から出た概算を、そのまま並べてみました。

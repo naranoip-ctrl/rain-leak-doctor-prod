@@ -6,7 +6,7 @@ category: "雨漏り"
 tags: ["雨漏り", "軒天", "築30年", "写真診断", "屋根"]
 cover: "/images/blog/chiku30nen-amamori.png"
 author: "株式会社ドローン工務店"
-draft: false
+draft: true
 ---
 
 築30年を超えた家の雨漏りは「屋根が古いから」で片づけられがちです。ただ、当社の写真AI診断に届いた写真を築年数で分けてみると、傷んでいる場所にはっきりした偏りがありました。
