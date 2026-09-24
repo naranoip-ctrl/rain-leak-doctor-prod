@@ -566,19 +566,32 @@ export default function HomePage({ faq, latestPosts }: { faq: ReactNode; latestP
           <p className="text-center text-slate-400 text-sm mb-8">AI診断の結果を見てから、以下のプランをお選びいただけます ↓</p>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {/* 現地診断（有償・成約時は工事代から全額充当）会長決裁2026-08-24 */}
+            {/* 原因特定調査（成果報酬型・充当は新規契約から廃止）社長決裁2026-09-24 */}
             <div className="relative bg-primary rounded-xl p-6 text-white border-2 border-accent shadow-2xl md:scale-105 z-10 md:col-span-2">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-primary px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider">
                 原因を特定したい方へ
               </div>
-              <h3 className="text-accent font-bold text-lg mb-2">現地診断（報告書付き）</h3>
-              <div className="text-3xl font-bold mt-2 mb-1">¥55,000<span className="text-base font-normal opacity-70">（税込）</span></div>
-              <p className="text-accent font-bold text-sm mb-5">工事をご依頼の場合、診断費は工事代から全額差し引きます</p>
+              <h3 className="text-accent font-bold text-lg mb-2">原因特定調査（報告書付き）</h3>
+              <dl className="mt-2 mb-3 divide-y divide-white/15 text-sm">
+                <div className="flex flex-col gap-0.5 py-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+                  <dt className="text-slate-200">木造戸建て・小規模建物<span className="block text-xs text-white/60">小規模のS造を含む・RC/SRCは除く</span></dt>
+                  <dd className="text-2xl font-bold whitespace-nowrap">¥55,000<span className="text-base font-normal opacity-70">〜（税込）</span></dd>
+                </div>
+                <div className="flex flex-col gap-0.5 py-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+                  <dt className="text-slate-200">RC・SRC・中型建物</dt>
+                  <dd className="text-2xl font-bold whitespace-nowrap">¥150,000<span className="text-base font-normal opacity-70">〜（税込）</span></dd>
+                </div>
+                <div className="flex flex-col gap-0.5 py-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+                  <dt className="text-slate-200">大型建物・8階建て以上</dt>
+                  <dd className="text-lg font-bold whitespace-nowrap">別途見積</dd>
+                </div>
+              </dl>
+              <p className="text-accent font-bold text-sm mb-5">原因を特定できなかった場合、基本調査料は0円です</p>
               <div className="grid sm:grid-cols-2 gap-x-6">
                 <ul className="space-y-3 text-sm text-slate-100 mb-6">
                   <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 足場を組まずに高所を確認（ドローン／ロープ）</li>
-                  <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 赤外線サーモグラフィ・散水試験（必要時）</li>
-                  <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 原因と工事範囲を書いた診断レポート（PDF）</li>
+                  <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 赤外線サーモグラフィと散水試験で浸入口を確かめます</li>
+                  <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 位置図・写真・散水の条件を書いた調査報告書（PDF）</li>
                 </ul>
                 <ul className="space-y-3 text-sm text-slate-100 mb-6">
                   <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-accent flex-shrink-0" /> 「工事は不要」という結論もそのまま報告</li>
@@ -589,7 +602,12 @@ export default function HomePage({ faq, latestPosts }: { faq: ReactNode; latestP
               <a href="tel:0120-410-654" onClick={() => { trackReportPurchaseClick('genchi_55000'); trackCallClick('pricing_genchi'); }} className="block w-full text-center py-3 rounded-md bg-accent text-primary hover:bg-accent/90 font-bold h-12 leading-6 transition-colors">
                 日程を相談する
               </a>
-              <p className="text-xs text-white/60 mt-3">大阪府内・戸建て〜3階建の目安。集合住宅は別途お見積り。足場は組みません。</p>
+              <div className="text-xs text-white/60 mt-3 space-y-1.5 leading-relaxed">
+                <p>基本調査料は基本価格です。調査範囲・必要な体制・移動条件を確認し、着手前に金額を確定します。基本対応範囲内の交通費は基本調査料に含みます（範囲外は事前にお見積り）。</p>
+                <p>「特定」は、散水試験で浸入口を再現し、室内側で水の到達を確認できた場合です。赤外線の温度差や目視の亀裂だけでは特定とせず、その場合の基本調査料はいただきません（報告書はお渡しします）。</p>
+                <p>お申込み前に、調査する症状に番号を付け、調査範囲・特定の基準・結果ごとのお支払い総額（特定できた場合／できなかった場合）を書面でお示しします。結果が出たあとの料金変更はしません。</p>
+                <p>ロープ作業・仮設・部分開口とその復旧など、基本調査料に含まれない作業は、内容・上限額・特定できなかった場合のご負担額を書面で合意してから行います。合意した作業の費用は、特定の可否にかかわらずお支払いいただきます。調査が長引いたことを理由とする追加請求はしません。</p>
+              </div>
             </div>
             {/* Repair Plan */}
             <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
@@ -606,12 +624,12 @@ export default function HomePage({ faq, latestPosts }: { faq: ReactNode; latestP
             </div>
           </div>
 
-          {/* 保証区分（応急=対象外 / 本修繕=再漏水1年 / 原因未特定=対象外） */}
+          {/* 保証区分（応急=対象外 / 自社本修繕=特定箇所の再漏水1年 / 調査と工事の保証は別） */}
           <div className="max-w-2xl mx-auto mt-10 text-center">
             <p className="text-slate-400 text-xs leading-relaxed">
               <span className="font-bold text-slate-300">保証について：</span>
-              応急処置（一次止水）は保証対象外です。本修繕（根本修繕）は再漏水について<strong className="text-slate-300">1年保証</strong>。
-              現地確認で原因が特定できない場合は保証対象外となります。
+              応急処置（一次止水）は保証対象外です。当社が本修繕（根本修繕）を行った場合、特定した浸入口からの再漏水を<strong className="text-slate-300">1年保証</strong>します。
+              調査の結果と工事の保証は別のものです。原因を特定できなかった場合は基本調査料をいただかず、工事の保証も付きません。
             </p>
           </div>
         </div>

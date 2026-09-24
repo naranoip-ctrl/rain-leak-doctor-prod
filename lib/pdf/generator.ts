@@ -333,8 +333,10 @@ export async function generatePDF(data: PDFData): Promise<Buffer> {
   if (!isNotApplicable && present(data.detailedAnalysis)) section('建物の状態評価', data.detailedAnalysis!);
 
   const ctaLines = [
-    { text: '現地診断のご相談はLINEから', size: 12.5, leading: 20, bold: true },
-    { text: '現地診断（報告書付き）55,000円（税込）', size: 11, leading: 19, bold: false },
+    { text: '原因特定調査のご相談はLINEから', size: 12.5, leading: 20, bold: true },
+    { text: '原因特定調査（報告書付き）木造・小規模 55,000円〜／RC・SRC・中型 150,000円〜（いずれも税込）／大型・8階建て以上は別途見積', size: 10.5, leading: 18, bold: false },
+    { text: '原因を特定できなかった場合、基本調査料は0円です。', size: 10.5, leading: 18, bold: false },
+    { text: '※対象範囲・構造等により事前見積。事前合意した特殊作業費等は、原因特定の可否にかかわらず発生する場合があります。結果別のお支払総額は契約前にご提示します。', size: 9, leading: 15, bold: false },
     { text: 'LINE: https://lin.ee/LTMUhxy', size: 11, leading: 19, bold: false },
     { text: 'お電話でもお気軽にご相談ください', size: 10, leading: 17, bold: false },
   ].map((run) => ({ ...run, lines: wrapText(run.text, run.bold ? boldFont : font, run.size, contentWidth - 28) }));
