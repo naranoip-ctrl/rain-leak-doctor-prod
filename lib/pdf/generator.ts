@@ -153,7 +153,7 @@ export async function generatePDF(data: PDFData): Promise<Buffer> {
     if (!first) page = pdfDoc.addPage([pageWidth, pageHeight]);
     page.drawRectangle({ x: 0, y: 0, width: pageWidth, height: pageHeight, color: COLORS.paper });
     page.drawRectangle({ x: 0, y: pageHeight - 5, width: pageWidth, height: 5, color: COLORS.primary });
-    page.drawText(first ? 'AI雨漏り診断レポート' : 'AI雨漏り診断レポート ─ 詳細', {
+    page.drawText(first ? '雨漏り写真診断レポート' : '雨漏り写真診断レポート ─ 詳細', {
       x: margin, y: pageHeight - (first ? 47 : 36), size: first ? 21 : 13,
       font: boldFont, color: COLORS.primary,
     });
@@ -365,7 +365,7 @@ export async function generatePDF(data: PDFData): Promise<Buffer> {
     const pageNumber = `${index + 1} / ${pages.length}`;
     reportPage.drawText(pageNumber, { x: pageWidth - margin - font.widthOfTextAtSize(pageNumber, 8), y: 44, size: 8, font, color: COLORS.muted });
     if (index === pages.length - 1) {
-      const disclaimer = '※本レポートはAIによる画像分析に基づく参考情報です。正確な診断には現地調査が必要です。';
+      const disclaimer = '※本レポートは画像の自動解析に基づく参考情報です。正確な診断には現地調査が必要です。';
       wrapText(disclaimer, font, 7.5, contentWidth).forEach((line, lineIndex) => {
         reportPage.drawText(line, { x: margin, y: 26 - lineIndex * 10, size: 7.5, font, color: COLORS.muted });
       });

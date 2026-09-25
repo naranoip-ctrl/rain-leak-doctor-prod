@@ -6,7 +6,7 @@ import { getAllPosts } from '@/lib/blog';
 import { homeFaqs } from '@/lib/home-faq';
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, organization, photoDiagnosisService, onsiteDiagnosisService, website } from '@/lib/site';
 
-const title = 'AI雨漏りドクター | 写真で雨漏りの危険度と次の一手を整理';
+const title = '雨漏りドクター | 写真で雨漏りの危険度と次の一手を整理';
 const description = '写真1枚から無料・匿名で雨漏りの一次判定。危険度や費用の目安を整理し、結果はLINEで受け取れます。原因の断定には現地確認が必要です。現地対応は大阪・関西エリア。';
 
 export const metadata: Metadata = {
