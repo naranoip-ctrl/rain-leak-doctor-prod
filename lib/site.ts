@@ -1,5 +1,5 @@
 export const SITE_URL = 'https://aiamamori.com';
-export const SITE_NAME = 'AI雨漏りドクター';
+export const SITE_NAME = '雨漏りドクター';
 export const COMPANY_URL = 'https://loki-drone.com/';
 export const ORGANIZATION_ID = `${COMPANY_URL}#organization`;
 export const COMPANY_PROFILE_URL = `${COMPANY_URL}company/`;
@@ -26,7 +26,7 @@ export const DEFAULT_OG_IMAGE = {
   url: '/images/case2.jpg',
   width: 1376,
   height: 768,
-  alt: 'AI雨漏りドクター',
+  alt: '雨漏りドクター',
 };
 
 export const organization = {
@@ -73,7 +73,7 @@ export const website = {
 export const photoDiagnosisService = {
   '@type': 'Service',
   '@id': `${SITE_URL}/#photo-diagnosis`,
-  name: 'AI雨漏り写真診断',
+  name: '雨漏り写真診断',
   serviceType: '写真による雨漏りの一次判定',
   description: '写真1枚から危険度の目安・費用レンジ・確認すべき点を整理します。原因の断定には現地確認が必要です。',
   url: `${SITE_URL}/diagnosis`,
