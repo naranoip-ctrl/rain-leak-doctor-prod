@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { homeFaqs } from '@/lib/home-faq';
 
@@ -16,7 +17,14 @@ export function HomeFaq() {
                 <span>{item.q}</span>
                 <ChevronRight aria-hidden="true" className="h-5 w-5 shrink-0 transition-transform group-open:rotate-90" />
               </summary>
-              <div className="px-5 pb-5 text-sm text-slate-600 leading-relaxed">{item.a}</div>
+              <div className="px-5 pb-5 text-sm text-slate-600 leading-relaxed">
+                <p>{item.a}</p>
+                {'source' in item && item.source ? (
+                  <p className="mt-2 text-xs">
+                    <Link href={item.source.href} className="underline underline-offset-2 hover:text-primary">{item.source.label}</Link>
+                  </p>
+                ) : null}
+              </div>
             </details>
           ))}
         </div>
