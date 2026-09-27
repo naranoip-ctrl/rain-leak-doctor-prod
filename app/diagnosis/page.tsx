@@ -138,7 +138,7 @@ export default function DiagnosisPage() {
       }
 
       // 2. 診断APIを呼び出し（即座にレスポンスが返る）
-      setUploadProgress('AI診断を開始しています...');
+      setUploadProgress('写真の自動解析を開始しています...');
 
       const diagnosisResponse = await fetch('/api/diagnosis', {
         method: 'POST',
@@ -205,7 +205,7 @@ export default function DiagnosisPage() {
             <p className={styles.description}>{analysisStatus === 'error' ? '写真を選び直して、もう一度お試しください。' : 'あとは、この番号をLINEで送るだけ。'}</p>
           </div>
           {analysisStatus === 'error' ? <button type="button" className={styles.submit} onClick={() => setStep('form')}>写真を選び直す</button> : <DiagnosisReceipt code={secretCode} source="diagnosis_result" pdfFailed={analysisStatus === 'pdf_failed'} />}
-          <p role="status" className={styles.note}>{analysisStatus === 'completed' ? '診断結果の準備ができました。LINEで番号を送ってください。' : analysisStatus === 'pdf_failed' ? '診断の概要は、下のリンクから確認できます。' : analysisStatus === 'processing' ? 'AIが写真を確認しています。' : analysisStatus === 'error' ? '診断は無料でやり直せます。' : '診断の準備状況を確認しています。'}</p>
+          <p role="status" className={styles.note}>{analysisStatus === 'completed' ? '診断結果の準備ができました。LINEで番号を送ってください。' : analysisStatus === 'pdf_failed' ? '診断の概要は、下のリンクから確認できます。' : analysisStatus === 'processing' ? '写真を自動解析しています。' : analysisStatus === 'error' ? '診断は無料でやり直せます。' : '診断の準備状況を確認しています。'}</p>
           {sessionId && <Link href={`/result/${sessionId}`} className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4">診断状況・結果を見る</Link>}
           <details className={styles.help}>
             <summary>結果が届かないとき</summary>

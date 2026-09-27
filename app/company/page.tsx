@@ -5,8 +5,8 @@ import { JsonLd } from '@/components/JsonLd';
 import { TrackedCallLink } from '@/components/TrackedCallLink';
 import { BUSINESS_INFO, COMPANY_PROFILE_URL, DEFAULT_OG_IMAGE, GOOGLE_MAPS_URL, ONSITE_AREAS, ORGANIZATION_ID, PRIMARY_CITIES, SITE_NAME, SITE_URL, organization, onsiteDiagnosisService } from '@/lib/site';
 
-const title = '運営会社・対応エリア | AI雨漏りドクター';
-const description = 'AI雨漏りドクターは大阪市旭区の株式会社ドローン工務店が運営。会社所在地・電話窓口と、大阪・京都・兵庫・奈良・滋賀・和歌山での現地診断のご案内です。';
+const title = '運営会社・対応エリア | 雨漏りドクター';
+const description = '雨漏りドクターは大阪市旭区の株式会社ドローン工務店が運営。会社所在地・電話窓口と、大阪・京都・兵庫・奈良・滋賀・和歌山での現地診断のご案内です。';
 
 export const metadata: Metadata = {
   title, description, alternates: { canonical: '/company' },
@@ -29,7 +29,7 @@ export default function CompanyPage() {
       }] }} />
       <main className="container max-w-3xl py-10 md:py-14">
         <h1 className="text-2xl md:text-3xl font-bold text-primary">運営会社・対応エリア</h1>
-        <p className="mt-5 text-slate-700 leading-relaxed">AI雨漏りドクターは、大阪市旭区の{BUSINESS_INFO.name}が運営する、雨漏りの写真診断・現地診断のサービスです。</p>
+        <p className="mt-5 text-slate-700 leading-relaxed">雨漏りドクターは、大阪市旭区の{BUSINESS_INFO.name}が運営する、雨漏りの写真診断・現地診断のサービスです。</p>
 
         <section aria-labelledby="company-info-heading" className="mt-8 bg-white border border-slate-200 rounded-lg p-5 md:p-8">
           <h2 id="company-info-heading" className="text-xl font-bold text-primary">運営会社</h2>

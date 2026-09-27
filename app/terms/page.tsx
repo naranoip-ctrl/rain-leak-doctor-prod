@@ -3,8 +3,8 @@ import type { Metadata } from 'next';
 import { PageHeader } from '@/components/PageHeader';
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/lib/site';
 
-const title = '特定商取引法に基づく表記 | AI雨漏りドクター';
-const description = 'AI雨漏りドクターの事業者情報、サービスの対価、お支払い方法、提供時期などについてご案内します。';
+const title = '特定商取引法に基づく表記 | 雨漏りドクター';
+const description = '雨漏りドクターの事業者情報、サービスの対価、お支払い方法、提供時期などについてご案内します。';
 export const metadata: Metadata = {
   title, description, alternates: { canonical: '/terms' },
   openGraph: { title, description, url: `${SITE_URL}/terms`, siteName: SITE_NAME, locale: 'ja_JP', type: 'website', images: [DEFAULT_OG_IMAGE] },
@@ -45,6 +45,7 @@ export default function Terms() {
                 <td className="py-4 pr-4 font-bold text-slate-800 align-top whitespace-nowrap">サービス内容</td>
                 <td className="py-4">
                   AIによる建物外装の損傷診断サービス（無料）<br />
+                  雨漏り・漏水の原因特定調査（報告書付き・有償）<br />
                   雨漏り修繕工事の施工・監理
                 </td>
               </tr>
@@ -52,7 +53,8 @@ export default function Terms() {
                 <td className="py-4 pr-4 font-bold text-slate-800 align-top whitespace-nowrap">サービスの対価</td>
                 <td className="py-4">
                   <p><strong>AI診断:</strong> 無料</p>
-                  <p className="mt-1"><strong>修繕工事:</strong> 現地調査後に個別にお見積りいたします</p>
+                  <p className="mt-1"><strong>原因特定調査:</strong> 木造戸建て・小規模建物 55,000円〜（税込）、RC・SRC・中型建物 150,000円〜（税込）、大型建物・8階建て以上は別途お見積り。調査範囲・必要な体制・移動条件を確認のうえ、着手前に結果ごとのお支払い総額（特定できた場合／できなかった場合）を書面でご提示します。原因を特定できなかった場合、基本調査料は0円です。事前に書面で合意した独立した作業（ロープ作業・仮設・部分開口とその復旧など）の費用は、特定の可否にかかわらずお支払いいただきます。</p>
+                  <p className="mt-1"><strong>修繕工事:</strong> 原因特定調査とは別の契約として、個別にお見積りいたします</p>
                 </td>
               </tr>
               <tr>
@@ -64,13 +66,14 @@ export default function Terms() {
               <tr>
                 <td className="py-4 pr-4 font-bold text-slate-800 align-top whitespace-nowrap">お支払い方法</td>
                 <td className="py-4">
-                  修繕工事の場合: 銀行振込、現金払い<br />
+                  原因特定調査・修繕工事の場合: 銀行振込、現金払い<br />
                   （詳細はお見積り時にご案内いたします）
                 </td>
               </tr>
               <tr>
                 <td className="py-4 pr-4 font-bold text-slate-800 align-top whitespace-nowrap">お支払い時期</td>
                 <td className="py-4">
+                  原因特定調査の場合: 報告書のお渡し後、請求書発行から30日以内<br />
                   修繕工事の場合: 工事完了後、請求書発行から30日以内
                 </td>
               </tr>
@@ -78,6 +81,7 @@ export default function Terms() {
                 <td className="py-4 pr-4 font-bold text-slate-800 align-top whitespace-nowrap">サービス提供時期</td>
                 <td className="py-4">
                   <p><strong>AI診断:</strong> 写真アップロード後、最短3分で結果をお届け</p>
+                  <p className="mt-1"><strong>原因特定調査:</strong> お申込み後、日程調整のうえ現地調査を実施し、調査後に報告書をお渡しします</p>
                   <p className="mt-1"><strong>修繕工事:</strong> ご契約後、日程調整のうえ施工開始</p>
                 </td>
               </tr>
@@ -85,6 +89,7 @@ export default function Terms() {
                 <td className="py-4 pr-4 font-bold text-slate-800 align-top whitespace-nowrap">キャンセル・返金</td>
                 <td className="py-4">
                   <p><strong>AI診断:</strong> 無料サービスのため該当なし</p>
+                  <p className="mt-1"><strong>原因特定調査:</strong> 出動前であればキャンセル可能です。出動前に天候により日程を延期する場合は無料です。出動後に天候で中止となった場合の再訪は1回まで基本調査料に含み、それ以降の再訪は実施前に費用と条件を合意します。当社の不備による再訪は当社負担です。お客様のご都合や調査範囲の追加による再訪は、理由と費用を事前に合意します。</p>
                   <p className="mt-1"><strong>修繕工事:</strong> 工事着手前であればキャンセル可能です。着手後のキャンセルについては、実費をご請求させていただく場合があります。</p>
                 </td>
               </tr>
