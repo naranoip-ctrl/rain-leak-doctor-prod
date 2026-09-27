@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { PDFDocument, PDFName, PDFString, rgb, type PDFFont, type PDFPage, type RGB } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 
@@ -22,11 +24,15 @@ interface PDFData {
   imageFindings?: string;
 }
 
-// IBM Plex Sans JP（静的TTF）。
+// IBM Plex Sans JP（静的TTF・SIL OFL 1.1）。
 // 本文には Medium を使い（Regular は線が細すぎて可読性が低いため）、強調には Bold を使う。
-// ビジネス向けのクリーンな字形でレポート用途に最適。
-const FONT_URL_REGULAR = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/ibmplexsansjp/IBMPlexSansJP-Medium.ttf';
-const FONT_URL_BOLD = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/ibmplexsansjp/IBMPlexSansJP-Bold.ttf';
+// フォントはリポジトリ同梱の lib/pdf/fonts/ を第一候補に読み、読めない場合だけ CDN から取得する。
+// （外部CDNへの依存が PDF 生成失敗の単一障害点になっていたため。next.config.js の
+//   outputFileTracingIncludes で同梱ファイルをサーバーレス関数に含めている。）
+const FONT_DIR = path.join(process.cwd(), 'lib', 'pdf', 'fonts');
+const FONT_FILE_REGULAR = 'IBMPlexSansJP-Medium.ttf';
+const FONT_FILE_BOLD = 'IBMPlexSansJP-Bold.ttf';
+const FONT_CDN_BASE = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/ibmplexsansjp/';
 const FONT_FETCH_TIMEOUT_MS = 25_000;
 
 let cachedRegularFont: ArrayBuffer | null = null;
@@ -51,15 +57,30 @@ async function fetchFontWithTimeout(url: string, label: string): Promise<ArrayBu
   }
 }
 
+async function loadFont(fileName: string, label: string): Promise<ArrayBuffer> {
+  const localPath = path.join(FONT_DIR, fileName);
+  try {
+    const bytes = await readFile(localPath);
+    if (bytes.byteLength < 100_000) {
+      throw new Error(`local font too small (${bytes.byteLength} bytes)`);
+    }
+    return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+  } catch (localErr) {
+    const reason = localErr instanceof Error ? localErr.message : String(localErr);
+    console.warn(`[PDF font] local ${label} unavailable (${reason}); falling back to CDN`);
+    return fetchFontWithTimeout(FONT_CDN_BASE + fileName, label);
+  }
+}
+
 async function loadJapaneseFont(): Promise<ArrayBuffer> {
   if (cachedRegularFont) return cachedRegularFont;
-  cachedRegularFont = await fetchFontWithTimeout(FONT_URL_REGULAR, 'Regular');
+  cachedRegularFont = await loadFont(FONT_FILE_REGULAR, 'Regular');
   return cachedRegularFont;
 }
 
 async function loadJapaneseBoldFont(): Promise<ArrayBuffer> {
   if (cachedBoldFont) return cachedBoldFont;
-  cachedBoldFont = await fetchFontWithTimeout(FONT_URL_BOLD, 'Bold');
+  cachedBoldFont = await loadFont(FONT_FILE_BOLD, 'Bold');
   return cachedBoldFont;
 }
 
